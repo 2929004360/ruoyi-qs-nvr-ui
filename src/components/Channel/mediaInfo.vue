@@ -6,7 +6,7 @@
         icon="RefreshRight"
         circle
         size="mini"
-        @click="getMediaInfo"
+        @click="getMediaInfoFun"
     ></el-button>
 
     <!-- 概况信息 -->

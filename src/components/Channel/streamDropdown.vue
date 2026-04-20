@@ -1,5 +1,5 @@
 <template>
-  <el-dropdown v-if="streamInfo" trigger="click" @command="copyUrl">
+  <el-dropdown v-if="streamInfo" trigger="click" @command="copyUrl" placement="top">
     <el-button :icon="ArrowDownBold">
       更多地址
     </el-button>
