@@ -184,3 +184,23 @@ export function streamPullPush(id: number): Promise<AjaxResult> {
         }
     })
 }
+
+/**
+ * gb28181 播放
+ */
+export function startGb28181Play(id: number): Promise<AjaxResult<StreamContent>> {
+    return request({
+        url: '/zlm/startGb28181Play/' + id,
+        method: 'get',
+    })
+}
+
+/**
+ * gb28181 停止点播
+ */
+export function stopGb28181Play(id: number): Promise<AjaxResult> {
+    return request({
+        url: '/zlm/stopGb28181Play/' + id,
+        method: 'get',
+    })
+}

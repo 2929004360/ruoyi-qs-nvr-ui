@@ -104,7 +104,16 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="通道号" align="center" prop="channel" width="80"/>
+      <el-table-column label="通道号" align="center" width="150">
+        <template #default="scope">
+          <div v-if="scope.row.channel">
+            {{scope.row.channel}}
+          </div>
+          <div v-else>
+            {{scope.row.gbChannelId}}
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column label="截图" align="center" prop="snap" width="150">
         <template #default="scope">
           <image-preview v-if="scope.row.snap" :src="scope.row.snap" :width="100" :height="50"/>
@@ -169,230 +178,396 @@
     />
 
     <!-- 添加或修改视频监控设备对话框 -->
-    <el-dialog :title="title" v-model="open" width="600px" append-to-body draggable>
-      <el-form ref="deviceRef" :model="form" :rules="rules" label-width="140px">
-        <el-form-item label="直播流接入类型" prop="type">
-          <el-select v-model="form.type" placeholder="请选择直播流接入类型" @change="liveStreamChange" filterable>
-            <el-option
-                v-for="dict in qs_live_stream_type"
-                :key="dict.value"
-                :label="dict.label"
-                :value="dict.value"
-            ></el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="设备名称" prop="deviceName">
-          <el-input v-model="form.deviceName" placeholder="请输入设备名称" :maxlength="100" show-word-limit/>
-        </el-form-item>
-        <el-form-item label="直播流地址"
+    <el-dialog :title="title" v-model="open" width="960px" append-to-body draggable>
+      <el-form ref="deviceRef" :model="form" :rules="rules" label-width="110px">
+        <!-- 基础信息分组 -->
+        <el-card class="form-card" body-style="padding: 16px 20px;">
+          <template #header>
+            <div class="card-header">
+              <span style="font-weight: 600; color: #303133;">基础信息</span>
+            </div>
+          </template>
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="接入类型" prop="type">
+                <el-select v-model="form.type" placeholder="请选择接入类型" @change="liveStreamChange" filterable style="width: 100%;">
+                  <el-option
+                    v-for="dict in qs_live_stream_type"
+                    :key="dict.value"
+                    :label="dict.label"
+                    :value="dict.value"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="设备名称" prop="deviceName">
+                <el-input v-model="form.deviceName" placeholder="请输入设备名称" :maxlength="100" show-word-limit/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-card>
+
+        <!-- 连接配置分组 -->
+        <el-card class="form-card" body-style="padding: 16px 20px;">
+          <template #header>
+            <div class="card-header">
+              <span style="font-weight: 600; color: #303133;">连接配置</span>
+            </div>
+          </template>
+          
+          <!-- 通用流地址 -->
+          <el-form-item label="流地址"
                       prop="liveAddress"
                       v-if="form.type === '1' || form.type === '2' || form.type === '3' || form.type === '4'"
-        >
-          <el-input v-model="form.liveAddress" placeholder="请输入直播流地址" :maxlength="1024" show-word-limit/>
-        </el-form-item>
-        <el-form-item label="视频文件" prop="liveAddress"
-                      v-if="form.type === '6'"
-        >
-          <file-upload
-              v-model="form.liveAddress"
-              :fileType="['mp4']"
-              :limit="1"
-              :fileSize="1204"
-          />
-        </el-form-item>
-
-        <el-form-item label="上线类型" prop="onlineType" v-if="form.type === '9'">
-          <el-radio-group v-model="form.onlineType" @change="onlineTypeChange">
-            <el-radio
-                v-for="dict in qs_online_type"
-                :key="dict.value"
-                :label="dict.value"
-            >{{ dict.label }}
-            </el-radio>
-          </el-radio-group>
-        </el-form-item>
-
-        <el-form-item label="IP地址" prop="ipAddress"
-                      v-if="form.type === '7' || (form.type === '9' && form.onlineType === '1')">
-          <el-input v-model="form.ipAddress" placeholder="请输入IP地址" :maxlength="50" show-word-limit/>
-        </el-form-item>
-
-        <el-form-item label="onvif设备IP" prop="ipAddress"
-                      v-if="form.type === '5'">
-          <el-select v-model="form.ipAddress" @change="onvifDeviceCodeChange" placeholder="请选择onvif设备IP"
-                     filterable>
-            <el-option
-                v-for="item in onvifDeviceList"
-                :key="item.ip"
-                :label="item.ip"
-                :value="item.ip"
+          >
+            <el-input v-model="form.liveAddress" placeholder="请输入流地址" :maxlength="1024" show-word-limit/>
+          </el-form-item>
+          
+          <!-- 视频文件 -->
+          <el-form-item label="视频文件" prop="liveAddress"
+                        v-if="form.type === '6'"
+          >
+            <file-upload
+                v-model="form.liveAddress"
+                :fileType="['mp4']"
+                :limit="1"
+                :fileSize="1204"
             />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="端口号" prop="port"
-                      v-if="form.type === '7' || (form.type === '9' && form.onlineType === '1')">
-          <el-input v-model="form.port" placeholder="请输入端口号" disabled :maxlength="10" show-word-limit/>
-        </el-form-item>
-        <el-form-item label="用户名" prop="userName"
-                      v-if="form.type === '7' || form.type === '5' || form.type === '9' ">
-          <el-input v-model="form.userName" placeholder="请输入用户名" :maxlength="64" show-word-limit/>
-        </el-form-item>
-        <el-form-item label="密码" prop="password" v-if="form.type === '7' || form.type === '5' || form.type === '9' ">
-          <el-input v-model="form.password" placeholder="请输入密码" :maxlength="128" show-word-limit/>
-        </el-form-item>
+          </el-form-item>
 
-        <el-form-item label="海康ISUP设备ID" prop="deviceCode" v-if="form.type === '8'">
-          <el-select v-model="form.deviceCode" @change="haikangIsupDeviceCodeChange" placeholder="请选择海康ISUP设备ID"
-                     filterable>
-            <el-option
+          <!-- 上线类型 -->
+          <el-form-item label="上线类型" prop="onlineType" v-if="form.type === '9'">
+            <el-radio-group v-model="form.onlineType" @change="onlineTypeChange">
+              <el-radio
+                  v-for="dict in qs_online_type"
+                  :key="dict.value"
+                  :label="dict.value"
+              >{{ dict.label }}
+              </el-radio>
+            </el-radio-group>
+          </el-form-item>
+
+          <!-- IP/端口/用户名/密码 -->
+          <el-row :gutter="20" v-if="form.type === '7' || form.type === '5' || form.type === '9'">
+            <el-col :span="12">
+              <el-form-item label="IP地址" prop="ipAddress"
+                            v-if="form.type === '7' || (form.type === '9' && form.onlineType === '1')">
+                <el-input v-model="form.ipAddress" placeholder="请输入IP地址" :maxlength="50" show-word-limit/>
+              </el-form-item>
+              <el-form-item label="设备IP" prop="ipAddress"
+                            v-if="form.type === '5'">
+                <el-select v-model="form.ipAddress" @change="onvifDeviceCodeChange" placeholder="请选择设备IP"
+                          filterable style="width: 100%;">
+                  <el-option
+                    v-for="item in onvifDeviceList"
+                    :key="item.ip"
+                    :label="item.ip"
+                    :value="item.ip"
+                  />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="端口" prop="port"
+                            v-if="form.type === '7' || (form.type === '9' && form.onlineType === '1')">
+                <el-input v-model="form.port" placeholder="请输入端口" disabled :maxlength="10" show-word-limit/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="20" v-if="form.type === '7' || form.type === '5' || form.type === '9'">
+            <el-col :span="12">
+              <el-form-item label="用户名" prop="userName">
+                <el-input v-model="form.userName" placeholder="请输入用户名" :maxlength="64" show-word-limit/>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="密码" prop="password">
+                <el-input v-model="form.password" placeholder="请输入密码" :maxlength="128" show-word-limit type="password" show-password/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <!-- 海康ISUP设备ID -->
+          <el-form-item label="设备ID" prop="deviceCode" v-if="form.type === '8'">
+            <el-select v-model="form.deviceCode" @change="haikangIsupDeviceCodeChange" placeholder="请选择设备"
+                       filterable style="width: 100%;">
+              <el-option
                 v-for="item in haiKangIsupDeviceList"
                 :key="item.deviceId"
                 :label="item.deviceId"
                 :value="item.deviceId"
-            >
-              <span style="float: left">{{ item.deviceId }}</span>
-              <span
-                  style="
-                  float: right;
-                  color: var(--el-text-color-secondary);
-                  font-size: 13px;
-                "
               >
-                {{ item.ip }}
-              </span>
-            </el-option>
-          </el-select>
-        </el-form-item>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>{{ item.deviceId }}</span>
+                  <span style="color: #909399; font-size: 12px;">{{ item.ip }}</span>
+                </div>
+              </el-option>
+            </el-select>
+          </el-form-item>
 
-        <el-form-item label="大华设备ID" prop="deviceCode" v-if="form.type === '9' && form.onlineType === '2'">
-          <el-select v-model="form.deviceCode" @change="dahuaDeviceCodeChange" placeholder="请选择大华设备ID"
-                     filterable>
-            <el-option
+          <!-- 大华设备ID -->
+          <el-form-item label="设备ID" prop="deviceCode" v-if="form.type === '9' && form.onlineType === '2'">
+            <el-select v-model="form.deviceCode" @change="dahuaDeviceCodeChange" placeholder="请选择设备"
+                       filterable style="width: 100%;">
+              <el-option
                 v-for="item in dahuaDeviceList"
                 :key="item.deviceId"
                 :label="item.deviceId"
                 :value="item.deviceId"
-            >
-              <span style="float: left">{{ item.deviceId }}</span>
-              <span
-                  style="
-                  float: right;
-                  color: var(--el-text-color-secondary);
-                  font-size: 13px;
-                "
               >
-                {{ item.ip }}
-              </span>
-            </el-option>
-          </el-select>
-        </el-form-item>
+                <div style="display: flex; justify-content: space-between;">
+                  <span>{{ item.deviceId }}</span>
+                  <span style="color: #909399; font-size: 12px;">{{ item.ip }}</span>
+                </div>
+              </el-option>
+            </el-select>
+          </el-form-item>
 
-        <el-form-item label="通道号" prop="channel" v-if="form.type === '7' || form.type === '8' || form.type === '9'">
-          <el-input v-model="form.channel" placeholder="请输入通道号" @input="handleNumberInput" :maxlength="5"
-                    show-word-limit/>
-        </el-form-item>
+          <!-- 通道号/码流类型 -->
+          <el-row :gutter="20" v-if="form.type === '7' || form.type === '8' || form.type === '9'">
+            <el-col :span="12">
+              <el-form-item label="通道号" prop="channel">
+                <el-input v-model="form.channel" placeholder="请输入通道号" @input="handleNumberInput" :maxlength="5"
+                          show-word-limit/>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="码流类型" prop="streamType">
+                <el-radio-group v-model="form.streamType">
+                  <el-radio
+                    v-for="dict in qs_stream_type"
+                    :key="dict.value"
+                    :label="dict.value"
+                  >{{ dict.label }}
+                  </el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+          </el-row>
 
-        <el-form-item label="码流类型" prop="streamType"
-                      v-if="form.type === '7' || form.type === '8' || form.type === '9'">
-          <el-radio-group v-model="form.streamType">
-            <el-radio
-                v-for="dict in qs_stream_type"
-                :key="dict.value"
-                :label="dict.value"
-            >{{ dict.label }}
-            </el-radio>
-          </el-radio-group>
-        </el-form-item>
-
-        <el-form-item label="onvif验证类型" prop="onvifAuth"
-                      v-if="form.type === '5'">
-          <el-radio-group v-model="form.onvifAuth">
-            <el-radio
+          <!-- ONVIF验证 -->
+          <el-form-item label="验证类型" prop="onvifAuth"
+                        v-if="form.type === '5'">
+            <el-radio-group v-model="form.onvifAuth">
+              <el-radio
                 v-for="dict in qs_onvif_auth"
                 :key="dict.value"
                 :label="dict.value"
-            >{{ dict.label }}
-            </el-radio>
-          </el-radio-group>
-        </el-form-item>
+              >{{ dict.label }}
+              </el-radio>
+            </el-radio-group>
+          </el-form-item>
 
-        <el-form-item v-if="form.type === '5'">
-          <el-button type="primary" @click="onvifAuthLogin">认证</el-button>
-        </el-form-item>
+          <el-form-item v-if="form.type === '5'" style="margin: -8px 0 0 110px;">
+            <el-button type="primary" @click="onvifAuthLogin" size="small">认证</el-button>
+          </el-form-item>
 
-        <el-form-item label="直播流地址"
-                      prop="liveAddress"
-                      v-if="form.type === '5'"
-        >
-          <el-select v-model="form.liveAddress" placeholder="请选择直播流地址" filterable>
-            <el-option
+          <!-- ONVIF直播流地址 -->
+          <el-form-item label="流地址"
+                        prop="liveAddress"
+                        v-if="form.type === '5'"
+          >
+            <el-select v-model="form.liveAddress" placeholder="请选择流地址" filterable style="width: 100%;">
+              <el-option
                 v-for="item in streamUris"
                 :key="item"
                 :label="item"
                 :value="item"
-            />
-          </el-select>
-        </el-form-item>
+              />
+            </el-select>
+          </el-form-item>
 
-        <el-form-item label="开启音频"
-                      prop="enableAudio"
-        >
-          <el-radio-group v-model="form.enableAudio">
-            <el-radio label="0">关闭</el-radio>
-            <el-radio label="1">开启</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="开启mp4录制"
-                      prop="enableMp4"
-        >
-          <el-radio-group v-model="form.enableMp4">
-            <el-radio label="0">关闭</el-radio>
-            <el-radio label="1">开启</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="传输协议" prop="protocol">
-          <el-radio-group v-model="form.protocol">
-            <el-radio
+          <!-- 国标28181配置 -->
+          <template v-if="form.type === '12'">
+            <el-form-item label="国标设备" prop="gbDeviceId">
+              <el-select v-model="form.gbDeviceId" placeholder="请选择国标设备" @change="gbDeviceChange" filterable style="width: 100%;">
+                <el-option
+                  v-for="item in gb28181DeviceList"
+                  :key="item.deviceId"
+                  :label="item.name"
+                  :value="item.deviceId"
+                >
+                  <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 2px 0;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span
+                        :style="{
+                          display: 'inline-block',
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          backgroundColor: item.onLine ? '#67C23A' : '#909399'
+                        }"
+                      ></span>
+                      <span style="font-weight: 500;">{{ item.name }}</span>
+                    </div>
+                    <span style="color: #909399; font-size: 12px; font-family: 'Courier New', monospace;">{{ item.deviceId }}</span>
+                  </div>
+                </el-option>
+              </el-select>
+            </el-form-item>
+
+            <el-form-item label="国标通道" prop="gbChannelId">
+              <el-select v-model="form.gbChannelId" placeholder="请选择国标通道" @change="gbChannelChange" filterable :disabled="!form.gbDeviceId" style="width: 100%;">
+                <el-option
+                  v-for="item in gb28181ChannelList"
+                  :key="item.gbDeviceId || item.deviceId"
+                  :label="item.gbName || item.name"
+                  :value="item.gbDeviceId || item.deviceId"
+                >
+                  <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 2px 0;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span
+                        :style="{
+                          display: 'inline-block',
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          backgroundColor: (item.gbStatus || item.status) === 'ON' ? '#67C23A' : '#909399'
+                        }"
+                      ></span>
+                      <span style="font-weight: 500;">{{ item.gbName || item.name }}</span>
+                    </div>
+                    <span style="color: #909399; font-size: 12px; font-family: 'Courier New', monospace;">{{ item.gbDeviceId || item.deviceId }}</span>
+                  </div>
+                </el-option>
+              </el-select>
+            </el-form-item>
+
+            <el-form-item label="传输模式" prop="streamMode">
+              <el-radio-group v-model="form.streamMode">
+                <el-radio label="UDP">UDP</el-radio>
+                <el-radio label="TCP-ACTIVE">TCP主动</el-radio>
+                <el-radio label="TCP-PASSIVE">TCP被动</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </template>
+        </el-card>
+
+        <!-- 功能配置分组 -->
+        <el-card class="form-card" body-style="padding: 16px 20px;">
+          <template #header>
+            <div class="card-header">
+              <span style="font-weight: 600; color: #303133;">功能配置</span>
+            </div>
+          </template>
+          
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="音频" prop="enableAudio">
+                <el-radio-group v-model="form.enableAudio">
+                  <el-radio label="0">关闭</el-radio>
+                  <el-radio label="1">开启</el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="MP4录制" prop="enableMp4">
+                <el-radio-group v-model="form.enableMp4">
+                  <el-radio label="0">关闭</el-radio>
+                  <el-radio label="1">开启</el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-form-item label="传输协议" prop="protocol" v-if="form.type !== '12'">
+            <el-radio-group v-model="form.protocol">
+              <el-radio
                 v-for="dict in qs_protocol"
                 :key="dict.value"
                 :label="dict.value"
-            >{{ dict.label }}
-            </el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="经度" prop="longitude">
-          <el-input v-model="form.longitude" placeholder="请输入经度" @input="handleNumberInput" :maxlength="20"
-                    show-word-limit/>
-        </el-form-item>
-        <el-form-item label="纬度" prop="latitude">
-          <el-input v-model="form.latitude" placeholder="请输入纬度" @input="handleNumberInput" :maxlength="20"
-                    show-word-limit/>
-        </el-form-item>
-        <el-form-item label="国标编码" prop="gbCode">
-          <el-input v-model="form.gbCode" placeholder="请输入国标编码" @input="handleNumberInput" :maxlength="100"
-                    show-word-limit/>
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-radio-group v-model="form.status">
-            <el-radio
+              >{{ dict.label }}
+              </el-radio>
+            </el-radio-group>
+          </el-form-item>
+
+          <el-form-item label="无人观看" prop="enableDisableNoneReader">
+            <el-radio-group v-model="form.enableDisableNoneReader">
+              <el-radio label="0">不处理</el-radio>
+              <el-radio label="1">停用</el-radio>
+            </el-radio-group>
+          </el-form-item>
+        </el-card>
+
+        <!-- 位置信息分组 -->
+        <el-card class="form-card" body-style="padding: 16px 20px;">
+          <template #header>
+            <div class="card-header">
+              <span style="font-weight: 600; color: #303133;">设备信息</span>
+            </div>
+          </template>
+          
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="经度" prop="longitude">
+                <el-input v-model="form.longitude" placeholder="请输入经度" @input="handleNumberInput" :maxlength="20"
+                          show-word-limit/>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="纬度" prop="latitude">
+                <el-input v-model="form.latitude" placeholder="请输入纬度" @input="handleNumberInput" :maxlength="20"
+                          show-word-limit/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="20" v-if="form.type !== '12'">
+            <el-col :span="12">
+              <el-form-item label="国标编码" prop="gbCode">
+                <el-input v-model="form.gbCode" placeholder="请输入国标编码" @input="handleNumberInput" :maxlength="100"
+                          show-word-limit/>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="生产厂商" prop="manufacturer">
+                <el-input v-model="form.manufacturer" placeholder="请输入生产厂商" :maxlength="100" show-word-limit/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-form-item label="生产厂商" prop="manufacturer" v-if="form.type === '12'">
+            <el-input v-model="form.manufacturer" placeholder="请输入生产厂商" :maxlength="100" show-word-limit/>
+          </el-form-item>
+
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="摄像机类型" prop="ptzType">
+                <el-select v-model="form.ptzType" placeholder="请选择摄像机类型" clearable style="width: 100%;">
+                  <el-option label="球机" :value="1"/>
+                  <el-option label="半球" :value="2"/>
+                  <el-option label="固定枪机" :value="3"/>
+                  <el-option label="遥控枪机" :value="4"/>
+                  <el-option label="遥控半球" :value="5"/>
+                  <el-option label="全景/拼接通道" :value="6"/>
+                  <el-option label="分割通道" :value="7"/>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="安装地址" prop="address">
+                <el-input v-model="form.address" placeholder="请输入安装地址" type="textarea" :maxlength="200" show-word-limit :rows="1"/>
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <el-form-item label="状态" prop="status">
+            <el-radio-group v-model="form.status">
+              <el-radio
                 v-for="dict in qs_status"
                 :key="dict.value"
                 :label="dict.value"
-            >{{ dict.label }}
-            </el-radio>
-          </el-radio-group>
-        </el-form-item>
+              >{{ dict.label }}
+              </el-radio>
+            </el-radio-group>
+          </el-form-item>
 
-        <el-form-item label="无人观看"
-                      prop="enableDisableNoneReader">
-          <el-radio-group v-model="form.enableDisableNoneReader">
-            <el-radio label="0">不处理</el-radio>
-            <el-radio label="1">停用</el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" :maxlength="255" show-word-limit/>
-        </el-form-item>
+          <el-form-item label="备注" prop="remark">
+            <el-input v-model="form.remark" type="textarea" placeholder="请输入备注信息" :maxlength="255" show-word-limit :rows="2"/>
+          </el-form-item>
+        </el-card>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
@@ -511,12 +686,15 @@ import {
   rtpPlay,
   stopRtpPlay,
   stopStreamPullPlay,
-  streamPullPlay, streamPullPush
+  streamPullPlay, streamPullPush,
+  startGb28181Play, stopGb28181Play
 } from "@/api/qs/zlm";
 import {DocumentCopy} from '@element-plus/icons-vue'
 import StreamDropdown from "@/components/Channel/streamDropdown.vue";
 import MediaInfo from "@/components/Channel/mediaInfo.vue";
 import {getOnvifDeviceList, onvifLogin} from "@/api/qs/onvif";
+import {getAllDevices, getChannelsByDeviceId} from "@/api/qs/gb28181";
+import type {Gb28181Device, Gb28181Channel} from "@/types/api/qs/gb28181";
 import {ElMessageBox} from "element-plus";
 
 const {toClipboard} = useClipboard()
@@ -546,6 +724,8 @@ const haiKangIsupDeviceList = ref<HaikangIsupDevice[]>([])
 const dahuaDeviceList = ref<DaHuaDevice[]>([])
 const onvifDeviceList = ref<WSDiscoveryDevice[]>([])
 const streamUris = ref<string>([])
+const gb28181DeviceList = ref<Gb28181Device[]>([])
+const gb28181ChannelList = ref<Gb28181Channel[]>([])
 
 // 播放
 const easyPlayerOpen = ref(false)
@@ -648,6 +828,12 @@ function reset() {
     enableDisableNoneReader: "0",
     onvifAuth: "1",
     onvifHostName: null,
+    gbDeviceId: null,
+    gbChannelId: null,
+    streamMode: "TCP-PASSIVE",
+    manufacturer: null,
+    address: null,
+    ptzType: null,
     createBy: null,
     createTime: null,
     updateBy: null,
@@ -713,6 +899,25 @@ function handleUpdate(row: QsDevice) {
       getOnvifDeviceList().then((res) => {
         onvifDeviceList.value = res.data
       })
+    }
+
+    // 国标28181
+    if (form.value.type === '12') {
+      getAllDevices().then((res) => {
+        gb28181DeviceList.value = res.data
+        // 如果有选中的国标设备，自动填充生产厂商
+        if (form.value.gbDeviceId) {
+          const device = res.data.find((item: any) => item.deviceId === form.value.gbDeviceId)
+          if (device?.manufacturer && !form.value.manufacturer) {
+            form.value.manufacturer = device.manufacturer
+          }
+        }
+      })
+      if (form.value.gbDeviceId) {
+        getChannelsByDeviceId(form.value.gbDeviceId).then((res) => {
+          gb28181ChannelList.value = res.data
+        })
+      }
     }
   })
 }
@@ -783,6 +988,9 @@ const liveStreamChange = (e: string) => {
   form.value.password = null
   form.value.channel = null
   form.value.hostName = null
+  form.value.gbDeviceId = null
+  form.value.gbChannelId = null
+  form.value.streamMode = "UDP"
 
   // 海康sdk
   if (e === '7') {
@@ -809,6 +1017,50 @@ const liveStreamChange = (e: string) => {
       onvifDeviceList.value = res.data
     })
   }
+
+  // 国标28181
+  if (e === '12') {
+    getAllDevices().then((res) => {
+      gb28181DeviceList.value = res.data
+    })
+  }
+}
+
+/**
+ * 国标设备选择变化
+ * @param gbDeviceId 国标设备ID
+ */
+const gbDeviceChange = (gbDeviceId: string) => {
+  form.value.gbChannelId = null
+  if (gbDeviceId) {
+    getChannelsByDeviceId(gbDeviceId).then((res) => {
+      gb28181ChannelList.value = res.data
+    })
+    const device = gb28181DeviceList.value.find(item => item.deviceId === gbDeviceId)
+    if (device) {
+      if (device.manufacturer) {
+        form.value.manufacturer = device.manufacturer
+      }
+      if (device.ip) {
+        form.value.ipAddress = device.ip
+      }
+      if (device.port) {
+        form.value.port = device.port
+      }
+    }
+  } else {
+    form.value.manufacturer = null
+    form.value.ipAddress = null
+    form.value.port = null
+  }
+}
+
+/**
+ * 国标通道选择变化
+ * @param gbChannelId 国标通道ID
+ */
+const gbChannelChange = (gbChannelId: string) => {
+  // 可以在这里添加处理逻辑
 }
 
 /**
@@ -1095,6 +1347,32 @@ const handlePlay = (row: QsDevice) => {
     }).catch((err) => {
       row.loading = false
     })
+  } else if (row.type === '12') {
+    startGb28181Play(row.id).then(async (res: any) => {
+      await nextTick(async () => {
+        if (location.protocol === "https:") {
+          flvUrl.value = res.data.https_flv;
+          rtcUrl.value = res.data.rtcs;
+          wsUrl.value = res.data.wss_flv;
+        } else {
+          flvUrl.value = res.data.flv;
+          rtcUrl.value = res.data.rtc;
+          wsUrl.value = res.data.ws_flv;
+        }
+
+        streamInfo.value = res.data;
+        quality.value = []
+        defaultQuality.value = ''
+        isPtz.value = false
+        isQuality.value = false
+        isLive.value = true
+        deviceRow.value = row
+        row.loading = false
+        easyPlayerOpen.value = true
+      })
+    }).catch((err) => {
+      row.loading = false
+    })
   }
 
 }
@@ -1152,6 +1430,11 @@ const handleStopPlay = (row: QsDevice) => {
       getList()
       proxy.$modal.msgSuccess("停止播放成功");
     })
+  } else if (row.type === '12') {
+    stopGb28181Play(row.id).then((res) => {
+      getList()
+      proxy.$modal.msgSuccess("停止播放成功");
+    })
   }
 }
 
@@ -1201,3 +1484,26 @@ const startTimer = () => {
 
 startTimer()
 </script>
+
+<style scoped>
+.form-card {
+  margin-bottom: 16px;
+  border: 1px solid #e4e7ed;
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.form-card:last-child {
+  margin-bottom: 0;
+}
+
+:deep(.el-card__header) {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border-bottom: 1px solid #ebeef5;
+  padding: 12px 20px;
+}
+
+:deep(.el-dialog__body) {
+  padding: 20px 20px 0;
+}
+</style>

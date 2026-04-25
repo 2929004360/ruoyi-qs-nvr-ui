@@ -76,6 +76,25 @@ export interface QsDevice extends BaseEntity {
   onvifAuth?: string;
   /** onvif 主机名 */
   onvifHostName?: string;
+  /** 生产厂商 */
+  manufacturer?: string;
+  /** 安装地址 */
+  address?: string;
+  /** 
+   * 摄像机结构类型,标识摄像机类型: 1-球机; 2-半球; 3-固定枪机; 4-遥控枪机;5-遥控半球;6-多目设备的全景/拼接通道;7-多目设备的分割通道 
+   */
+  ptzType?: number;
+  /** gb设备id */
+  gbDeviceId?: string;
+  /** gb通道id */
+  gbChannelId?: string;
+  /**
+   * 数据流传输模式
+   * UDP:udp传输
+   * TCP-ACTIVE：tcp主动模式
+   * TCP-PASSIVE：tcp被动模式
+   */
+  streamMode?: string;
   /** 创建者 */
   createBy?: string;
   /** 创建时间 */

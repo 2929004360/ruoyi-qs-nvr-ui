@@ -136,7 +136,7 @@ import {queryRegionForDevice} from "@/api/qs/region";
 import {queryGroupForDevice} from "@/api/qs/group";
 import {getDevice, getVideoSnapshot, updateDevice} from "@/api/qs/device";
 import {PullConfig, RTPServerParam} from "@/types/api";
-import {loadRecord, rtpPlay, streamPullPlay, streamPullPush} from "@/api/qs/zlm";
+import {loadRecord, rtpPlay, streamPullPlay, streamPullPush, startGb28181Play} from "@/api/qs/zlm";
 import {ElLoading} from "element-plus";
 
 const {toClipboard} = useClipboard()
@@ -729,6 +729,31 @@ function play(id) {
       })
     }else if (row.type === '13') {
       streamPullPush(row.id).then(async (res: any) => {
+        await nextTick(async () => {
+          if (location.protocol === "https:") {
+            flvUrl.value = res.data.https_flv;
+            rtcUrl.value = res.data.rtcs;
+            wsUrl.value = res.data.wss_flv;
+          } else {
+            flvUrl.value = res.data.flv;
+            rtcUrl.value = res.data.rtc;
+            wsUrl.value = res.data.ws_flv;
+          }
+
+          streamInfo.value = res.data;
+          quality.value = []
+          defaultQuality.value = ''
+          isPtz.value = false
+          isQuality.value = false
+          isLive.value = true
+          deviceRow.value = row
+          easyPlayerOpen.value = true
+        })
+      }).finally(() => {
+        loading.close()
+      })
+    } else if (row.type === '12') {
+      startGb28181Play(row.id).then(async (res: any) => {
         await nextTick(async () => {
           if (location.protocol === "https:") {
             flvUrl.value = res.data.https_flv;
