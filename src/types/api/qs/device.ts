@@ -105,6 +105,12 @@ export interface QsDevice extends BaseEntity {
   updateTime?: string;
   /** 备注 */
   remark?: string;
+  /** JT1078-手机号 */
+  jtMobileNo?: string;
+  /** JT1078-车牌号 */
+  jtPlateNo?: string;
+  /** JT1078-车牌颜色 */
+  jtPlateColor?: string;
 }
 
 /**

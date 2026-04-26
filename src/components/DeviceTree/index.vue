@@ -1,12 +1,15 @@
 <template>
   <div id="DeviceTree" class="device-tree-container" style="height: 100%">
     <div class="device-tree-header">
-      <div class="header-title">设备列表</div>
+      <div class="header-title">
+        <span class="title-icon">📹</span>
+        <span>设备列表</span>
+      </div>
       <div class="header-switch">
         <el-switch
             v-model="showRegion"
-            active-color="#13ce66"
-            inactive-color="rgb(64, 158, 255)"
+            active-color="#10b981"
+            inactive-color="#3b82f6"
             active-text="行政区划"
             inactive-text="业务分组"
             @change="change"
@@ -105,22 +108,32 @@ defineExpose({
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  overflow: hidden !important; /* Force no overflow on container */
+  overflow: hidden !important;
 }
 
 .device-tree-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 16px;
+  padding: 10px 4px;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   min-height: 30px;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .header-title {
   font-size: 16px;
-  font-weight: 500;
+  font-weight: 600;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title-icon {
+  font-size: 18px;
 }
 
 .tree-content {
@@ -135,31 +148,58 @@ defineExpose({
 .tree-wrapper {
   width: 100%;
   height: 100%;
-  min-width: 0; /* Prevent flex items from overflowing */
+  min-width: 0;
   position: relative;
 }
 
 /* Global fixes for Element UI tree components */
-.el-tree {
+:deep(.el-tree) {
   overflow: visible !important;
   width: 100% !important;
   min-width: 0 !important;
   height: 100% !important;
 }
 
-.el-tree-node {
+:deep(.el-tree-node) {
   width: 100% !important;
   min-width: 0 !important;
+  transition: all 0.2s ease;
 }
 
-.el-tree-node__content {
+:deep(.el-tree-node__content) {
   width: 100% !important;
   min-width: 0 !important;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  margin: 2px 0;
 }
 
-.el-tree-node__label {
+:deep(.el-tree-node__content:hover) {
+  background: rgba(59, 130, 246, 0.08);
+  transform: translateX(2px);
+}
+
+:deep(.el-tree-node__label) {
   word-break: break-word !important;
   white-space: normal !important;
+  font-weight: 500;
+  color: #374151;
+}
+
+:deep(.el-tree-node.is-current > .el-tree-node__content) {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+  font-weight: 600;
+}
+
+:deep(.el-tree-node__expand-icon) {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+:deep(.el-tree-node__expand-icon:hover) {
+  transform: scale(1.15);
 }
 
 /* Fix for any scrollable containers */
@@ -171,13 +211,8 @@ defineExpose({
 }
 
 /* Make sure tree nodes are fully visible */
-.el-tree-node__children {
+:deep(.el-tree-node__children) {
   overflow: visible !important;
-}
-
-/* Ensure tree nodes can be expanded/collapsed */
-.el-tree-node__expand-icon {
-  cursor: pointer;
 }
 
 .device-tree-main-box {
@@ -186,33 +221,25 @@ defineExpose({
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .device-tree-container {
-    padding: 10px;
-  }
-
   .device-tree-header {
     flex-direction: column;
     align-items: flex-start;
+    padding: 8px 0;
   }
 
   .header-switch {
     width: 100%;
-    margin-top: 5px;
+    margin-top: 4px;
   }
 }
 
 @media (max-width: 480px) {
-  .device-tree-container {
-    padding: 8px;
-  }
-
   .header-title {
-    font-size: 14px;
+    font-size: 15px;
   }
 
-  /* Adjust el-switch text size for mobile */
-  .el-switch__label {
-    font-size: 12px;
+  .title-icon {
+    font-size: 16px;
   }
 }
 </style>

@@ -204,3 +204,23 @@ export function stopGb28181Play(id: number): Promise<AjaxResult> {
         method: 'get',
     })
 }
+
+/**
+ * jt1078 播放
+ */
+export function startJt1078Play(id: number): Promise<AjaxResult<StreamContent>> {
+    return request({
+        url: '/zlm/startJt1078Play/' + id,
+        method: 'get',
+    })
+}
+
+/**
+ * jt1078 停止点播
+ */
+export function stopJt1078Play(id: number): Promise<AjaxResult> {
+    return request({
+        url: '/zlm/stopJt1078Play/' + id,
+        method: 'get',
+    })
+}

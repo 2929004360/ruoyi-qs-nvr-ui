@@ -119,7 +119,7 @@ import DeviceTree from '@/components/DeviceTree'
 import screenFull from 'screenfull'
 import {ElMessageBox} from "element-plus";
 import {PullConfig, RTPServerParam} from "@/types/api";
-import {loadRecord, rtpPlay, streamPullPlay, streamPullPush, startGb28181Play} from "@/api/qs/zlm";
+import {loadRecord, rtpPlay, streamPullPlay, streamPullPush, startGb28181Play, startJt1078Play} from "@/api/qs/zlm";
 import {getDevice, getVideoSnapshot} from "@/api/qs/device";
 import {FullScreen, Close, VideoPlay, Delete, Document, RefreshLeft, Monitor} from '@element-plus/icons-vue'
 
@@ -381,6 +381,31 @@ async function sendDevicePush(id) {
           })
     } else if (row.type === '12') {
       startGb28181Play(row.id).then(async (res: any) => {
+        await nextTick(async () => {
+          let videoUrl
+          if (location.protocol === 'https:') {
+            videoUrl = res.data.wss_flv
+          } else {
+            videoUrl = res.data.ws_flv
+          }
+
+          setPlayUrl(videoUrl, idxTmp)
+          setEnableAudio(row.enableAudio, idxTmp)
+
+          quality.value = []
+          defaultQuality.value = ''
+          isPtz.value = false
+          isQuality.value = false
+          isLive.value = true
+        })
+      }).catch(err => {
+        videoTip.value[idxTmp] = '播放失败'
+      })
+          .finally(() => {
+            loading.value = false
+          })
+    } else if (row.type === '14') {
+      startJt1078Play(row.id).then(async (res: any) => {
         await nextTick(async () => {
           let videoUrl
           if (location.protocol === 'https:') {

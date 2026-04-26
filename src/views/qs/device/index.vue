@@ -184,7 +184,7 @@
         <el-card class="form-card" body-style="padding: 16px 20px;">
           <template #header>
             <div class="card-header">
-              <span style="font-weight: 600; color: #303133;">基础信息</span>
+              <span style="font-weight: 500; color: #303133; font-size: 14px;">基础信息</span>
             </div>
           </template>
           <el-row :gutter="20">
@@ -212,7 +212,7 @@
         <el-card class="form-card" body-style="padding: 16px 20px;">
           <template #header>
             <div class="card-header">
-              <span style="font-weight: 600; color: #303133;">连接配置</span>
+              <span style="font-weight: 500; color: #303133; font-size: 14px;">连接配置</span>
             </div>
           </template>
           
@@ -443,13 +443,73 @@
               </el-radio-group>
             </el-form-item>
           </template>
+
+          <!-- JT1078 配置 -->
+          <template v-if="form.type === '14'">
+            <el-form-item label="JT1078 设备" prop="deviceCode">
+              <el-select v-model="form.deviceCode" placeholder="请选择 JT1078 设备" @change="jt1078DeviceChange" filterable style="width: 100%;">
+                <el-option
+                  v-for="item in jt1078DeviceList"
+                  :key="item.deviceId"
+                  :value="item.deviceId"
+                >
+                  <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 2px 0;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span
+                        :style="{
+                          display: 'inline-block',
+                          width: '6px',
+                          height: '6px',
+                          borderRadius: '50%',
+                          backgroundColor: item.online ? '#67C23A' : '#909399'
+                        }"
+                      ></span>
+                      <span style="font-weight: 500;">{{ item.plateNo || item.deviceId }}</span>
+                    </div>
+                    <span style="color: #909399; font-size: 12px; font-family: 'Courier New', monospace;">{{ item.mobileNo }}</span>
+                  </div>
+                </el-option>
+              </el-select>
+            </el-form-item>
+
+            <el-form-item label="通道号" prop="channel">
+              <el-input v-model="form.channel" placeholder="请输入通道号" @input="handleNumberInput" :maxlength="5" show-word-limit/>
+            </el-form-item>
+
+            <el-form-item label="手机号" prop="jtMobileNo">
+              <el-input v-model="form.jtMobileNo" placeholder="请输入手机号" :maxlength="20" show-word-limit disabled/>
+            </el-form-item>
+
+            <el-form-item label="车牌号" prop="jtPlateNo">
+              <el-input v-model="form.jtPlateNo" placeholder="请输入车牌号" :maxlength="20" show-word-limit disabled/>
+            </el-form-item>
+
+            <el-form-item label="车牌颜色" prop="jtPlateColor">
+              <el-select v-model="form.jtPlateColor" placeholder="请选择车牌颜色" disabled style="width: 100%;">
+                <el-option label="蓝牌" :value="1" />
+                <el-option label="黄牌" :value="2" />
+                <el-option label="黑牌" :value="3" />
+                <el-option label="白牌" :value="4" />
+                <el-option label="绿牌" :value="5" />
+                <el-option label="黄绿牌" :value="6" />
+              </el-select>
+            </el-form-item>
+
+            <el-form-item label="传输模式" prop="streamMode">
+              <el-radio-group v-model="form.streamMode">
+                <el-radio label="UDP">UDP</el-radio>
+                <el-radio label="TCP-ACTIVE">TCP主动</el-radio>
+                <el-radio label="TCP-PASSIVE">TCP被动</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </template>
         </el-card>
 
         <!-- 功能配置分组 -->
         <el-card class="form-card" body-style="padding: 16px 20px;">
           <template #header>
             <div class="card-header">
-              <span style="font-weight: 600; color: #303133;">功能配置</span>
+              <span style="font-weight: 500; color: #303133; font-size: 14px;">功能配置</span>
             </div>
           </template>
           
@@ -472,7 +532,7 @@
             </el-col>
           </el-row>
 
-          <el-form-item label="传输协议" prop="protocol" v-if="form.type !== '12'">
+          <el-form-item label="传输协议" prop="protocol" v-if="form.type !== '12' && form.type !== '14'">
             <el-radio-group v-model="form.protocol">
               <el-radio
                 v-for="dict in qs_protocol"
@@ -495,7 +555,7 @@
         <el-card class="form-card" body-style="padding: 16px 20px;">
           <template #header>
             <div class="card-header">
-              <span style="font-weight: 600; color: #303133;">设备信息</span>
+              <span style="font-weight: 500; color: #303133; font-size: 14px;">设备信息</span>
             </div>
           </template>
           
@@ -663,6 +723,7 @@
 </template>
 
 <script setup lang="ts" name="Device">
+import {onUnmounted} from "vue";
 import useClipboard from "vue-clipboard3";
 import EasyPlayer from "@/components/EasyPlayer";
 import type {DeviceQueryParams, QsDevice} from "@/types/api/qs/device"
@@ -687,7 +748,8 @@ import {
   stopRtpPlay,
   stopStreamPullPlay,
   streamPullPlay, streamPullPush,
-  startGb28181Play, stopGb28181Play
+  startGb28181Play, stopGb28181Play,
+  startJt1078Play, stopJt1078Play
 } from "@/api/qs/zlm";
 import {DocumentCopy} from '@element-plus/icons-vue'
 import StreamDropdown from "@/components/Channel/streamDropdown.vue";
@@ -695,6 +757,8 @@ import MediaInfo from "@/components/Channel/mediaInfo.vue";
 import {getOnvifDeviceList, onvifLogin} from "@/api/qs/onvif";
 import {getAllDevices, getChannelsByDeviceId} from "@/api/qs/gb28181";
 import type {Gb28181Device, Gb28181Channel} from "@/types/api/qs/gb28181";
+import {getAllDevice} from "@/api/qs/jt1078";
+import type {Jt1078Device} from "@/types/api/qs/jt1078";
 import {ElMessageBox} from "element-plus";
 
 const {toClipboard} = useClipboard()
@@ -726,6 +790,7 @@ const onvifDeviceList = ref<WSDiscoveryDevice[]>([])
 const streamUris = ref<string>([])
 const gb28181DeviceList = ref<Gb28181Device[]>([])
 const gb28181ChannelList = ref<Gb28181Channel[]>([])
+const jt1078DeviceList = ref<Jt1078Device[]>([])
 
 // 播放
 const easyPlayerOpen = ref(false)
@@ -781,7 +846,7 @@ const data = reactive({
       {required: true, message: "通道号不能为空", trigger: "blur"}
     ],
     deviceCode: [
-      {required: true, message: "设备唯一标识不能为空", trigger: "blur"}
+      {required: true, message: "设备唯一标识不能为空", trigger: "change"}
     ],
   }
 })
@@ -838,7 +903,10 @@ function reset() {
     createTime: null,
     updateBy: null,
     updateTime: null,
-    remark: null
+    remark: null,
+    jtMobileNo: null,
+    jtPlateNo: null,
+    jtPlateColor: null
   }
   proxy.resetForm("deviceRef")
 }
@@ -919,6 +987,41 @@ function handleUpdate(row: QsDevice) {
         })
       }
     }
+
+    // JT1078
+    if (form.value.type === '14') {
+      getAllDevice().then((res) => {
+        jt1078DeviceList.value = res.data
+        // 如果有选中的 JT1078 设备，自动填充信息
+        let device = null;
+        // 优先用 deviceCode 查找
+        if (form.value.deviceCode) {
+          device = res.data.find((item: any) => item.deviceId === form.value.deviceCode)
+        }
+        // 如果用 deviceCode 没找到，尝试用 mobileNo 查找（兼容旧数据）
+        if (!device && form.value.jtMobileNo) {
+          device = res.data.find((item: any) => item.mobileNo === form.value.jtMobileNo)
+          if (device) {
+            form.value.deviceCode = device.deviceId
+          }
+        }
+        
+        if (device) {
+          if (device?.makerId) {
+            form.value.manufacturer = device.makerId
+          }
+          if (device?.mobileNo) {
+            form.value.jtMobileNo = device.mobileNo
+          }
+          if (device?.plateNo) {
+            form.value.jtPlateNo = device.plateNo
+          }
+          if (device?.plateColor !== undefined && device?.plateColor !== null) {
+            form.value.jtPlateColor = String(device.plateColor)
+          }
+        }
+      })
+    }
   })
 }
 
@@ -980,6 +1083,7 @@ const handleCopy = async (text: string) => {
  * @param text
  */
 const liveStreamChange = (e: string) => {
+  // 清空所有设备相关字段
   form.value.deviceCode = null
   form.value.deviceName = null
   form.value.ipAddress = null
@@ -987,10 +1091,25 @@ const liveStreamChange = (e: string) => {
   form.value.userName = null
   form.value.password = null
   form.value.channel = null
+  form.value.alarmChannelId = null
   form.value.hostName = null
   form.value.gbDeviceId = null
   form.value.gbChannelId = null
-  form.value.streamMode = "UDP"
+  form.value.onvifAuth = '1'
+  form.value.onvifHostName = null
+  form.value.manufacturer = null
+  form.value.address = null
+  form.value.ptzType = null
+  form.value.deviceType = null
+  form.value.onlineType = null
+  form.value.jtMobileNo = null
+  form.value.jtPlateNo = null
+  form.value.jtPlateColor = null
+
+  // 根据接入类型设置默认值
+  if (e === '12' || e === '14') {
+    form.value.streamMode = 'TCP-PASSIVE'
+  }
 
   // 海康sdk
   if (e === '7') {
@@ -1005,7 +1124,7 @@ const liveStreamChange = (e: string) => {
     })
   }
 
-  // 海康sdk
+  // 大华sdk
   if (e === '9') {
     form.value.port = '37777';
     form.value.onlineType = '1';
@@ -1022,6 +1141,13 @@ const liveStreamChange = (e: string) => {
   if (e === '12') {
     getAllDevices().then((res) => {
       gb28181DeviceList.value = res.data
+    })
+  }
+
+  // JT1078
+  if (e === '14') {
+    getAllDevice().then((res) => {
+      jt1078DeviceList.value = res.data
     })
   }
 }
@@ -1061,6 +1187,36 @@ const gbDeviceChange = (gbDeviceId: string) => {
  */
 const gbChannelChange = (gbChannelId: string) => {
   // 可以在这里添加处理逻辑
+}
+
+/**
+ * JT1078 设备选择变化
+ * @param deviceId JT1078 设备ID
+ */
+const jt1078DeviceChange = (deviceId: string) => {
+  if (deviceId) {
+    const device = jt1078DeviceList.value.find(item => item.deviceId === deviceId)
+    if (device) {
+      if (device.makerId) {
+        form.value.manufacturer = device.makerId
+      }
+      if (device.mobileNo) {
+        form.value.jtMobileNo = device.mobileNo
+      }
+      if (device.plateNo) {
+        form.value.jtPlateNo = device.plateNo
+      }
+      if (device.plateColor) {
+        form.value.jtPlateColor = String(device.plateColor)
+      }
+    }
+  } else {
+    form.value.manufacturer = null
+    form.value.deviceName = null
+    form.value.jtMobileNo = null
+    form.value.jtPlateNo = null
+    form.value.jtPlateColor = null
+  }
 }
 
 /**
@@ -1373,6 +1529,32 @@ const handlePlay = (row: QsDevice) => {
     }).catch((err) => {
       row.loading = false
     })
+  } else if (row.type === '14') {
+    startJt1078Play(row.id).then(async (res: any) => {
+      await nextTick(async () => {
+        if (location.protocol === "https:") {
+          flvUrl.value = res.data.https_flv;
+          rtcUrl.value = res.data.rtcs;
+          wsUrl.value = res.data.wss_flv;
+        } else {
+          flvUrl.value = res.data.flv;
+          rtcUrl.value = res.data.rtc;
+          wsUrl.value = res.data.ws_flv;
+        }
+
+        streamInfo.value = res.data;
+        quality.value = []
+        defaultQuality.value = ''
+        isPtz.value = false
+        isQuality.value = false
+        isLive.value = true
+        deviceRow.value = row
+        row.loading = false
+        easyPlayerOpen.value = true
+      })
+    }).catch((err) => {
+      row.loading = false
+    })
   }
 
 }
@@ -1405,7 +1587,7 @@ const convertWsToHttp = (wsUrl: string) => {
  * 停止播放
  */
 const handleStopPlay = (row: QsDevice) => {
-  if (row.type === '1' || row.type === '2' || row.type === '3' || row.type === '4' | row.type === '5') {
+  if (row.type === '1' || row.type === '2' || row.type === '3' || row.type === '4' || row.type === '5') {
     let data = {
       deviceId: row.id,
       mediaServerId: row.mediaServerId,
@@ -1435,6 +1617,11 @@ const handleStopPlay = (row: QsDevice) => {
       getList()
       proxy.$modal.msgSuccess("停止播放成功");
     })
+  } else if (row.type === '14') {
+    stopJt1078Play(row.id).then((res) => {
+      getList()
+      proxy.$modal.msgSuccess("停止播放成功");
+    })
   }
 }
 
@@ -1453,7 +1640,7 @@ const handleAccessAddress = (row: QsDevice) => {
       inputErrorMessage: '输入callId不合法',
     })
         .then(({value}) => {
-          getStreamPushAddress(row.id, "12345678").then((res: any) => {
+          getStreamPushAddress(row.id, value).then((res: any) => {
             deviceRow.value = row
             streamPushAddressForm.value = res.data
             accessAddressOpen.value = true
@@ -1483,14 +1670,28 @@ const startTimer = () => {
 };
 
 startTimer()
+
+// 组件卸载时清理定时器，防止内存泄漏
+onUnmounted(() => {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+  }
+})
 </script>
 
 <style scoped>
 .form-card {
   margin-bottom: 16px;
-  border: 1px solid #e4e7ed;
+  border: 1px solid #ebeef5;
   border-radius: 6px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.form-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #dcdfe6;
 }
 
 .form-card:last-child {
@@ -1498,12 +1699,82 @@ startTimer()
 }
 
 :deep(.el-card__header) {
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  background: transparent;
   border-bottom: 1px solid #ebeef5;
-  padding: 12px 20px;
+  padding: 14px 20px;
 }
 
 :deep(.el-dialog__body) {
-  padding: 20px 20px 0;
+  padding: 20px 24px 0;
+}
+
+:deep(.el-form-item) {
+  margin-bottom: 20px;
+}
+
+:deep(.el-input) {
+  transition: all 0.2s ease;
+}
+
+:deep(.el-input:hover .el-input__wrapper) {
+  box-shadow: 0 0 0 1px var(--el-input-border-color, #c0c4cc) inset;
+}
+
+:deep(.el-button--primary.is-plain) {
+  transition: all 0.2s ease;
+}
+
+:deep(.el-button--primary.is-plain:hover) {
+  transform: translateY(-1px);
+}
+
+:deep(.el-table) {
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+:deep(.el-table__header-wrapper) {
+  border-radius: 6px 6px 0 0;
+}
+
+:deep(.el-table th) {
+  background: #f8f9fa;
+  color: #303133;
+  font-weight: 500;
+}
+
+:deep(.el-table--border) {
+  border: 1px solid #ebeef5;
+}
+
+:deep(.el-select) {
+  width: 100%;
+}
+
+:deep(.el-radio-group .el-radio) {
+  margin-right: 24px;
+}
+
+:deep(.el-dialog) {
+  border-radius: 8px;
+}
+
+:deep(.el-dialog__header) {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 18px 24px;
+  margin-right: 0;
+}
+
+:deep(.el-dialog__footer) {
+  border-top: 1px solid #f0f0f0;
+  padding: 16px 24px;
+}
+
+:deep(.el-tab-pane) {
+  padding-top: 8px;
+}
+
+.mb8 {
+  margin-bottom: 16px;
 }
 </style>

@@ -27,7 +27,10 @@ const fieldMap = {
   fileCount: '视频文件',
   hikSdkCount: '海康SDK',
   hikIsupCount: '海康ISUP',
-  dahuaSdkCount: '大华SDK'
+  dahuaSdkCount: '大华SDK',
+  gb28181Count: 'GB28181',
+  jt1078Count: 'JT1078',
+  pushCount: '推流设备'
 };
 
 function setData(data) {
