@@ -1,45 +1,79 @@
 <template>
-  <div id="mediaInfo">
-    <!-- 刷新按钮 -->
-    <el-button
-        style="position: absolute; right: 1rem;"
+  <div class="media-info">
+    <!-- 头部 -->
+    <div class="header">
+      <span class="title">媒体信息</span>
+      <el-button
         icon="RefreshRight"
         circle
-        size="mini"
+        size="small"
         @click="getMediaInfoFun"
-    ></el-button>
+        :loading="refreshing"
+      ></el-button>
+    </div>
 
     <!-- 概况信息 -->
-    <el-descriptions size="mini" :column="3" title="概况">
-      <el-descriptions-item label="观看人数">{{ info.readerCount }}</el-descriptions-item>
-      <el-descriptions-item label="网络">{{ formatByteSpeed() }}</el-descriptions-item>
-      <el-descriptions-item label="持续时间">{{ formatAliveSecond() }}</el-descriptions-item>
-    </el-descriptions>
+    <div class="overview">
+      <div class="stat-item">
+        <span class="label">观看人数</span>
+        <span class="value">{{ info.readerCount || 0 }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="label">网络速度</span>
+        <span class="value">{{ formatByteSpeed() }}</span>
+      </div>
+      <div class="stat-item">
+        <span class="label">持续时间</span>
+        <span class="value">{{ formatAliveSecond() }}</span>
+      </div>
+    </div>
 
-    <!-- 视频和音频信息 -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr">
+    <!-- 详细信息 -->
+    <div class="details" v-if="info.videoCodec || info.audioCodec">
       <!-- 视频信息 -->
-      <el-descriptions size="mini" v-if="info.videoCodec" :column="2" title="视频信息">
-        <el-descriptions-item label="编码">{{ info.videoCodec }}</el-descriptions-item>
-        <el-descriptions-item label="分辨率">
-          {{ info.width }}x{{ info.height }}
-        </el-descriptions-item>
-        <el-descriptions-item label="FPS">{{ info.fps }}</el-descriptions-item>
-        <el-descriptions-item label="丢包率">{{ info.loss }}</el-descriptions-item>
-      </el-descriptions>
+      <div class="detail-section" v-if="info.videoCodec">
+        <div class="section-title">视频信息</div>
+        <div class="section-content">
+          <div class="row">
+            <span class="row-label">编码</span>
+            <span class="row-value">{{ info.videoCodec }}</span>
+          </div>
+          <div class="row">
+            <span class="row-label">分辨率</span>
+            <span class="row-value">{{ info.width }}x{{ info.height }}</span>
+          </div>
+          <div class="row">
+            <span class="row-label">FPS</span>
+            <span class="row-value">{{ info.fps }}</span>
+          </div>
+          <div class="row">
+            <span class="row-label">丢包率</span>
+            <span class="row-value">{{ info.loss }}</span>
+          </div>
+        </div>
+      </div>
 
       <!-- 音频信息 -->
-      <el-descriptions size="mini" v-if="info.audioCodec" :column="2" title="音频信息">
-        <el-descriptions-item label="编码">{{ info.audioCodec }}</el-descriptions-item>
-        <el-descriptions-item label="采样率">{{ info.audioSampleRate }}</el-descriptions-item>
-      </el-descriptions>
+      <div class="detail-section" v-if="info.audioCodec">
+        <div class="section-title">音频信息</div>
+        <div class="section-content">
+          <div class="row">
+            <span class="row-label">编码</span>
+            <span class="row-value">{{ info.audioCodec }}</span>
+          </div>
+          <div class="row">
+            <span class="row-label">采样率</span>
+            <span class="row-value">{{ info.audioSampleRate }} Hz</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {onMounted, onUnmounted, ref} from 'vue';
-import {getMediaInfo} from "@/api/qs/zlm";
+import { onMounted, onUnmounted, ref } from 'vue';
+import { getMediaInfo } from '@/api/qs/zlm';
 
 // 定义 Props
 const props = defineProps({
@@ -60,28 +94,34 @@ const props = defineProps({
 // 数据定义
 const info = ref({});
 const task = ref(null);
+const refreshing = ref(false);
 
 // 获取媒体信息
 const getMediaInfoFun = async () => {
-  const res = await getMediaInfo(props.app, props.stream, props.mediaServerId);
-  info.value = res.data;
+  refreshing.value = true;
+  try {
+    const res = await getMediaInfo(props.app, props.stream, props.mediaServerId);
+    info.value = res.data;
+  } finally {
+    refreshing.value = false;
+  }
 };
 
 // 格式化字节速度
 const formatByteSpeed = () => {
-  const bytesSpeed = info.value.bytesSpeed || 0;
+  const bytesSpeed = (info.value as any).bytesSpeed || 0;
   const num = 1024.0;
 
   if (bytesSpeed < num) return `${bytesSpeed} B/S`;
   if (bytesSpeed < Math.pow(num, 2)) return `${(bytesSpeed / num).toFixed(2)} KB/S`;
   if (bytesSpeed < Math.pow(num, 3)) return `${(bytesSpeed / Math.pow(num, 2)).toFixed(2)} MB/S`;
-  if (bytesSpeed < Math.pow(num, 4)) return `${(bytesSpeed / Math.pow(num, 3)).toFixed(2)} G/S`;
-  return `${(bytesSpeed / Math.pow(num, 4)).toFixed(2)} T/S`;
+  if (bytesSpeed < Math.pow(num, 4)) return `${(bytesSpeed / Math.pow(num, 3)).toFixed(2)} GB/S`;
+  return `${(bytesSpeed / Math.pow(num, 4)).toFixed(2)} TB/S`;
 };
 
 // 格式化持续时间
 const formatAliveSecond = () => {
-  const aliveSecond = info.value.aliveSecond || 0;
+  const aliveSecond = (info.value as any).aliveSecond || 0;
   const h = Math.floor(aliveSecond / 3600);
   const minute = Math.floor((aliveSecond / 60) % 60);
   const second = Math.ceil(aliveSecond % 60);
@@ -118,11 +158,91 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.channel-form {
+.media-info {
+  padding: 16px;
+  background: #fff;
+  border-radius: 8px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.overview {
   display: grid;
-  background-color: #ffffff;
-  padding: 1rem 2rem 0 2rem;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 1rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-item .label {
+  font-size: 13px;
+  color: #909399;
+}
+
+.stat-item .value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #606266;
+}
+
+.section-content {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px 24px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.row-label {
+  font-size: 13px;
+  color: #909399;
+}
+
+.row-value {
+  font-size: 14px;
+  color: #303133;
+  font-weight: 500;
 }
 </style>

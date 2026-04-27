@@ -957,7 +957,7 @@ function handleUpdate(row: QsDevice) {
     if (form.value.type === '9' && form.value.onlineType === '2') {
       listDaHusDevice().then((res) => {
         res.data.forEach((item) => {
-          item.deviceId = "dahua_" + item.deviceId
+          item.deviceId = "device_" + item.deviceId
         })
         dahuaDeviceList.value = res.data
       })
@@ -1259,7 +1259,7 @@ const onlineTypeChange = (e: string) => {
   if (e === '2') {
     listDaHusDevice().then((res: any) => {
       res.data.forEach((item) => {
-        item.deviceId = "dahua_" + item.deviceId
+        item.deviceId = "device_" + item.deviceId
         if (item.deviceCode === form.value.deviceCode) {
           form.value.ipAddress = item.ip
           form.value.port = item.port
@@ -1403,6 +1403,11 @@ const handlePlay = (row: QsDevice) => {
         deviceRow.value = row
         row.loading = false
         easyPlayerOpen.value = true
+
+        await nextTick()
+        if (proxy.$refs['EasyPlayerRef']) {
+          proxy.$refs['EasyPlayerRef'].play(wsUrl.value)
+        }
       })
     }).catch((err) => {
       row.loading = false
@@ -1429,6 +1434,11 @@ const handlePlay = (row: QsDevice) => {
         deviceRow.value = row
         row.loading = false
         easyPlayerOpen.value = true
+
+        await nextTick()
+        if (proxy.$refs['EasyPlayerRef']) {
+          proxy.$refs['EasyPlayerRef'].play(wsUrl.value)
+        }
 
         getVideoSnapshot(row.id);
       })
@@ -1473,6 +1483,11 @@ const handlePlay = (row: QsDevice) => {
         deviceRow.value = row
         row.loading = false
         easyPlayerOpen.value = true
+
+        await nextTick()
+        if (proxy.$refs['EasyPlayerRef']) {
+          proxy.$refs['EasyPlayerRef'].play(wsUrl.value)
+        }
       })
     }).catch((err) => {
       row.loading = false
@@ -1499,6 +1514,11 @@ const handlePlay = (row: QsDevice) => {
         deviceRow.value = row
         row.loading = false
         easyPlayerOpen.value = true
+
+        await nextTick()
+        if (proxy.$refs['EasyPlayerRef']) {
+          proxy.$refs['EasyPlayerRef'].play(wsUrl.value)
+        }
       })
     }).catch((err) => {
       row.loading = false
@@ -1525,6 +1545,11 @@ const handlePlay = (row: QsDevice) => {
         deviceRow.value = row
         row.loading = false
         easyPlayerOpen.value = true
+
+        await nextTick()
+        if (proxy.$refs['EasyPlayerRef']) {
+          proxy.$refs['EasyPlayerRef'].play(wsUrl.value)
+        }
       })
     }).catch((err) => {
       row.loading = false
@@ -1551,6 +1576,11 @@ const handlePlay = (row: QsDevice) => {
         deviceRow.value = row
         row.loading = false
         easyPlayerOpen.value = true
+
+        await nextTick()
+        if (proxy.$refs['EasyPlayerRef']) {
+          proxy.$refs['EasyPlayerRef'].play(wsUrl.value)
+        }
       })
     }).catch((err) => {
       row.loading = false

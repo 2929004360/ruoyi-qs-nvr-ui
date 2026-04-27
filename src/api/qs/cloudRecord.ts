@@ -1,7 +1,7 @@
 import request from '@/utils/request'
 import type {AjaxResult, CloudRecordQueryParams, TableDataInfo, ZlmCloudRecord} from '@/types'
 
-// 查询云端录像列表
+// 查询云端录像列表（分页）
 export function listCloudRecord(query: CloudRecordQueryParams): Promise<TableDataInfo<ZlmCloudRecord[]>> {
     return request({
         url: '/zlm/cloudRecord/list',
@@ -9,6 +9,16 @@ export function listCloudRecord(query: CloudRecordQueryParams): Promise<TableDat
         params: query
     })
 }
+
+// 查询云端录像列表（不分页）
+export function listAllCloudRecord(query: CloudRecordQueryParams): Promise<AjaxResult<ZlmCloudRecord[]>> {
+    return request({
+        url: '/zlm/cloudRecord/allList',
+        method: 'get',
+        params: query
+    })
+}
+
 
 // 查询云端录像详细
 export function getCloudRecord(id: number): Promise<AjaxResult<ZlmCloudRecord>> {

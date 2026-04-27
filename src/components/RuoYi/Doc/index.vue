@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-const url = ref<string>('http://doc.ruoyi.vip/ruoyi-cloud')
+const url = ref<string>('http://1.12.55.122:5173/')
 
 function goto(): void {
   window.open(url.value)

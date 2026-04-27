@@ -248,7 +248,7 @@ onUnmounted(() => {
 const emit = defineEmits(['update:modelValue']);
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 div,
 span,
 p {
@@ -268,18 +268,20 @@ p {
   width: 658px;
   font-size: 14px;
   line-height: 32px;
-  color: #515a6e;
+  color: var(--el-text-color-secondary, #606266);
   user-select: none;
 }
 
 .weektime .weektime-main {
-  border: 1px solid #dcdee2;
-  position: relative;
+  border: 1px solid var(--el-border-color, #dcdfe6);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--el-bg-color-overlay, #ffffff);
 }
 
 .weektime .weektime-hd {
   display: flex;
-  background: #f8f8f9;
+  background: var(--el-bg-color-page, #f5f7fa);
 }
 
 .weektime .weektime-hd-title {
@@ -288,6 +290,8 @@ p {
   padding: 0 6px;
   width: 80px;
   height: 65px;
+  font-weight: 500;
+  color: var(--el-text-color-primary, #303133);
 }
 
 .weektime .weektime-hd-con {
@@ -299,7 +303,7 @@ p {
 
 .weektime .weektime-hd-con-top {
   display: flex;
-  border-bottom: 1px solid #dcdee2;
+  border-bottom: 1px solid var(--el-border-color-lighter, #ebeef5);
 }
 
 .weektime .weektime-date-range {
@@ -307,7 +311,7 @@ p {
   height: 32px;
   line-height: 32px;
   text-align: center;
-  border-left: 1px solid #dcdee2;
+  border-left: 1px solid var(--el-border-color-lighter, #ebeef5);
 }
 
 .weektime .weektime-hd-con-bottom {
@@ -319,7 +323,8 @@ p {
   height: 32px;
   line-height: 32px;
   text-align: center;
-  border-left: 1px solid #dcdee2;
+  border-left: 1px solid var(--el-border-color-lighter, #ebeef5);
+  font-size: 12px;
 }
 
 .weektime .weektime-bd {
@@ -332,10 +337,11 @@ p {
 }
 
 .weektime .week-item {
-  border-top: 1px solid #dcdee2;
+  border-top: 1px solid var(--el-border-color-lighter, #ebeef5);
   text-align: center;
   height: 30px;
   line-height: 30px;
+  color: var(--el-text-color-primary, #303133);
 }
 
 .weektime .time-body {
@@ -345,25 +351,32 @@ p {
   flex-wrap: wrap;
   align-items: flex-start;
   position: relative;
+  overflow: hidden;
 }
 
 .weektime .time-cell {
   position: relative;
   width: 12px;
   height: 30px;
-  border-left: 1px solid #efefef;
-  border-top: 1px solid #efefef;
+  border-left: 1px solid var(--el-border-color-extra-light, #f2f6fc);
+  border-top: 1px solid var(--el-border-color-extra-light, #f2f6fc);
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   outline-width: 0;
+  cursor: pointer;
+}
+
+.weektime .time-cell:hover:not(.disable) {
+  background: var(--el-bg-color-page, #f5f7fa);
 }
 
 .weektime .time-cell.active {
-  background: #2d8cf0;
+  background: var(--el-color-primary, #409eff);
 }
 
 .weektime .time-cell.disable {
   cursor: no-drop;
+  background: var(--el-bg-color-disabled, #f5f7fa);
 }
 
 .weektime .time-cell::after {
@@ -374,17 +387,17 @@ p {
   right: 0;
   bottom: 0;
   background: transparent;
-  opacity: 0.5;
-  transition: all 866ms ease;
+  opacity: 0.4;
+  transition: all 0.2s ease;
   z-index: 99999;
 }
 
 .weektime .pre-active::after {
-  background: #113860;
+  background: var(--el-color-primary-light-3, #79bbff);
 }
 
 .weektime .disable::after {
-  background: #cccccc;
+  background: var(--el-text-color-placeholder, #c0c4cc);
 }
 
 .time-area {
@@ -399,19 +412,22 @@ p {
 
 .weektime .weektime-help {
   width: 658px;
-  border: 1px solid #dcdee2;
+  border: 1px solid var(--el-border-color, #dcdfe6);
   border-top: none;
-  padding: 5px 15px;
+  border-radius: 0 0 8px 8px;
+  padding: 10px 15px;
+  background: var(--el-bg-color-overlay, #ffffff);
 }
 
 .weektime .weektime-help-tx {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 8px;
 }
 
 .weektime .weektime-help-week-tx {
-  color: #999;
+  color: var(--el-text-color-secondary, #909399);
 }
 
 .weektime .weektime-help-bd {
@@ -424,24 +440,111 @@ p {
 }
 
 .weektime .weektime-help .color-box {
-  width: 14px;
-  height: 20px;
-  background: #fff;
-  border: 1px solid #dddddd;
+  width: 16px;
+  height: 16px;
+  background: var(--el-bg-color-page, #f5f7fa);
+  border: 1px solid var(--el-border-color, #dcdfe6);
+  border-radius: 3px;
   display: block;
   margin-right: 6px;
 }
 
 .weektime .weektime-help-bd .color-box.color-active {
-  background: #2d8cf0;
+  background: var(--el-color-primary, #409eff);
+  border-color: var(--el-color-primary, #409eff);
 }
 
 .weektime .weektime-help .text-box {
   margin-right: 15px;
+  color: var(--el-text-color-regular, #606266);
 }
 
 .weektime .weektime-help .weektime-help-ft {
-  color: #2d8cf0;
+  color: var(--el-color-primary, #409eff);
   cursor: pointer;
+  transition: color 0.2s;
+  
+  &:hover {
+    color: var(--el-color-primary-light-3, #79bbff);
+  }
+}
+
+.weektime-help-select {
+  padding-top: 8px;
+  border-top: 1px solid var(--el-border-color-lighter, #ebeef5);
+  font-size: 13px;
+  color: var(--el-text-color-regular, #606266);
+}
+
+/* 暗黑模式适配 */
+html.dark {
+  .weektime {
+    color: var(--el-text-color-secondary, #a3a6ad);
+  }
+
+  .weektime .weektime-main {
+    border-color: var(--el-border-color, #4c4d4f);
+    background: var(--el-bg-color-overlay, #1d1e1f);
+  }
+
+  .weektime .weektime-hd {
+    background: var(--el-bg-color-page, #141414);
+  }
+
+  .weektime .weektime-hd-title {
+    color: var(--el-text-color-primary, #e5eaf3);
+  }
+
+  .weektime .weektime-hd-con-top {
+    border-color: var(--el-border-color-lighter, #363637);
+  }
+
+  .weektime .weektime-date-range {
+    border-color: var(--el-border-color-lighter, #363637);
+  }
+
+  .weektime .weektime-date-cell {
+    border-color: var(--el-border-color-lighter, #363637);
+  }
+
+  .weektime .week-item {
+    border-color: var(--el-border-color-lighter, #363637);
+    color: var(--el-text-color-primary, #e5eaf3);
+  }
+
+  .weektime .time-cell {
+    border-color: var(--el-border-color-extra-light, #262727);
+  }
+
+  .weektime .time-cell:hover:not(.disable) {
+    background: var(--el-bg-color-page, #141414);
+  }
+
+  .weektime .time-cell.disable {
+    background: var(--el-bg-color-disabled, #262727);
+  }
+
+  .weektime .weektime-help {
+    border-color: var(--el-border-color, #4c4d4f);
+    background: var(--el-bg-color-overlay, #1d1e1f);
+  }
+
+  .weektime .weektime-help-week-tx {
+    color: var(--el-text-color-secondary, #a3a6ad);
+  }
+
+  .weektime .weektime-help .color-box {
+    background: var(--el-bg-color-page, #141414);
+    border-color: var(--el-border-color, #4c4d4f);
+  }
+
+  .weektime .weektime-help .text-box {
+    color: var(--el-text-color-regular, #cfd3dc);
+  }
+
+  .weektime-help-select {
+    border-color: var(--el-border-color-lighter, #363637);
+    color: var(--el-text-color-regular, #cfd3dc);
+  }
 }
 </style>

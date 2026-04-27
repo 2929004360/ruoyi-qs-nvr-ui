@@ -86,6 +86,7 @@ const props = defineProps({
 })
 
 const easyplayer = ref<any>(null)
+const live = ref("STOP")
 
 onMounted(() => {
   playCreate()
@@ -274,14 +275,23 @@ const playCreate = () => {
     emit('error');
 
   })
-
-  play(props.videoUrl)
 }
 /**
  * 播放
  */
 const play = (url) => {
-  if (easyplayer.value) easyplayer.value.play(url)
+  console.log(live.value)
+  if (easyplayer.value && live.value == 'STOP') {
+    live.value = "LIVE"
+    easyplayer.value.play(url)
+  }else if(easyplayer.value && live.value == 'PAUSE'){
+    live.value = "LIVE"
+    easyplayer.value.play(url)
+  }else if(!easyplayer.value){
+    playCreate()
+    live.value = "LIVE"
+    easyplayer.value.play(url)
+  }
 }
 
 /**
@@ -295,6 +305,7 @@ const playback = (url) => {
  * 暂停播放
  */
 const pause = () => {
+  live.value = "PAUSE"
   if (easyplayer.value) easyplayer.value.pause()
 }
 
@@ -379,7 +390,11 @@ const setMic = (mic) => {
  * 关闭视频，释放底层资源
  */
 const destroy = () => {
-  if (easyplayer.value) easyplayer.value.destroy()
+  if (easyplayer.value) {
+    live.value = "STOP"
+    easyplayer.value.destroy()
+    easyplayer.value = null
+  }
 }
 
 defineExpose({

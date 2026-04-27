@@ -655,6 +655,11 @@ function play(id) {
           isLive.value = true
           deviceRow.value = row
           easyPlayerOpen.value = true
+
+          await nextTick()
+          if (proxy.$refs['EasyPlayerRef']) {
+            proxy.$refs['EasyPlayerRef'].play(wsUrl.value)
+          }
         })
       }).finally(() => {
         loading.close()
@@ -680,6 +685,11 @@ function play(id) {
           isLive.value = true
           deviceRow.value = row
           easyPlayerOpen.value = true
+
+          await nextTick()
+          if (proxy.$refs['EasyPlayerRef']) {
+            proxy.$refs['EasyPlayerRef'].play(wsUrl.value)
+          }
 
           getVideoSnapshot(row.id);
         })
@@ -723,6 +733,11 @@ function play(id) {
           isLive.value = true
           deviceRow.value = row
           easyPlayerOpen.value = true
+
+          await nextTick()
+          if (proxy.$refs['EasyPlayerRef']) {
+            proxy.$refs['EasyPlayerRef'].play(wsUrl.value)
+          }
         })
       }).finally(() => {
         loading.close()
@@ -748,6 +763,11 @@ function play(id) {
           isLive.value = true
           deviceRow.value = row
           easyPlayerOpen.value = true
+
+          await nextTick()
+          if (proxy.$refs['EasyPlayerRef']) {
+            proxy.$refs['EasyPlayerRef'].play(wsUrl.value)
+          }
         })
       }).finally(() => {
         loading.close()
@@ -773,6 +793,11 @@ function play(id) {
           isLive.value = true
           deviceRow.value = row
           easyPlayerOpen.value = true
+
+          await nextTick()
+          if (proxy.$refs['EasyPlayerRef']) {
+            proxy.$refs['EasyPlayerRef'].play(wsUrl.value)
+          }
         })
       }).finally(() => {
         loading.close()
@@ -798,6 +823,11 @@ function play(id) {
           isLive.value = true
           deviceRow.value = row
           easyPlayerOpen.value = true
+
+          await nextTick()
+          if (proxy.$refs['EasyPlayerRef']) {
+            proxy.$refs['EasyPlayerRef'].play(wsUrl.value)
+          }
         })
       }).finally(() => {
         loading.close()

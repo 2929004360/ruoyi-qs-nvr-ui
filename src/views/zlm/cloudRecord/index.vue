@@ -1,62 +1,63 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="应用名" prop="app">
-        <el-input
-            v-model="queryParams.app"
-            placeholder="请输入应用名"
-            clearable
-            @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="流id" prop="stream">
-        <el-input
-            v-model="queryParams.stream"
-            placeholder="请输入流id"
-            clearable
-            @keyup.enter="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="开始时间" prop="queryStartTime">
-        <el-date-picker
-            v-model="queryParams.queryStartTime"
-            type="datetime"
-            style="width: 240px"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            placeholder="选择日期时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="结束时间" prop="queryEndTime">
-        <el-date-picker
-            v-model="queryParams.queryEndTime"
-            type="datetime"
-            style="width: 240px"
-            value-format="YYYY-MM-DD HH:mm:ss"
-            placeholder="选择日期时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="媒体节点" prop="mediaServerId">
-        <el-select
-            v-model="queryParams.mediaServerId"
-            style="width: 240px"
-            placeholder="请选择节点选择"
-        >
-          <el-option
-              v-for="item in mediaServerList"
-              :key="item.id"
-              :label="item.id"
-              :value="item.id"
+    <div class="search-box">
+      <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+        <el-form-item label="应用名" prop="app">
+          <el-input
+              v-model="queryParams.app"
+              placeholder="请输入应用名"
+              clearable
+              @keyup.enter="handleQuery"
           />
-        </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-        <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form>
+        </el-form-item>
+        <el-form-item label="流id" prop="stream">
+          <el-input
+              v-model="queryParams.stream"
+              placeholder="请输入流id"
+              clearable
+              @keyup.enter="handleQuery"
+          />
+        </el-form-item>
+        <el-form-item label="开始时间" prop="queryStartTime">
+          <el-date-picker
+              v-model="queryParams.queryStartTime"
+              type="datetime"
+              style="width: 240px"
+              value-format="YYYY-MM-DD HH:mm:ss"
+              placeholder="选择日期时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="结束时间" prop="queryEndTime">
+          <el-date-picker
+              v-model="queryParams.queryEndTime"
+              type="datetime"
+              style="width: 240px"
+              value-format="YYYY-MM-DD HH:mm:ss"
+              placeholder="选择日期时间">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="媒体节点" prop="mediaServerId">
+          <el-select
+              v-model="queryParams.mediaServerId"
+              style="width: 240px"
+              placeholder="请选择节点选择"
+              clearable
+          >
+            <el-option
+                v-for="item in mediaServerList"
+                :key="item.id"
+                :label="item.id"
+                :value="item.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
+          <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+        </el-form-item>
+      </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
+      <div class="action-buttons">
         <el-button
             type="danger"
             plain
@@ -65,8 +66,6 @@
             @click="handleDelete"
         >删除
         </el-button>
-      </el-col>
-      <el-col :span="1.5">
         <el-button
             type="warning"
             plain
@@ -75,39 +74,38 @@
             @click="downloadZip"
         >下载
         </el-button>
-      </el-col>
-      <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
-    </el-row>
+        <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
+      </div>
+    </div>
 
-    <el-table v-loading="loading" :data="cloudRecordList" @selection-change="handleSelectionChange" border>
-      <el-table-column type="selection" width="55" align="center"/>
+    <el-table v-loading="loading" :data="cloudRecordList" @selection-change="handleSelectionChange" class="record-table" border>
+      <el-table-column type="selection" width="55" align="center" fixed/>
       <el-table-column label="编号" align="center" prop="id" width="80"/>
-      <el-table-column label="应用名" align="center" prop="app" width="100"/>
-      <el-table-column label="流id" align="center" prop="stream"/>
-      <el-table-column label="开始时间" align="center">
+      <el-table-column label="应用名" align="center" prop="app" width="120"/>
+      <el-table-column label="流id" align="center" prop="stream" min-width="150"/>
+      <el-table-column label="开始时间" align="center" width="180">
         <template v-slot:default="scope">
           {{ formatTimeStamp(scope.row.startTime) }}
         </template>
       </el-table-column>
-      <el-table-column label="结束时间" align="center">
+      <el-table-column label="结束时间" align="center" width="180">
         <template v-slot:default="scope">
           {{ formatTimeStamp(scope.row.endTime) }}
         </template>
       </el-table-column>
-
-      <el-table-column label="媒体节点" align="center" prop="mediaServerId"/>
-      <el-table-column label="文件名称" align="center" prop="fileName"/>
-      <el-table-column label="大小" align="center" prop="fileSize">
+      <el-table-column label="媒体节点" align="center" prop="mediaServerId" width="120"/>
+      <el-table-column label="文件名称" align="center" prop="fileName" min-width="150"/>
+      <el-table-column label="大小" align="center" prop="fileSize" width="120">
         <template v-slot:default="scope">
-          {{ formatBytes(scope.row.fileSize) }}
+          <el-tag type="info">{{ formatBytes(scope.row.fileSize) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="时长" align="center" width="150px">
+      <el-table-column label="时长" align="center" width="140">
         <template v-slot:default="scope">
-          <el-tag>{{ formatTime(scope.row.timeLen) }}</el-tag>
+          <el-tag type="success">{{ formatTime(scope.row.timeLen) }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="150px">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="200" fixed="right">
         <template #default="scope">
           <el-button link
                      type="primary"
@@ -117,8 +115,8 @@
           >
             播放
           </el-button>
-          <el-button icon="Download" type="text" @click="downloadZip(scope.row)">下载</el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
+          <el-button link type="success" icon="Download" @click="downloadZip(scope.row)">下载</el-button>
+          <el-button link type="danger" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -137,9 +135,10 @@
                append-to-body
                draggable
                @close="handleCloseStreams"
+               class="player-dialog"
     >
       <div id="cloudRecordPlayer">
-        <div style="width: 100%;display: flex;justify-content: center" v-if="easyPlayerOpen" :style="'height:'+ jessibucaHeight">
+        <div class="player-container" v-if="easyPlayerOpen" :style="'height:'+ jessibucaHeight">
           <EasyPlayer
               :style="'height:'+ jessibucaHeight"
               ref="EasyPlayerRef"
@@ -158,127 +157,97 @@
               :videoUrl="wsUrl"/>
         </div>
 
-        <div class="cloud-record-player-option-box">
-          <div class="cloud-record-show-time">
+        <div class="player-controls">
+          <div class="player-time">
             {{ showPlayTimeValue }}
           </div>
-          <div class="cloud-record-time-process" ref="timeProcess" @click="timeProcessClick($event)"
+          <div class="player-progress" ref="timeProcess" @click="timeProcessClick($event)"
                @mouseenter="timeProcessMouseEnter($event)" @mousemove="timeProcessMouseMove($event)"
                @mouseleave="timeProcessMouseLeave($event)">
             <div v-if="streamInfo">
-              <div class="cloud-record-time-process-value" :style="playTimeValue"></div>
+              <div class="player-progress-bar" :style="playTimeValue"></div>
               <transition name="el-fade-in-linear">
-                <div v-show="showTimeLeft" class="cloud-record-time-process-title" :style="playTimeTitleStyle">
+                <div v-show="showTimeLeft" class="player-progress-tooltip" :style="playTimeTitleStyle">
                   {{ showPlayTimeTitle }}
                 </div>
               </transition>
             </div>
           </div>
-          <div class="cloud-record-show-time">
+          <div class="player-time">
             {{ showPlayTimeTotal }}
           </div>
         </div>
 
-        <div style="height: 40px; background-color: #383838;display: flex;justify-content: space-between;width: 100%">
-          <div>
-            <div class="cloud-record-record-play-control"
-                 style="background-color: transparent; box-shadow: 0 0 10px transparent">
-              <a target="_blank" class="cloud-record-record-play-control-item iconfont icon-camera1196054easyiconnet"
-                 title="截图" @click="snap()"/>
-              <a target="_blank" style="zoom:0.8;" class="cloud-record-record-play-control-item iconfont icon-shuaxin11"
-                 title="刷新" @click="refresh()"/>
-              <a target="_blank" class="cloud-record-record-play-control-item iconfont icon-xiazai011" title="下载"
-                 @click="download()"/>
-            </div>
+        <div class="player-toolbar">
+          <div class="player-toolbar-left">
+            <el-tooltip content="截图" placement="top">
+              <el-button circle size="small" class="toolbar-btn" @click="snap()">
+                <el-icon><Camera /></el-icon>
+              </el-button>
+            </el-tooltip>
+            <el-tooltip content="刷新" placement="top">
+              <el-button circle size="small" class="toolbar-btn" @click="refresh()">
+                <el-icon><Refresh /></el-icon>
+              </el-button>
+            </el-tooltip>
+            <el-tooltip content="下载" placement="top">
+              <el-button circle size="small" class="toolbar-btn" @click="download()">
+                <el-icon><Download /></el-icon>
+              </el-button>
+            </el-tooltip>
           </div>
 
-          <div>
-            <div class="cloud-record-record-play-control">
-              <a target="_blank" class="cloud-record-record-play-control-item iconfont icon-kuaijin" title="快退五秒"
-                 @click="seekBackward()"/>
-              <a target="_blank" class="cloud-record-record-play-control-item iconfont icon-stop1" style="font-size: 14px"
-                 title="停止" @click="stopPLay()"/>
-              <a v-if="playing" target="_blank" class="cloud-record-record-play-control-item iconfont icon-zanting"
-                 title="暂停" @click="pausePlay()"/>
-              <a v-if="!playing" target="_blank" class="cloud-record-record-play-control-item iconfont icon-kaishi"
-                 title="播放" @click="playRecord()"/>
-              <a target="_blank" class="cloud-record-record-play-control-item iconfont icon-houtui" title="快进五秒"
-                 @click="seekForward()"/>
-              <el-dropdown @command="changePlaySpeed" :popper-append-to-body='false' style="margin-top: 10px;">
-                <a target="_blank" class="cloud-record-record-play-control-item record-play-control-speed"
-                   title="倍速播放">{{
-                    playSpeed
-                  }}X</a>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item
-                        v-for="item in playSpeedRange"
-                        :key="item"
-                        :command="item"
-                    >{{ item }}X
-                    </el-dropdown-item>
-                  </el-dropdown-menu>
-                </template>
-              </el-dropdown>
-            </div>
+          <div class="player-toolbar-center">
+            <el-tooltip content="快退五秒" placement="top">
+              <el-button circle size="small" class="toolbar-btn" @click="seekBackward()">
+                <el-icon><VideoPause /></el-icon>
+              </el-button>
+            </el-tooltip>
+            <el-tooltip content="停止" placement="top">
+              <el-button circle size="small" class="toolbar-btn danger" @click="stopPLay()">
+                <el-icon><VideoPlay /></el-icon>
+              </el-button>
+            </el-tooltip>
+            <el-tooltip :content="playing ? '暂停' : '播放'" placement="top">
+              <el-button circle size="small" class="toolbar-btn primary" @click="playing ? pausePlay() : playRecord()">
+                <el-icon v-if="playing"><VideoPause /></el-icon>
+                <el-icon v-else><VideoPlay /></el-icon>
+              </el-button>
+            </el-tooltip>
+            <el-tooltip content="快进五秒" placement="top">
+              <el-button circle size="small" class="toolbar-btn" @click="seekForward()">
+                <el-icon><Right /></el-icon>
+              </el-button>
+            </el-tooltip>
+            <el-dropdown @command="changePlaySpeed" :popper-append-to-body='false'>
+              <el-button class="toolbar-btn speed-btn" size="small">
+                {{ playSpeed }}X
+                <el-icon><ArrowDown /></el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item
+                      v-for="item in playSpeedRange"
+                      :key="item"
+                      :command="item"
+                      :class="{ 'is-active': playSpeed === item }"
+                  >{{ item }}X
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </div>
 
-          <div>
-            <div class="cloud-record-record-play-control"
-                 style="background-color: transparent; box-shadow: 0 0 10px transparent">
-              <a v-if="!isFullScreen" target="_blank"
-                 class="cloud-record-record-play-control-item iconfont icon-fangdazhanshi" title="全屏"
-                 @click="fullScreen()"/>
-              <a v-else target="_blank" class="cloud-record-record-play-control-item iconfont icon-suoxiao1" title="全屏"
-                 @click="fullScreen()"/>
-            </div>
+          <div class="player-toolbar-right">
+            <el-tooltip :content="isFullScreen ? '退出全屏' : '全屏'" placement="top">
+              <el-button circle size="small" class="toolbar-btn" @click="fullScreen()">
+                <el-icon v-if="!isFullScreen"><FullScreen /></el-icon>
+                <el-icon v-else><Aim /></el-icon>
+              </el-button>
+            </el-tooltip>
           </div>
         </div>
       </div>
-
-      <el-tabs v-model="tabActiveName"
-               v-if="easyPlayerOpen"
-               type="card"
-               :stretch="true"
-               style="margin-top: 10px;">
-        <el-tab-pane label="实时视频" name="media">
-          <el-row :gutter="10">
-            <el-col :span="3"><span style="width: 80px; line-height: 40px; text-align: right;">播放地址：</span></el-col>
-            <el-col :span="21">
-              <el-input v-model="flvUrl" :disabled="true" style="margin-top: 10px">
-                <template #prepend>flv地址</template>
-                <template #append>
-                  <el-button type="primary" :icon="DocumentCopy" @click="handleCopy(flvUrl)"/>
-                </template>
-              </el-input>
-              <el-input v-model="wsUrl" :disabled="true" style="margin-top: 10px">
-                <template #prepend>wsUrl地址</template>
-                <template #append>
-                  <el-button type="primary" :icon="DocumentCopy" @click="handleCopy(wsUrl)"/>
-                </template>
-              </el-input>
-            </el-col>
-          </el-row>
-
-          <el-row :gutter="10" style="margin-top: 10px">
-            <el-col :span="3"><span style="width: 80px; line-height: 40px; text-align: right;">资源地址：</span></el-col>
-            <el-col :span="21">
-              <el-input v-model="rtcUrl" :disabled="true">
-                <template #prepend>
-                  <StreamDropdown :stream-info="streamInfo"/>
-                </template>
-                <template #append>
-                  <el-button type="primary" :icon="DocumentCopy" @click="handleCopy(wsUrl)"/>
-                </template>
-              </el-input>
-            </el-col>
-          </el-row>
-        </el-tab-pane>
-        <el-tab-pane label="编码信息" name="codec">
-          <MediaInfo v-if="tabActiveName === 'codec' && streamInfo" ref="mediaInfo" :app="streamInfo.app"
-                     :stream="streamInfo.stream" :mediaServerId="streamInfo.mediaServerId"></MediaInfo>
-        </el-tab-pane>
-      </el-tabs>
     </el-dialog>
   </div>
 </template>
@@ -298,7 +267,21 @@ import {
   setCloudRecordSpeed
 } from "@/api/qs/cloudRecord"
 import momentDurationFormatSetup from 'moment-duration-format'
-import {DocumentCopy} from '@element-plus/icons-vue'
+import {
+  DocumentCopy,
+  Camera,
+  Refresh,
+  Download,
+  VideoPause,
+  VideoPlay,
+  Right,
+  ArrowDown,
+  FullScreen,
+  Aim,
+  Link,
+  Connection,
+  Clock
+} from '@element-plus/icons-vue'
 import StreamDropdown from "@/components/Channel/streamDropdown.vue";
 import MediaInfo from "@/components/Channel/mediaInfo.vue";
 import {getAllOnlineMediaServe} from "@/api/qs/zlm";
@@ -411,8 +394,13 @@ function handleDelete(row: ZlmCloudRecord) {
  *
  * @param row
  */
-const handlePlay = (row: ZlmCloudRecord) => {
-  loadRecord(row.id).then(async res => {
+const handlePlay = async (row: ZlmCloudRecord) => {
+  // 先停止当前播放
+  if (easyPlayerOpen.value) {
+    stopPLay()
+  }
+  
+  await loadRecord(row.id).then(async res => {
     await nextTick(async () => {
       if (location.protocol === "https:") {
         flvUrl.value = res.data.https_flv;
@@ -459,6 +447,11 @@ const handlePlay = (row: ZlmCloudRecord) => {
       timeLen.value = row.timeLen
       startTime.value = row.startTime
       easyPlayerOpen.value = true
+
+      await nextTick()
+      if (proxy.$refs["EasyPlayerRef"]) {
+        proxy.$refs["EasyPlayerRef"].play(wsUrl.value)
+      }
     })
   })
 }
@@ -801,49 +794,41 @@ onUnmounted(() => {
 
 </script>
 
-<style scoped>
-/* 添加 scoped 以避免样式污染，如果原项目是全局样式则去掉 scoped */
-.cloud-record-playBox {
+<style lang="scss" scoped>
+.app-container {
+  padding: 20px;
+}
+
+.search-box {
+  margin-bottom: 20px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.record-table {
+  margin-bottom: 20px;
+}
+
+.player-dialog {
+  :deep(.el-dialog__body) {
+    padding: 0;
+  }
+}
+
+.player-container {
   width: 100%;
-  background-color: #000000;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #000;
+  position: relative;
 }
 
-.cloud-record-record-play-control {
-  height: 32px;
-  line-height: 32px;
-  display: inline-block;
-  width: fit-content;
-  padding: 0 10px;
-  -webkit-box-shadow: 0 0 10px #262626;
-  box-shadow: 0 0 10px #262626;
-  background-color: #262626;
-  margin: 4px 0;
-}
-
-.cloud-record-record-play-control-item {
-  display: inline-block;
-  padding: 0 10px;
-  color: #fff;
-  margin-right: 2px;
-  cursor: pointer; /* 确保有手型指针 */
-  text-decoration: none;
-}
-
-.cloud-record-record-play-control-item:hover {
-  color: #1f83e6;
-}
-
-.cloud-record-record-play-control-speed {
-  font-weight: bold;
-  color: #fff;
-  user-select: none;
-  cursor: pointer;
-}
-
-.cloud-record-player-option-box {
+.player-controls {
   height: 20px;
   width: 100%;
   display: grid;
@@ -851,7 +836,7 @@ onUnmounted(() => {
   background-color: rgb(0, 0, 0);
 }
 
-.cloud-record-time-process {
+.player-progress {
   width: 100%;
   height: 8px;
   margin: 6px 0;
@@ -859,10 +844,10 @@ onUnmounted(() => {
   border: 1px solid #505050;
   background-color: rgb(56, 56, 56);
   cursor: pointer;
-  position: relative; /* 确保子元素定位正确 */
+  position: relative;
 }
 
-.cloud-record-show-time {
+.player-time {
   color: #FFFFFF;
   text-align: center;
   font-size: 14px;
@@ -872,47 +857,86 @@ onUnmounted(() => {
   justify-content: center;
 }
 
-.cloud-record-time-process-value {
-  width: 100%; /* 动态控制宽度 */
+.player-progress-bar {
+  width: 100%;
   height: 6px;
-  background-color: rgb(162, 162, 162);
+  background-color: var(--el-color-primary, #409eff);
   border-radius: 4px;
   transition: width 0.1s linear;
 }
 
-/* 原 CSS 中的 .cloud-record-time-process-value1::after 似乎未在模板中使用，如需进度条拖拽手柄可取消注释并应用类名 */
-/*
-.cloud-record-time-process-value::after {
-  content: '';
-  display: block;
-  width: 12px;
-  height: 12px;
-  background-color: rgb(192, 190, 190);
-  border-radius: 50%;
-  position: absolute;
-  top: -3px;
-  right: -6px;
-}
-*/
-.cloud-record-time-process-title {
+.player-progress-tooltip {
   width: fit-content;
   text-align: center;
-  position: absolute; /* 改为 absolute 以配合 top/left 定位 */
+  position: absolute;
   top: -35px;
   color: rgb(217, 217, 217);
   font-size: 14px;
-  text-shadow: -1px -1px 0 black,
-  1px -1px 0 black,
-  -1px 1px 0 black,
-  1px 1px 0 black;
+  text-shadow: -1px -1px 0 black, 1px -1px 0 black, -1px 1px 0 black, 1px 1px 0 black;
   pointer-events: none;
   white-space: nowrap;
   z-index: 99;
 }
 
-.record-play-control-player {
-  width: fit-content;
-  height: 32px;
-  display: inline-block;
+.player-toolbar {
+  height: 48px;
+  background-color: #1a1a1a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0 16px;
+}
+
+.player-toolbar-left,
+.player-toolbar-center,
+.player-toolbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.toolbar-btn {
+  margin-left: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  transition: all 0.2s;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  &.primary {
+    background: var(--el-color-primary, #409eff);
+  }
+
+  &.danger {
+    background: rgba(245, 108, 108, 0.2);
+  }
+
+  &.speed-btn {
+    border-radius: 12px;
+    padding: 0 8px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    font-size: 12px;
+  }
+}
+
+
+
+/* 暗黑模式适配 */
+html.dark {
+  .player-toolbar {
+    background: linear-gradient(to bottom, #0d0d0d, #1a1a1a);
+  }
+
+  .url-header {
+    .url-label {
+      color: var(--el-text-color-primary, #e5eaf3);
+    }
+  }
 }
 </style>

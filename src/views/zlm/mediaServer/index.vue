@@ -1,107 +1,145 @@
 <template>
   <div class="app-container">
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-            type="primary"
-            plain
-            icon="Plus"
-            @click="handleAdd"
-        >新增
-        </el-button>
-      </el-col>
+    <div class="header-bar">
+      <el-button type="primary" plain icon="Plus" @click="handleAdd">新增</el-button>
       <right-toolbar :search="false" @queryTable="getList"></right-toolbar>
-    </el-row>
+    </div>
 
-    <el-row :gutter="12">
-      <el-col :xs="24" :sm="24" :md="12" :lg="6" v-for="item in wvpMediaServerList" :key="item.id">
-        <el-card shadow="hover" class="server-card">
+    <div class="server-grid">
+      <TransitionGroup name="card-list" tag="div">
+        <div v-for="item in wvpMediaServerList" :key="item.id" class="server-card">
           <div v-if="item.type === 'zlm'" class="card-img-zlm"></div>
           <div v-if="item.type === 'abl'" class="card-img-abl"></div>
-          <div style="padding: 10px;display: flex;justify-content: space-between;align-items: center">
-            <div>
-              <div style="font-size: 16px">{{ item.id }}</div>
-              <div style="font-size: 14px; color: #999; margin-top: 5px; ">{{ item.ip }}</div>
-              <div style="font-size: 14px; color: #999; margin-top: 5px; ">
-                {{ item.status === "ON" ? '在线' : '离线' }}
+          <div class="card-content">
+            <div class="card-info">
+              <div class="server-id">{{ item.id }}</div>
+              <div class="server-ip">{{ item.ip }}</div>
+              <div class="server-status">
+                <span :class="['status-dot', item.status === 'ON' ? 'online' : 'offline']"></span>
+                <span class="status-text">{{ item.status === 'ON' ? '在线' : '离线' }}</span>
               </div>
             </div>
 
-            <div>
-              <el-button type="text"
-                         @click="handleView(item)">查看
-              </el-button>
-              <el-button type="text" v-if="!item.defaultServer"
-                         @click="handleUpdate(item)">编辑
-              </el-button>
-              <el-button type="text" @click="handleDelete(item)" v-if="!item.defaultServer">移除
-              </el-button>
-              <el-button type="text" @click="handleRestartServer(item)">重启
-              </el-button>
+            <div class="card-actions">
+              <el-button type="text" @click="handleView(item)">查看</el-button>
+              <el-button type="text" v-if="!item.defaultServer" @click="handleUpdate(item)">编辑</el-button>
+              <el-button type="text" @click="handleDelete(item)" v-if="!item.defaultServer">移除</el-button>
+              <el-button type="text" @click="handleRestartServer(item)">重启</el-button>
             </div>
           </div>
-          <el-icon v-if="item.defaultServer" class="server-card-status-offline" color="#67C23A">
+          <el-icon v-if="item.defaultServer" class="default-icon" color="#67C23A">
             <SuccessFilled/>
           </el-icon>
-          <i v-if="item.defaultServer" class="server-card-default">默认</i>
-        </el-card>
-      </el-col>
-    </el-row>
+          <el-tag v-if="item.defaultServer" type="success" class="default-tag">默认</el-tag>
+        </div>
+      </TransitionGroup>
+    </div>
 
-    <el-dialog draggable title="媒体节点" v-model="openView" width="1000px" append-to-body>
-      <el-descriptions border>
-        <el-descriptions-item label="媒体服务IP">
-          {{ rowData.ip }}
-        </el-descriptions-item>
-        <el-descriptions-item label="HTTP端口">
-          {{ rowData.httpPort }}
-        </el-descriptions-item>
-        <el-descriptions-item label="SECRET">
-          {{ rowData.secret }}
-        </el-descriptions-item>
-        <el-descriptions-item label="类型">
-          <el-tag type="primary" v-if="rowData.type === 'zlm'">ZLMediaKit</el-tag>
-          <el-tag type="primary" v-if="rowData.type === 'abl'">ABLMediaServer</el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="媒体服务RTMP_PORT">
-          {{ rowData.rtmpPort }}
-        </el-descriptions-item>
-        <el-descriptions-item label="媒体服务RTMPS_PORT">
-          {{ rowData.rtmpSslPort }}
-        </el-descriptions-item>
-        <el-descriptions-item label="媒体服务HOOK_IP">
-          {{ rowData.hookIp }}
-        </el-descriptions-item>
-        <el-descriptions-item label="媒体服务SDP_IP">
-          {{ rowData.sdpIp }}
-        </el-descriptions-item>
-        <el-descriptions-item label="自动配置媒体服务">
-          <el-tag type="primary" v-if="rowData.autoConfig">是</el-tag>
-          <el-tag type="primary" v-if="!rowData.autoConfig">否</el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="媒体服务流IP">
-          {{ rowData.streamIp }}
-        </el-descriptions-item>
-        <el-descriptions-item label="收流端口模式">
-          <el-tag type="primary" v-if="rowData.rtpEnable">多端口</el-tag>
-          <el-tag type="primary" v-if="!rowData.rtpEnable">单端口</el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="媒体服务HTTPS_PORT">
-          {{ rowData.httpSslPort }}
-        </el-descriptions-item>
-        <el-descriptions-item label="收流端口">
-          {{ rowData.rtpPortRange }}
-        </el-descriptions-item>
-        <el-descriptions-item label="媒体服务RTSP_PORT">
-          {{ rowData.rtspPort }}
-        </el-descriptions-item>
-        <el-descriptions-item label="录像管理服务端口">
-          {{ rowData.recordAssistPort }}
-        </el-descriptions-item>
-        <!--        <el-descriptions-item label="媒体服务RTSPS_PORT">-->
-        <!--          {{ rowData.rtspSslPort }}-->
-        <!--        </el-descriptions-item>-->
-      </el-descriptions>
+    <el-dialog draggable title="媒体节点详情" v-model="openView" width="720px" append-to-body class="server-detail-dialog">
+      <div class="detail-container">
+        <!-- 基本信息 -->
+        <div class="detail-section">
+          <div class="section-title">
+            <el-icon><InfoFilled /></el-icon>
+            <span>基本信息</span>
+          </div>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">节点ID</span>
+              <span class="info-value">{{ rowData.id }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">服务IP</span>
+              <span class="info-value">{{ rowData.ip }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">服务类型</span>
+              <el-tag v-if="rowData.type === 'zlm'" type="primary">ZLMediaKit</el-tag>
+              <el-tag v-if="rowData.type === 'abl'" type="success">ABLMediaServer</el-tag>
+            </div>
+            <div class="info-item">
+              <span class="info-label">自动配置</span>
+              <el-tag v-if="rowData.autoConfig" type="success">已启用</el-tag>
+              <el-tag v-else type="info">未启用</el-tag>
+            </div>
+          </div>
+        </div>
+
+        <!-- 端口配置 -->
+        <div class="detail-section">
+          <div class="section-title">
+            <el-icon><Connection /></el-icon>
+            <span>端口配置</span>
+          </div>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">HTTP端口</span>
+              <span class="info-value">{{ rowData.httpPort }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">HTTPS端口</span>
+              <span class="info-value">{{ rowData.httpSslPort }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">RTMP端口</span>
+              <span class="info-value">{{ rowData.rtmpPort }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">RTSP端口</span>
+              <span class="info-value">{{ rowData.rtspPort }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">录像管理端口</span>
+              <span class="info-value">{{ rowData.recordAssistPort }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">收流端口模式</span>
+              <el-tag v-if="rowData.rtpEnable" type="warning">多端口</el-tag>
+              <el-tag v-else type="info">单端口</el-tag>
+            </div>
+            <div class="info-item full-width">
+              <span class="info-label">收流端口范围</span>
+              <span class="info-value">{{ rowData.rtpPortRange }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 网络配置 -->
+        <div class="detail-section">
+          <div class="section-title">
+            <el-icon><Monitor /></el-icon>
+            <span>网络配置</span>
+          </div>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="info-label">流IP</span>
+              <span class="info-value">{{ rowData.streamIp }}</span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">HOOK IP</span>
+              <span class="info-value">{{ rowData.hookIp }}</span>
+            </div>
+            <div class="info-item full-width">
+              <span class="info-label">SDP IP</span>
+              <span class="info-value">{{ rowData.sdpIp }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 安全配置 -->
+        <div class="detail-section">
+          <div class="section-title">
+            <el-icon><Lock /></el-icon>
+            <span>安全配置</span>
+          </div>
+          <div class="info-grid">
+            <div class="info-item full-width">
+              <span class="info-label">SECRET</span>
+              <span class="info-value secret-value">{{ rowData.secret }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -110,6 +148,7 @@
 import router from "@/router";
 import {delMediaServer, getMediaServerList, restartServer} from "../../../api/qs/zlm.js";
 import {MediaServer} from "@/types/api";
+import {InfoFilled, Connection, Monitor, Lock} from '@element-plus/icons-vue';
 
 const {proxy} = getCurrentInstance();
 
@@ -191,52 +230,398 @@ getList();
 </script>
 
 <style lang="scss" scoped>
-.server-card {
-  position: relative;
+.app-container {
+  padding: 16px;
+}
+
+.header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
 }
 
-.card-img-zlm {
-  width: 200px;
-  height: 200px;
+.server-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.card-list-enter-active,
+.card-list-leave-active {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-list-enter-from,
+.card-list-leave-to {
+  opacity: 0;
+  transform: scale(0.8) translateY(20px);
+}
+
+.card-list-move {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.server-card {
+  position: relative;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #e8e8e8;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeInUp 0.5s ease forwards;
+  
+  &:hover {
+    border-color: #409eff;
+    box-shadow: 0 8px 24px rgba(64, 158, 255, 0.15);
+    transform: translateY(-4px);
+    
+    .card-img-zlm,
+    .card-img-abl {
+      transform: scale(1.05);
+    }
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-img-zlm,
+.card-img-abl {
+  width: 100%;
+  height: 160px;
   background: url('../../../assets/images/zlm-logo.png') no-repeat center;
-  background-position: center;
   background-size: contain;
-  margin: 0 auto;
+  background-color: #f8fafc;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: logoFadeIn 0.6s ease 0.2s both;
 }
 
-//.card-img-abl {
-//  width: 200px;
-//  height: 200px;
-//  background: url('../../../assets/images/zlm-logo.png') no-repeat center;
-//  background-position: center;
-//  background-size: contain;
-//  margin: 0 auto;
-//}
+@keyframes logoFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
 
-.server-card-status-online {
+.card-content {
+  padding: 16px;
+  animation: contentFadeIn 0.5s ease 0.3s both;
+}
+
+@keyframes contentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-info {
+  margin-bottom: 12px;
+}
+
+.server-id {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 6px;
+  transition: color 0.3s ease;
+}
+
+.server-ip {
+  font-size: 13px;
+  color: #909399;
+  margin-bottom: 8px;
+  transition: color 0.3s ease;
+}
+
+.server-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  position: relative;
+  transition: transform 0.3s ease;
+  
+  &.online {
+    background: #67c23a;
+    animation: pulse-green 2s ease-in-out infinite;
+  }
+  
+  &.offline {
+    background: #f56c6c;
+  }
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: inherit;
+    opacity: 0.4;
+    animation: pulse 2s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.8);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse-green {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(103, 194, 58, 0.4);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 8px rgba(103, 194, 58, 0);
+  }
+}
+
+.status-text {
+  font-size: 13px;
+  color: #606266;
+  transition: color 0.3s ease;
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  padding-top: 12px;
+  border-top: 1px solid #f5f7fa;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: actionsFadeIn 0.4s ease 0.4s both;
+}
+
+@keyframes actionsFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.default-icon {
   position: absolute;
-  right: 20px;
-  top: 20px;
-  font-size: 18px;
+  right: 12px;
+  top: 12px;
+  font-size: 20px;
+  background: white;
+  border-radius: 50%;
+  padding: 4px;
+  animation: bounceIn 0.6s ease 0.5s both;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.server-card-status-offline {
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.default-tag {
   position: absolute;
-  right: 20px;
-  top: 20px;
-  font-size: 18px;
+  left: 12px;
+  top: 12px;
+  animation: slideInRight 0.5s ease 0.4s both;
 }
 
-.server-card-default {
-  position: absolute;
-  left: 20px;
-  top: 20px;
-  color: #808080;
-  font-size: 18px;
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.server-card:hover {
-  border: 1px solid #adadad;
+:deep(.el-descriptions__label) {
+  font-weight: 500;
+  color: #606266;
+}
+
+:deep(.el-descriptions__cell) {
+  padding: 14px 16px;
+}
+
+:deep(.el-button--text) {
+  transition: all 0.2s ease;
+  
+  &:hover {
+    transform: translateY(-1px);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+/* 详情对话框样式 */
+.detail-container {
+  padding: 8px 0;
+}
+
+.detail-section {
+  margin-bottom: 24px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+
+  .el-icon {
+    color: #409eff;
+    font-size: 18px;
+  }
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  &.full-width {
+    grid-column: 1 / -1;
+  }
+}
+
+.info-label {
+  font-size: 13px;
+  color: #909399;
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: 14px;
+  color: #303133;
+  font-weight: 500;
+  word-break: break-all;
+
+  &.secret-value {
+    font-family: 'Courier New', monospace;
+    color: #f56c6c;
+    background: #fef0f0;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+}
+
+/* 暗黑模式适配 */
+html.dark {
+  .server-card {
+    background: var(--el-bg-color-overlay, #1d1e1f);
+    border-color: var(--el-border-color-light, #434343);
+
+    &:hover {
+      border-color: #409eff;
+      box-shadow: 0 8px 24px rgba(64, 158, 255, 0.2);
+    }
+  }
+
+  .card-img-zlm,
+  .card-img-abl {
+    background-color: var(--el-bg-color, #141414);
+  }
+
+  .server-id {
+    color: var(--el-text-color-primary, #ffffff);
+  }
+
+  .server-ip {
+    color: var(--el-text-color-secondary, #909399);
+  }
+
+  .status-text {
+    color: var(--el-text-color-regular, #d0d0d0);
+  }
+
+  .card-actions {
+    border-top-color: var(--el-border-color-lighter, #303030);
+  }
+
+  .default-icon {
+    background: var(--el-bg-color-overlay, #1d1e1f);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  /* 详情对话框暗黑模式 */
+  .section-title {
+    color: var(--el-text-color-primary, #ffffff);
+    border-bottom-color: var(--el-border-color-lighter, #303030);
+  }
+
+  .info-label {
+    color: var(--el-text-color-secondary, #909399);
+  }
+
+  .info-value {
+    color: var(--el-text-color-primary, #ffffff);
+
+    &.secret-value {
+      background: rgba(245, 108, 108, 0.15);
+      color: #f56c6c;
+    }
+  }
 }
 </style>

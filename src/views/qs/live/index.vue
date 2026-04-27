@@ -279,6 +279,12 @@ async function sendDevicePush(id) {
           isPtz.value = false
           isQuality.value = false
           isLive.value = true
+
+          await nextTick()
+          const playerRef = proxy.$refs[`player${idxTmp}`]
+          if (playerRef && playerRef.length > 0) {
+            playerRef[0].play(videoUrl)
+          }
         })
       }).catch(err => {
         videoTip.value[idxTmp] = '播放失败'
@@ -304,6 +310,12 @@ async function sendDevicePush(id) {
           isPtz.value = false
           isQuality.value = false
           isLive.value = true
+
+          await nextTick()
+          const playerRef = proxy.$refs[`player${idxTmp}`]
+          if (playerRef && playerRef.length > 0) {
+            playerRef[0].play(videoUrl)
+          }
 
           getVideoSnapshot(row.id);
         })
@@ -347,6 +359,12 @@ async function sendDevicePush(id) {
           isPtz.value = false
           isQuality.value = false
           isLive.value = true
+
+          await nextTick()
+          const playerRef = proxy.$refs[`player${idxTmp}`]
+          if (playerRef && playerRef.length > 0) {
+            playerRef[0].play(videoUrl)
+          }
         })
       }).catch(err => {
         videoTip.value[idxTmp] = '播放失败'
@@ -372,6 +390,12 @@ async function sendDevicePush(id) {
           isPtz.value = false
           isQuality.value = false
           isLive.value = true
+
+          await nextTick()
+          const playerRef = proxy.$refs[`player${idxTmp}`]
+          if (playerRef && playerRef.length > 0) {
+            playerRef[0].play(videoUrl)
+          }
         })
       }).catch(err => {
         videoTip.value[idxTmp] = '播放失败'
@@ -397,6 +421,12 @@ async function sendDevicePush(id) {
           isPtz.value = false
           isQuality.value = false
           isLive.value = true
+
+          await nextTick()
+          const playerRef = proxy.$refs[`player${idxTmp}`]
+          if (playerRef && playerRef.length > 0) {
+            playerRef[0].play(videoUrl)
+          }
         })
       }).catch(err => {
         videoTip.value[idxTmp] = '播放失败'
@@ -422,6 +452,12 @@ async function sendDevicePush(id) {
           isPtz.value = false
           isQuality.value = false
           isLive.value = true
+
+          await nextTick()
+          const playerRef = proxy.$refs[`player${idxTmp}`]
+          if (playerRef && playerRef.length > 0) {
+            playerRef[0].play(videoUrl)
+          }
         })
       }).catch(err => {
         videoTip.value[idxTmp] = '播放失败'
