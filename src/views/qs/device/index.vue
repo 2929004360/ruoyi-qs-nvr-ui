@@ -562,14 +562,26 @@
           <el-row :gutter="20">
             <el-col :span="12">
               <el-form-item label="经度" prop="longitude">
-                <el-input v-model="form.longitude" placeholder="请输入经度" @input="handleNumberInput" :maxlength="20"
-                          show-word-limit/>
+                <el-input v-model="form.longitude" placeholder="请输入经度" :maxlength="20"
+                          show-word-limit>
+                  <template #append>
+                    <el-button @click="selectMapPositionFun">
+                      选择
+                    </el-button>
+                  </template>
+                </el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="纬度" prop="latitude">
-                <el-input v-model="form.latitude" placeholder="请输入纬度" @input="handleNumberInput" :maxlength="20"
-                          show-word-limit/>
+                <el-input v-model="form.latitude" placeholder="请输入纬度" :maxlength="20"
+                          show-word-limit>
+                  <template #append>
+                    <el-button @click="selectMapPositionFun">
+                      选择
+                    </el-button>
+                  </template>
+                </el-input>
               </el-form-item>
             </el-col>
           </el-row>
@@ -578,7 +590,11 @@
             <el-col :span="12">
               <el-form-item label="国标编码" prop="gbCode">
                 <el-input v-model="form.gbCode" placeholder="请输入国标编码" @input="handleNumberInput" :maxlength="100"
-                          show-word-limit/>
+                          show-word-limit>
+                  <template #append>
+                    <el-button @click="handleChannelCode">选择</el-button>
+                  </template>
+                </el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -719,6 +735,9 @@
         </el-form-item>
       </el-form>
     </el-dialog>
+
+    <SelectMapPosition ref="selectMapPositionRef" @onSubmit="selectMapPositionSubmit"/>
+    <ChannelCode ref="channelCodeRef" @handleOk="channelCodeOk"/>
   </div>
 </template>
 
@@ -754,6 +773,8 @@ import {
 import {DocumentCopy} from '@element-plus/icons-vue'
 import StreamDropdown from "@/components/Channel/streamDropdown.vue";
 import MediaInfo from "@/components/Channel/mediaInfo.vue";
+import SelectMapPosition from '@/components/SelectMapPosition';
+import ChannelCode from '@/views/components/common/channelCode.vue';
 import {getOnvifDeviceList, onvifLogin} from "@/api/qs/onvif";
 import {getAllDevices, getChannelsByDeviceId} from "@/api/qs/gb28181";
 import type {Gb28181Device, Gb28181Channel} from "@/types/api/qs/gb28181";
@@ -1657,6 +1678,26 @@ const handleStopPlay = (row: QsDevice) => {
 
 const accessAddressOpen = ref(false)
 
+const selectMapPositionFun = () => {
+  proxy.$refs["selectMapPositionRef"].openDialog({
+    lat: form.value.latitude,
+    lng: form.value.longitude,
+  })
+}
+
+const selectMapPositionSubmit = (data: any) => {
+  form.value.longitude = data.lng
+  form.value.latitude = data.lat
+}
+
+const handleChannelCode = () => {
+  proxy.$refs["channelCodeRef"].openDialog(null, form.value.gbCode)
+}
+
+const channelCodeOk = (code: string) => {
+  form.value.gbCode = code
+}
+
 /**
  * 接入地址
  */
@@ -1732,10 +1773,6 @@ onUnmounted(() => {
   background: transparent;
   border-bottom: 1px solid #ebeef5;
   padding: 14px 20px;
-}
-
-:deep(.el-dialog__body) {
-  padding: 20px 24px 0;
 }
 
 :deep(.el-form-item) {
