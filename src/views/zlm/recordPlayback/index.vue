@@ -341,18 +341,19 @@ const handleDeviceClick = async (deviceId: number) => {
     const device = res.data
     currentDevice.value = device
 
-    // 设置查询参数
-    if (device.type === '1' || device.type === '2' || device.type === '3' || device.type === '4' || device.type === '5') {
-      queryParams.value.app = device.type === '1' ? 'rtsp' :
-          device.type === '2' ? 'rtmp' :
-              device.type === '3' ? 'flv' :
-                  device.type === '4' ? 'hls' : 'onvif'
-      queryParams.value.stream = device.deviceCode
-    } else {
-      // 其他类型的设备，暂时不处理
-      proxy.$modal.msgWarning('该设备类型暂不支持录像回放')
-      return
-    }
+    // 设置查询参数 - 所有设备类型都支持录像回放
+    queryParams.value.app = device.type === '1' ? 'rtsp' :
+        device.type === '2' ? 'rtmp' :
+            device.type === '3' ? 'flv' :
+                device.type === '4' ? 'hls' :
+                    device.type === '5' ? 'onvif' :
+                        device.type === '7' ? 'haikang' :
+                            device.type === '8' ? 'haikang_isup' :
+                                device.type === '9' ? 'dahua' :
+                                    device.type === '12' ? 'gb28181' :
+                                        device.type === '13' ? 'push' :
+                                            device.type === '14' ? 'jt1078' : 'live'
+    queryParams.value.stream = device.deviceCode
 
     // 清空已选择的录像
     selectedRecord.value = null
@@ -839,23 +840,20 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .app-container {
-  padding: 16px;
-  height: calc(100vh - 40px);
+  padding: 12px;
+  height: calc(100vh - 36px);
   box-sizing: border-box;
 }
 
 /* splitpanes 基础优化 */
 .record-splitpanes {
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
   border: 1px solid var(--el-border-color-lighter);
   background: var(--el-bg-color);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  animation: panelFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 html.dark .record-splitpanes {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
   border-color: var(--el-border-color-darker);
 }
 
@@ -873,42 +871,29 @@ html.dark .record-splitpanes {
 .panel-header {
   display: flex;
   align-items: center;
-  padding: 12px 16px;
+  padding: 10px 14px;
   background: var(--el-bg-color-page);
   border-bottom: 1px solid var(--el-border-color-lighter);
-  font-weight: 600;
+  font-weight: 500;
   color: var(--el-text-color-primary);
-  font-size: 14px;
-  gap: 10px;
-  position: relative;
-  animation: slideInDown 0.4s ease both;
-
-  .header-accent {
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 3px;
-    height: 18px;
-    background: var(--el-color-primary);
-    border-radius: 0 3px 3px 0;
-  }
+  font-size: 13px;
+  gap: 8px;
 
   .header-icon-wrap {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
     background: var(--el-color-primary-light-9);
     color: var(--el-color-primary);
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .device-name {
     margin-left: auto;
-    font-weight: 500;
+    font-weight: 400;
     color: var(--el-text-color-secondary);
     font-size: 12px;
     overflow: hidden;
@@ -917,12 +902,12 @@ html.dark .record-splitpanes {
     max-width: 45%;
     padding: 2px 8px;
     background: var(--el-fill-color-light);
-    border-radius: 10px;
+    border-radius: 6px;
   }
 
   .record-meta {
     margin-left: auto;
-    font-weight: 500;
+    font-weight: 400;
     color: var(--el-color-primary);
     font-size: 12px;
     overflow: hidden;
@@ -944,7 +929,7 @@ html.dark .record-splitpanes {
 }
 
 .tree-container {
-  padding: 10px;
+  padding: 8px;
 }
 
 /* 日期面板 */
@@ -952,42 +937,34 @@ html.dark .record-splitpanes {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px;
-  gap: 8px;
+  padding: 10px;
+  gap: 6px;
   background: var(--el-bg-color-page);
   border-bottom: 1px solid var(--el-border-color-lighter);
   flex-shrink: 0;
 
   .date-nav-btn {
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
 
     &:hover {
-      transform: scale(1.08);
       background: var(--el-color-primary-light-9);
       color: var(--el-color-primary);
-      border-color: var(--el-color-primary-light-5);
     }
   }
 
   .today-btn {
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.2s ease;
-
-    &:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px var(--el-color-primary-light-8);
-    }
+    border-radius: 6px;
+    font-weight: 400;
+    transition: all 0.15s ease;
   }
 }
 
 :deep(.record-date-picker) {
-  width: 140px;
+  width: 130px;
 
   .el-input__wrapper {
-    border-radius: 8px;
+    border-radius: 6px;
     box-shadow: 0 0 0 1px var(--el-border-color) inset;
-    transition: box-shadow 0.2s ease;
 
     &:hover, &.is-focus {
       box-shadow: 0 0 0 1px var(--el-color-primary) inset;
@@ -998,13 +975,13 @@ html.dark .record-splitpanes {
 /* 录像列表 */
 .record-list {
   flex: 1;
-  padding: 10px;
+  padding: 8px;
   overflow-y: auto;
 
   .record-items-wrap {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 4px;
   }
 
   .list-empty {
@@ -1012,29 +989,27 @@ html.dark .record-splitpanes {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 48px 20px;
+    padding: 40px 16px;
     color: var(--el-text-color-secondary);
-    font-size: 14px;
+    font-size: 13px;
     text-align: center;
-    animation: fadeIn 0.5s ease both;
 
     .empty-animation {
-      width: 72px;
-      height: 72px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       background: var(--el-fill-color-light);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       color: var(--el-text-color-placeholder);
-      animation: emptyPulse 2.5s ease-in-out infinite;
     }
 
     span {
-      font-weight: 600;
+      font-weight: 500;
       color: var(--el-text-color-primary);
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     p {
@@ -1048,22 +1023,18 @@ html.dark .record-splitpanes {
 .record-item {
   display: flex;
   align-items: flex-start;
-  gap: 10px;
-  padding: 10px 10px 10px 6px;
+  gap: 8px;
+  padding: 8px;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 10px;
+  transition: all 0.15s ease;
+  border-radius: 6px;
   border: 1px solid transparent;
-  animation: listItemSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
 
   &:hover {
     background: var(--el-fill-color-light);
     border-color: var(--el-border-color-lighter);
-    transform: translateX(2px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
     .record-dot {
-      transform: scale(1.3);
       background: var(--el-color-primary);
     }
   }
@@ -1071,11 +1042,9 @@ html.dark .record-splitpanes {
   &.active {
     background: var(--el-color-primary-light-9);
     border-color: var(--el-color-primary-light-7);
-    box-shadow: 0 0 0 1px var(--el-color-primary-light-8), 0 4px 12px var(--el-color-primary-light-8);
 
     .record-dot {
       background: var(--el-color-primary);
-      box-shadow: 0 0 0 3px var(--el-color-primary-light-8);
     }
 
     .record-time {
@@ -1087,21 +1056,20 @@ html.dark .record-splitpanes {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 6px;
+    padding-top: 4px;
     flex-shrink: 0;
 
     .record-dot {
-      width: 8px;
-      height: 8px;
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: var(--el-border-color);
-      transition: all 0.3s ease;
     }
 
     .record-line {
       width: 2px;
       flex: 1;
-      min-height: 24px;
+      min-height: 20px;
       background: var(--el-border-color-lighter);
       margin-top: 4px;
       border-radius: 1px;
@@ -1113,20 +1081,19 @@ html.dark .record-splitpanes {
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
   }
 
   .record-time {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     color: var(--el-text-color-primary);
     font-size: 13px;
-    font-weight: 600;
-    transition: color 0.2s ease;
+    font-weight: 500;
 
     .el-icon {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--el-text-color-secondary);
       flex-shrink: 0;
     }
@@ -1137,8 +1104,8 @@ html.dark .record-splitpanes {
     align-items: center;
 
     .duration-tag {
-      font-weight: 500;
-      border-radius: 6px;
+      font-weight: 400;
+      border-radius: 4px;
 
       .el-icon {
         margin-right: 2px;
@@ -1150,15 +1117,13 @@ html.dark .record-splitpanes {
 
 /* 播放器区域 */
 .player-wrapper {
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
-  margin: 16px;
+  margin: 12px;
   display: flex;
   flex-direction: column;
   background: #0a0a0a;
   border: 1px solid rgba(255, 255, 255, 0.06);
-  animation: playerSlideUp 0.55s 0.1s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 .player-container {
@@ -1177,7 +1142,7 @@ html.dark .record-splitpanes {
   left: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(145deg, #0f0f0f 0%, #1a1a1a 100%);
+  background: #0f0f0f;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1185,47 +1150,44 @@ html.dark .record-splitpanes {
 
   .empty-content {
     text-align: center;
-    animation: emptyContentFadeIn 0.6s ease both;
   }
 
   .empty-icon-wrap {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 20px;
+    margin: 0 auto 16px;
     color: rgba(255, 255, 255, 0.25);
-    animation: emptyIconPulse 3s ease-in-out infinite;
   }
 
   .empty-text {
     color: rgba(255, 255, 255, 0.7);
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 6px;
   }
 
   .empty-hint {
     color: rgba(255, 255, 255, 0.35);
-    font-size: 13px;
+    font-size: 12px;
   }
 }
 
 /* 播放控制条 */
 .player-controls {
-  height: 36px;
+  height: 32px;
   width: 100%;
   display: grid;
-  grid-template-columns: 150px 1fr 150px;
+  grid-template-columns: 130px 1fr 130px;
   align-items: center;
-  background: linear-gradient(180deg, #141414 0%, #0f0f0f 100%);
+  background: #141414;
   border-top: 1px solid rgba(255, 255, 255, 0.04);
-  padding: 0 12px;
-  transition: opacity 0.3s ease;
+  padding: 0 10px;
 
   &.disabled {
     opacity: 0.4;
@@ -1241,8 +1203,7 @@ html.dark .record-splitpanes {
   text-align: center;
   font-size: 12px;
   font-family: 'SF Mono', Monaco, monospace;
-  font-weight: 500;
-  letter-spacing: 0.3px;
+  font-weight: 400;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1259,80 +1220,57 @@ html.dark .record-splitpanes {
 .player-progress-wrap {
   display: flex;
   align-items: center;
-  padding: 0 12px;
+  padding: 0 10px;
 }
 
 .player-progress {
   width: 100%;
-  height: 5px;
-  border-radius: 3px;
+  height: 4px;
+  border-radius: 2px;
   background: rgba(255, 255, 255, 0.1);
   cursor: pointer;
   position: relative;
-  transition: height 0.2s ease;
-
-  &:hover {
-    height: 8px;
-  }
 }
 
 .player-progress-track {
   position: relative;
   width: 100%;
   height: 100%;
-  border-radius: 3px;
+  border-radius: 2px;
   overflow: hidden;
 }
 
 .player-progress-bar {
   height: 100%;
   background: var(--el-color-primary);
-  border-radius: 3px;
-  transition: width 0.1s linear;
+  border-radius: 2px;
   position: relative;
   z-index: 1;
-}
-
-.player-progress-glow {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  background: linear-gradient(90deg, var(--el-color-primary) 0%, var(--el-color-primary-light-3) 100%);
-  border-radius: 3px;
-  opacity: 0.3;
-  filter: blur(4px);
-  transition: width 0.1s linear;
-  z-index: 0;
 }
 
 .player-progress-tooltip {
   width: fit-content;
   text-align: center;
   position: absolute;
-  top: -44px;
+  top: -36px;
   color: #fff;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 400;
   pointer-events: none;
   white-space: nowrap;
   z-index: 99;
-  background: rgba(30, 30, 30, 0.85);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  background: rgba(30, 30, 30, 0.9);
+  padding: 4px 10px;
+  border-radius: 4px;
 
   .tooltip-arrow {
     position: absolute;
-    bottom: -5px;
+    bottom: -4px;
     left: 50%;
     transform: translateX(-50%);
-    width: 10px;
-    height: 10px;
-    background: rgba(30, 30, 30, 0.85);
+    width: 8px;
+    height: 8px;
+    background: rgba(30, 30, 30, 0.9);
     border-right: 1px solid rgba(255, 255, 255, 0.08);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     transform: translateX(-50%) rotate(45deg);
@@ -1341,15 +1279,14 @@ html.dark .record-splitpanes {
 
 /* 播放器工具栏 */
 .player-toolbar {
-  height: 52px;
-  background: linear-gradient(180deg, #1a1a1a 0%, #141414 100%);
+  height: 44px;
+  background: #1a1a1a;
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 0 16px;
+  padding: 0 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.04);
-  transition: opacity 0.3s ease;
 
   &.disabled {
     opacity: 0.35;
@@ -1361,82 +1298,67 @@ html.dark .record-splitpanes {
 .player-toolbar-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .toolbar-btn {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.06);
   color: rgba(255, 255, 255, 0.75);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.15s ease;
 
   &:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.12);
     border-color: rgba(255, 255, 255, 0.12);
     color: #fff;
-    transform: scale(1.1);
-  }
-
-  &:active:not(:disabled) {
-    transform: scale(0.95);
   }
 
   &.play-btn {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     background: var(--el-color-primary);
     border-color: var(--el-color-primary);
     color: #fff;
-    font-size: 18px;
+    font-size: 16px;
 
     &:hover:not(:disabled) {
       background: var(--el-color-primary-light-3);
       border-color: var(--el-color-primary-light-3);
-      box-shadow: 0 0 16px var(--el-color-primary-light-5);
-      transform: scale(1.12);
     }
   }
 
   &.stop-btn {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     background: rgba(245, 108, 108, 0.15);
     border-color: rgba(245, 108, 108, 0.2);
     color: #f56c6c;
-
-    &:hover:not(:disabled) {
-      background: rgba(245, 108, 108, 0.25);
-      border-color: rgba(245, 108, 108, 0.35);
-      box-shadow: 0 0 12px rgba(245, 108, 108, 0.2);
-    }
   }
 
   &.speed-btn {
-    border-radius: 10px;
-    padding: 0 12px;
-    height: 30px;
+    border-radius: 6px;
+    padding: 0 10px;
+    height: 28px;
     display: flex;
     align-items: center;
     gap: 4px;
     font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.3px;
+    font-weight: 500;
     background: rgba(255, 255, 255, 0.06);
   }
 }
 
 /* 速度下拉菜单 */
 .speed-dropdown-menu {
-  border-radius: 10px;
-  padding: 6px;
-  min-width: 80px;
+  border-radius: 6px;
+  padding: 4px;
+  min-width: 70px;
 
   :deep(.el-dropdown-menu__item) {
-    border-radius: 6px;
-    padding: 7px 12px;
-    font-size: 13px;
-    font-weight: 500;
-    transition: all 0.2s ease;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 400;
 
     &:hover {
       background: var(--el-color-primary-light-9);
@@ -1446,91 +1368,8 @@ html.dark .record-splitpanes {
     &.is-active {
       background: var(--el-color-primary-light-9);
       color: var(--el-color-primary);
-      font-weight: 600;
+      font-weight: 500;
     }
-  }
-}
-
-/* ========== 动画定义 ========== */
-@keyframes panelFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px) scale(0.995);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes slideInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes listItemSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes emptyPulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.06);
-    opacity: 0.8;
-  }
-}
-
-@keyframes emptyIconPulse {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.05);
-  }
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 0 0 16px rgba(255, 255, 255, 0);
-  }
-}
-
-@keyframes emptyContentFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes playerSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -1539,21 +1378,10 @@ html.dark {
   .panel-header {
     background: rgba(255, 255, 255, 0.02);
     border-bottom-color: var(--el-border-color-darker);
-    color: var(--el-text-color-primary);
-
-    .header-icon-wrap {
-      background: var(--el-color-primary-light-5);
-    }
 
     .device-name {
       background: rgba(255, 255, 255, 0.04);
     }
-  }
-
-  .tree-container,
-  .list-container,
-  .player-area {
-    background: var(--el-bg-color);
   }
 
   .date-panel {
@@ -1565,13 +1393,11 @@ html.dark {
     &:hover {
       background: rgba(255, 255, 255, 0.04);
       border-color: var(--el-border-color);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     }
 
     &.active {
       background: var(--el-color-primary-light-5);
       border-color: var(--el-color-primary-light-3);
-      box-shadow: 0 0 0 1px var(--el-color-primary-light-3), 0 4px 12px rgba(0, 0, 0, 0.2);
     }
   }
 
@@ -1579,11 +1405,6 @@ html.dark {
     .empty-animation {
       background: rgba(255, 255, 255, 0.04);
     }
-  }
-
-  .player-wrapper {
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   }
 }
 </style>
