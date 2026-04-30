@@ -237,21 +237,19 @@ async function toggleTheme(event?: MouseEvent): Promise<void> {
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    padding: 0 12px;
-    border-radius: 8px;
-    margin: 0 4px;
+    padding: 0 10px;
+    border-radius: 6px;
+    margin: 0 2px;
     transition: var(--navbar-transition);
     color: var(--navbar-item-color);
 
     &:hover {
       background: var(--navbar-item-hover-bg);
-      transform: scale(1.02);
     }
   }
 
   .breadcrumb-container {
     flex-shrink: 0;
-    animation: fadeInLeft 0.5s 0.1s both;
   }
 
   .topmenu-container {
@@ -265,7 +263,7 @@ async function toggleTheme(event?: MouseEvent): Promise<void> {
     display: flex;
     align-items: center;
     overflow: hidden;
-    margin-left: 8px;
+    margin-left: 6px;
   }
 
   .right-menu {
@@ -273,8 +271,8 @@ async function toggleTheme(event?: MouseEvent): Promise<void> {
     display: flex;
     align-items: center;
     margin-left: auto;
-    gap: 4px;
-    padding-right: 12px;
+    gap: 2px;
+    padding-right: 8px;
 
     &:focus {
       outline: none;
@@ -284,66 +282,22 @@ async function toggleTheme(event?: MouseEvent): Promise<void> {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 0 8px;
-      height: 36px;
-      min-width: 36px;
+      padding: 0 6px;
+      height: 32px;
+      min-width: 32px;
       font-size: var(--navbar-icon-size);
       color: var(--navbar-item-color);
-      border-radius: 10px;
+      border-radius: 6px;
       position: relative;
       transition: var(--navbar-transition);
-      animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
-
-      // 依次入场 stagger
-      @for $i from 1 through 10 {
-        &:nth-child(#{$i}) {
-          animation-delay: #{0.05 + $i * 0.04}s;
-        }
-      }
 
       &.hover-effect {
         cursor: pointer;
 
-        &::before {
-          content: '';
-          position: absolute;
-          inset: 0;
-          border-radius: 10px;
-          background: var(--navbar-item-hover-bg);
-          transform: scale(0.8);
-          opacity: 0;
-          transition: var(--navbar-transition);
-          z-index: 0;
-        }
-
-        > * {
-          position: relative;
-          z-index: 1;
-        }
-
         &:hover {
+          background: var(--navbar-item-hover-bg);
           color: var(--el-color-primary);
-
-          &::before {
-            transform: scale(1);
-            opacity: 1;
-          }
-
-          .svg-icon,
-          .el-icon {
-            transform: translateY(-2px);
-          }
         }
-      }
-
-      .svg-icon,
-      .el-icon {
-        transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
-      }
-
-      .svg-icon {
-        width: var(--navbar-icon-size);
-        height: var(--navbar-icon-size);
       }
 
       &.theme-switch-wrapper {
@@ -351,30 +305,19 @@ async function toggleTheme(event?: MouseEvent): Promise<void> {
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: transform 0.3s ease;
 
           &.is-dark {
             transform: rotate(180deg);
           }
         }
-
-        .theme-icon {
-          transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        &:active .theme-icon {
-          transform: scale(0.85) rotate(15deg);
-        }
       }
-
-      // 通知铃铛动画在 HeaderNotice 组件内部实现
     }
 
     .avatar-container {
-      margin-left: 6px;
-      padding: 0 10px;
-      border-radius: 10px;
-      animation-delay: 0.45s;
+      margin-left: 4px;
+      padding: 0 8px;
+      border-radius: 6px;
 
       &:hover {
         background: var(--navbar-item-hover-bg);
@@ -383,68 +326,51 @@ async function toggleTheme(event?: MouseEvent): Promise<void> {
       .avatar-wrapper {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
         height: 100%;
         cursor: pointer;
 
         .avatar-ring {
           position: relative;
-          width: 34px;
-          height: 34px;
+          width: 30px;
+          height: 30px;
           border-radius: 50%;
-          padding: 2px;
-          background: linear-gradient(135deg, var(--el-color-primary-light-3), var(--el-color-primary));
-          transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+          background: var(--el-fill-color-light);
 
           .user-avatar {
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 2px solid var(--navbar-bg);
             object-fit: cover;
             display: block;
             background: var(--el-fill-color);
-            transition: border-color 0.3s ease;
           }
 
           .online-status {
             position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 10px;
-            height: 10px;
+            bottom: -1px;
+            right: -1px;
+            width: 9px;
+            height: 9px;
             background: #67c23a;
             border: 2px solid var(--navbar-bg);
             border-radius: 50%;
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
           }
         }
 
         .user-nickname {
-          font-size: 14px;
-          font-weight: 600;
-          color: var(--navbar-text);
-          transition: color 0.3s ease;
-          max-width: 100px;
+          font-size: 13px;
+          font-weight: 500;
+          color: var(--navbar-item-color);
+          max-width: 90px;
           overflow: hidden;
           text-overflow: ellipsis;
           white-space: nowrap;
         }
 
         .dropdown-arrow {
-          font-size: 12px;
+          font-size: 10px;
           color: var(--el-text-color-placeholder);
-          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        &:hover {
-          .avatar-ring {
-            transform: scale(1.08);
-          }
-
-          .dropdown-arrow {
-            transform: translateY(2px);
-          }
         }
       }
     }
@@ -460,102 +386,24 @@ async function toggleTheme(event?: MouseEvent): Promise<void> {
 
 // 下拉菜单全局样式增强
 :global(.navbar-dropdown-menu.el-dropdown__menu) {
-  border-radius: 12px;
-  padding: 6px;
-  min-width: 160px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  padding: 4px;
+  min-width: 150px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   border: 1px solid var(--el-border-color-light);
-  animation: dropdownFadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
 
   .el-dropdown-menu__item {
-    border-radius: 8px;
-    padding: 8px 12px;
+    border-radius: 6px;
+    padding: 7px 10px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     font-size: 13px;
-    transition: all 0.2s ease;
 
     .el-icon {
-      font-size: 16px;
+      font-size: 15px;
       color: var(--el-text-color-secondary);
-      transition: color 0.2s ease;
     }
-
-    &:hover {
-      .el-icon {
-        color: var(--el-color-primary);
-      }
-    }
-
-    &.el-dropdown-menu__item--divided {
-      margin: 6px 0;
-      border-top: 1px solid var(--el-border-color-lighter);
-
-      &::before {
-        display: none;
-      }
-    }
-  }
-}
-
-:global(html.dark .navbar-dropdown-menu.el-dropdown__menu) {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-}
-
-// 动画定义
-@keyframes navbarSlideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.7;
-    transform: scale(0.9);
-  }
-}
-
-@keyframes dropdownFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(-6px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
   }
 }
 </style>

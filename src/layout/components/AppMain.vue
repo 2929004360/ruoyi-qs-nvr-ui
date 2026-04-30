@@ -61,13 +61,13 @@ function addIframe(): void {
 
 .hasTagsView {
   .app-main {
-    /* 84 = navbar + tags-view = 50 + 34 */
-    min-height: calc(100vh - 84px);
+    /* 86 = navbar + tags-view = 50 + 36 */
+    min-height: calc(100vh - 86px);
   }
 
   .fixed-header + .app-main {
-    margin-top: 84px;
-    height: calc(100vh - 84px);
+    margin-top: 86px;
+    height: calc(100vh - 86px);
     min-height: 0px;
   }
 }
@@ -99,8 +99,8 @@ function addIframe(): void {
     .hasTagsView .fixed-header + .app-main {
       padding-bottom: max(17px, calc(constant(safe-area-inset-bottom) + 10px));
       padding-bottom: max(17px, calc(env(safe-area-inset-bottom) + 10px));
-      height: calc(100svh - 84px);
-      height: calc(100dvh - 84px);
+      height: calc(100svh - 86px);
+      height: calc(100dvh - 86px);
     }
   }
 }
@@ -108,16 +108,20 @@ function addIframe(): void {
 
 <style lang="scss">
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background-color: #f1f1f1;
+  background-color: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #c0c0c0;
+  background-color: #d1d5db;
   border-radius: 3px;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background-color: #4b5563;
 }
 </style>

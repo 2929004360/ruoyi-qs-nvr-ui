@@ -80,17 +80,12 @@ const activeMenu = computed(() => {
   }
 
   .el-scrollbar__bar.is-vertical {
-    width: 4px;
+    width: 3px;
 
     .el-scrollbar__thumb {
       background: var(--el-text-color-placeholder);
-      border-radius: 4px;
-      opacity: 0.3;
-      transition: opacity 0.3s;
-
-      &:hover {
-        opacity: 0.5;
-      }
+      border-radius: 3px;
+      opacity: 0.25;
     }
   }
 
@@ -98,69 +93,34 @@ const activeMenu = computed(() => {
     border: none;
     height: 100%;
     width: 100% !important;
+    padding: 6px 0;
 
     .el-menu-item, .el-sub-menu__title {
-      border-radius: 0 8px 8px 0;
-      margin: 2px 8px 2px 0;
-      width: calc(100% - 8px) !important;
-      transition: all 0.25s ease;
-      animation: menuItemSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
-
-      @for $i from 1 through 30 {
-        &:nth-of-type(#{$i}) {
-          animation-delay: #{$i * 0.02}s;
-        }
-      }
-
-      &:hover {
-        background-color: var(--menu-hover, var(--el-fill-color-light)) !important;
-      }
+      border-radius: 6px;
+      margin: 2px 10px;
+      width: calc(100% - 20px) !important;
+      transition: all 0.2s ease;
     }
 
     .el-menu-item {
       color: var(--sidebar-menu-text);
+      font-weight: 450;
 
       &.is-active {
-        color: var(--menu-active-text, var(--el-color-primary));
-        background-color: var(--menu-hover, var(--el-fill-color-light)) !important;
-      }
-
-      .svg-icon {
-        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-      }
-
-      &:hover .svg-icon {
-        transform: scale(1.15);
+        color: var(--el-color-primary);
+        background-color: rgba(64, 158, 255, 0.1) !important;
+        font-weight: 500;
       }
     }
 
     .el-sub-menu__title {
       color: var(--sidebar-menu-text);
-
-      .svg-icon {
-        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-      }
-
-      &:hover .svg-icon {
-        transform: scale(1.15);
-      }
     }
 
     .nest-menu .el-menu-item {
-      margin-left: 8px;
-      width: calc(100% - 16px) !important;
+      margin: 2px 10px 2px 22px;
+      width: calc(100% - 32px) !important;
     }
-  }
-}
-
-@keyframes menuItemSlideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
   }
 }
 </style>

@@ -401,50 +401,44 @@ function handleScroll(): void {
 .tags-view-container {
   // 局部变量
   --tag-bg: var(--tags-item-bg, #fff);
-  --tag-border: var(--tags-item-border, #e4e7ed);
-  --tag-text: var(--tags-item-text, #606266);
-  --tag-hover-bg: var(--tags-item-hover, #f5f7fa);
+  --tag-border: var(--tags-item-border, #e5e7eb);
+  --tag-text: var(--tags-item-text, #6b7280);
+  --tag-hover-bg: var(--tags-item-hover, #f3f4f6);
   --tag-active-text: #fff;
-  --tag-radius: 6px;
-  --tag-height: 28px;
+  --tag-radius: 4px;
+  --tag-height: 26px;
   --btn-hover-bg: var(--el-fill-color-light, #f0f2f5);
-  --btn-color: #333333;
-  --btn-disabled: #a8abb2;
+  --btn-color: #6b7280;
+  --btn-disabled: #d1d5db;
 
-  height: 40px;
+  height: 36px;
   width: 100%;
   background: var(--tags-bg, #fff);
   border-bottom: 1px solid var(--tag-border);
   display: flex;
   align-items: center;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-  animation: tagsSlideDown 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+  transition: background 0.3s ease, border-color 0.3s ease;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
 
   .tags-nav-btn {
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    margin: 0 2px;
+    width: 30px;
+    height: 30px;
+    margin: 0 1px;
     cursor: pointer;
     color: var(--btn-color);
-    font-size: 14px;
+    font-size: 13px;
     user-select: none;
-    border-radius: 8px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 4px;
+    transition: all 0.2s ease;
 
     &:hover:not(.disabled) {
       background: var(--btn-hover-bg);
       color: var(--el-color-primary);
-      transform: scale(1.05);
-    }
-
-    &:active:not(.disabled) {
-      transform: scale(0.95);
     }
 
     &.disabled {
@@ -471,78 +465,46 @@ function handleScroll(): void {
       border: 1px solid var(--tag-border);
       color: var(--tag-text);
       background: var(--tag-bg);
-      padding: 0 12px;
-      font-size: 13px;
-      margin-left: 6px;
+      padding: 0 10px;
+      font-size: 12px;
+      margin-left: 5px;
       border-radius: var(--tag-radius);
       text-decoration: none;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      animation: tagFadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
+      transition: all 0.2s ease;
 
-      @for $i from 1 through 20 {
-        &:nth-of-type(#{$i}) {
-          animation-delay: #{$i * 0.03}s;
-        }
-      }
-
-      &:first-of-type { margin-left: 8px; }
-      &:last-of-type  { margin-right: 12px; }
+      &:first-of-type { margin-left: 6px; }
+      &:last-of-type  { margin-right: 8px; }
 
       &:hover:not(.active) {
         background: var(--tag-hover-bg);
         color: var(--el-color-primary);
         border-color: var(--el-color-primary-light-7);
-        transform: translateY(-1px);
       }
 
       &.active {
         color: var(--tag-active-text);
-
-        &::before {
-          content: '';
-          display: inline-block;
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
-          background: rgba(255, 255, 255, 0.9);
-          margin-right: 6px;
-          box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
-          animation: dotPulse 2s ease-in-out infinite;
-        }
-      }
-
-      &.active.has-icon::before {
-        display: none !important;
       }
 
       .tag-title {
         position: relative;
-        top: 0.5px;
       }
 
       .tag-close {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        margin-left: 6px;
-        width: 16px;
-        height: 16px;
+        margin-left: 5px;
+        width: 14px;
+        height: 14px;
         border-radius: 50%;
         cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.2s ease;
         color: inherit;
-
-        .el-icon {
-          transition: transform 0.3s ease;
-        }
+        font-size: 11px;
 
         &:hover {
-          background-color: var(--tags-close-hover, #b4bccc);
+          background-color: var(--tags-close-hover, #9ca3af);
           color: #fff;
-
-          .el-icon {
-            transform: rotate(90deg);
-          }
         }
       }
 
@@ -562,37 +524,20 @@ function handleScroll(): void {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
-    height: 32px;
-    padding: 0 10px;
-    margin: 0 2px;
+    gap: 3px;
+    height: 28px;
+    padding: 0 8px;
+    margin: 0 1px;
     cursor: pointer;
     color: var(--btn-color);
-    font-size: 13px;
-    border-radius: 8px;
+    font-size: 12px;
+    border-radius: 4px;
     user-select: none;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
 
     &:hover {
       background: var(--btn-hover-bg);
       color: var(--el-color-primary);
-    }
-
-    .el-icon {
-      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
-
-    &:hover .el-icon {
-      transform: scale(1.1);
-    }
-  }
-
-  .tags-refresh-btn {
-    padding: 0 12px;
-    font-size: 13px;
-
-    &:hover .el-icon {
-      transform: rotate(180deg);
     }
   }
 
@@ -602,24 +547,23 @@ function handleScroll(): void {
     z-index: 3000;
     position: fixed;
     list-style-type: none;
-    padding: 6px;
-    border-radius: 10px;
-    font-size: 13px;
+    padding: 4px;
+    border-radius: 6px;
+    font-size: 12px;
     font-weight: 400;
     color: var(--el-text-color-regular, #333);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    border: 1px solid var(--el-border-color-light, #e4e7ed);
-    min-width: 160px;
-    animation: contextMenuFadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) both;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--el-border-color-light, #e5e7eb);
+    min-width: 140px;
 
     li {
       margin: 0;
-      padding: 8px 14px;
+      padding: 6px 10px;
       cursor: pointer;
-      border-radius: 8px;
+      border-radius: 4px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       transition: all 0.2s ease;
 
       &:hover {
@@ -629,215 +573,58 @@ function handleScroll(): void {
 
       .el-icon {
         color: var(--el-text-color-secondary);
-        transition: color 0.2s ease;
         flex-shrink: 0;
-      }
-
-      &:hover .el-icon {
-        color: var(--el-color-primary);
       }
     }
   }
 }
 
 html.dark .tags-view-container {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-
-  .tags-action-btn {
-    background: var(--el-bg-color-overlay);
-    border-color: var(--el-border-color);
-    color: var(--el-text-color-regular);
-
-    &:hover {
-      background: var(--el-fill-color-light);
-      border-color: var(--el-color-primary-light-7);
-      color: var(--el-color-primary);
-    }
-  }
-
   .contextmenu {
     background: var(--el-bg-color-overlay);
     border-color: var(--el-border-color-light);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-
-    li:hover {
-      background: var(--el-fill-color-light);
-    }
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   }
 }
 
 // 下拉菜单全局样式
 :global(.tags-dropdown-menu.el-dropdown__menu) {
-  border-radius: 12px;
-  padding: 8px;
-  min-width: 180px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-radius: 6px;
+  padding: 4px;
+  min-width: 160px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   border: 1px solid var(--el-border-color-light);
-  animation: dropdownFadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
 
   .el-dropdown-menu__item {
-    border-radius: 8px;
-    padding: 9px 14px;
+    border-radius: 4px;
+    padding: 6px 10px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: 13px;
+    gap: 6px;
+    font-size: 12px;
     color: var(--el-text-color-regular);
     transition: all 0.2s ease;
-    position: relative;
-    overflow: hidden;
-
-    &::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%) scaleY(0);
-      width: 3px;
-      height: 60%;
-      background: var(--el-color-primary);
-      border-radius: 0 3px 3px 0;
-      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    }
 
     .el-icon {
       color: var(--el-text-color-secondary);
-      transition: color 0.2s ease, transform 0.3s ease;
       flex-shrink: 0;
     }
 
     &:hover {
       background: var(--el-fill-color-light);
       color: var(--el-color-primary);
-
-      &::before {
-        transform: translateY(-50%) scaleY(1);
-      }
-
-      .el-icon {
-        color: var(--el-color-primary);
-        transform: scale(1.1);
-      }
     }
 
     &.is-disabled {
       opacity: 0.4;
       cursor: not-allowed;
-
-      &:hover {
-        background: transparent;
-        color: var(--el-text-color-regular);
-
-        &::before {
-          transform: translateY(-50%) scaleY(0);
-        }
-
-        .el-icon {
-          color: var(--el-text-color-secondary);
-          transform: none;
-        }
-      }
     }
 
     &.el-dropdown-menu__item--divided {
-      margin: 6px 0;
+      margin: 4px 0;
       border-top: 1px solid var(--el-border-color-lighter);
-      padding-top: 7px;
-
-      &::before {
-        display: none;
-      }
+      padding-top: 5px;
     }
-  }
-}
-
-:global(html.dark .tags-dropdown-menu.el-dropdown__menu) {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-
-  .el-dropdown-menu__item {
-    color: var(--el-text-color-regular);
-
-    .el-icon {
-      color: var(--el-text-color-secondary);
-    }
-
-    &:hover {
-      background: var(--el-fill-color-light);
-      color: var(--el-color-primary);
-
-      .el-icon {
-        color: var(--el-color-primary);
-      }
-    }
-
-    &.is-disabled:hover {
-      background: transparent;
-      color: var(--el-text-color-regular);
-
-      .el-icon {
-        color: var(--el-text-color-secondary);
-      }
-    }
-
-    &.el-dropdown-menu__item--divided {
-      border-top-color: var(--el-border-color);
-    }
-  }
-}
-
-// 动画定义
-@keyframes tagsSlideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes tagFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.92) translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-@keyframes contextMenuFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-@keyframes dropdownFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-@keyframes dotPulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.7;
-    transform: scale(0.85);
   }
 }
 </style>
