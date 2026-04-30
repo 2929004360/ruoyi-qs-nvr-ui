@@ -26,7 +26,7 @@
       <!-- 触发器 -->
       <template #reference>
         <div class="right-menu-item hover-effect notice-trigger" @mouseenter="onNoticeEnter" @mouseleave="onNoticeLeave">
-          <svg-icon icon-class="bell" />
+          <el-icon :size="18" class="bell-icon"><Bell /></el-icon>
           <span v-if="unreadCount > 0" class="notice-badge">{{ unreadCount }}</span>
         </div>
       </template>
@@ -52,6 +52,7 @@
 </template>
 
 <script setup lang="ts">
+import { Bell } from '@element-plus/icons-vue'
 import { listNoticeTop, markNoticeRead, markNoticeReadAll, getNotice } from '@/api/system/notice'
 import type { SysNotice } from '@/types/api/system/notice'
 
@@ -138,104 +139,171 @@ function markAllRead(): void {
 <style lang="scss" scoped>
 .notice-trigger {
   position: relative;
-  transform: translateX(-6px);
-  .svg-icon { width: 1.2em; height: 1.2em; vertical-align: -0.2em; }
+
+  .bell-icon {
+    transform-origin: top center;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  // 有未读消息时，铃铛轻微摇摆
+  &:has(.notice-badge) .bell-icon {
+    animation: bellIdle 2.5s ease-in-out infinite;
+  }
+
+  &:hover {
+    .bell-icon {
+      animation: bellShake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both !important;
+      transform: translateY(-2px);
+    }
+  }
+
   .notice-badge {
     position: absolute;
-    top: 7px;
-    right: -3px;
-    background: #f56c6c;
+    top: 2px;
+    right: 2px;
+    background: linear-gradient(135deg, #ff6b6b, #f56c6c);
     color: #fff;
     border-radius: 10px;
     font-size: 10px;
     height: 16px;
     line-height: 16px;
-    padding: 0 4px;
+    padding: 0 5px;
     min-width: 16px;
     text-align: center;
     white-space: nowrap;
     pointer-events: none;
+    box-shadow: 0 2px 6px rgba(245, 108, 108, 0.35);
+    animation: badgePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   }
 }
+
+@keyframes bellIdle {
+  0%, 100% { transform: rotate(0deg); }
+  10% { transform: rotate(6deg); }
+  20% { transform: rotate(-6deg); }
+  30% { transform: rotate(3deg); }
+  40% { transform: rotate(0deg); }
+}
+
+@keyframes bellShake {
+  0% { transform: rotate(0deg); }
+  15% { transform: rotate(12deg); }
+  30% { transform: rotate(-12deg); }
+  45% { transform: rotate(8deg); }
+  60% { transform: rotate(-4deg); }
+  75% { transform: rotate(2deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes badgePop {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+
 .notice-popover { padding: 0 !important; }
+
 .notice-popover .notice-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
-  background: #f7f9fb;
-  border-bottom: 1px solid #eee;
-  font-size: 13px;
+  padding: 12px 16px;
+  background: var(--el-bg-color-overlay, #f7f9fb);
+  border-bottom: 1px solid var(--el-border-color-lighter, #eee);
+  font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--el-text-color-primary, #333);
 }
+
 .notice-popover .notice-mark-all {
   font-size: 12px;
   color: var(--el-color-primary);
   font-weight: normal;
   cursor: pointer;
+  transition: color 0.2s ease;
 }
-.notice-popover .notice-mark-all:hover { color: #2b7cc1; }
+
+.notice-popover .notice-mark-all:hover {
+  color: var(--el-color-primary-light-3);
+}
+
 .notice-popover .notice-loading,
 .notice-popover .notice-empty {
-  padding: 24px;
+  padding: 32px 24px;
   text-align: center;
-  color: #bbb;
-  font-size: 12px;
+  color: var(--el-text-color-placeholder, #bbb);
+  font-size: 13px;
   line-height: 1.8;
 }
+
 .notice-popover .notice-item {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-bottom: 1px solid #f5f5f5;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--el-border-color-lighter, #f5f5f5);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.2s ease, transform 0.2s ease;
+
+  &:last-child { border-bottom: none; }
+  &:hover {
+    background: var(--el-fill-color-light, #f7f9fb);
+    transform: translateX(2px);
+  }
+
+  &.is-read .notice-tag,
+  &.is-read .notice-item-title,
+  &.is-read .notice-item-date {
+    opacity: 0.45;
+    filter: grayscale(1);
+    color: var(--el-text-color-placeholder, #999);
+  }
 }
-.notice-popover .notice-item:last-child { border-bottom: none; }
-.notice-popover .notice-item:hover { background: #f7f9fb; }
-.notice-popover .notice-item.is-read .notice-tag,
-.notice-popover .notice-item.is-read .notice-item-title,
-.notice-popover .notice-item.is-read .notice-item-date { opacity: 0.45; filter: grayscale(1); color: #999; }
+
 .notice-popover .notice-tag { flex-shrink: 0; }
+
 .notice-popover .notice-item-title {
   flex: 1;
-  font-size: 12px;
-  color: #333;
+  font-size: 13px;
+  color: var(--el-text-color-primary, #333);
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+
 .notice-popover .notice-item-date {
   flex-shrink: 0;
   font-size: 11px;
-  color: #bbb;
+  color: var(--el-text-color-placeholder, #bbb);
 }
 </style>
 
 <style>
 .notice-preview-dialog .el-dialog__body { padding: 0 10px 10px; }
+
 .notice-preview-dialog .notice-preview-meta {
   display: flex;
   align-items: center;
   gap: 14px;
   padding: 12px 0;
   font-size: 12px;
-  color: #888;
+  color: var(--el-text-color-secondary, #888);
 }
+
 .notice-preview-dialog .notice-preview-info { display: flex; align-items: center; gap: 4px; }
+
 .notice-preview-dialog .notice-preview-divider {
   height: 1px;
-  background: linear-gradient(to right, transparent, #e2e8f0, transparent);
+  background: linear-gradient(to right, transparent, var(--el-border-color, #e2e8f0), transparent);
   margin-bottom: 16px;
 }
+
 .notice-preview-dialog .notice-preview-content {
   font-size: 14px;
   line-height: 1.85;
-  color: #2d3748;
+  color: var(--el-text-color-regular, #2d3748);
   word-break: break-word;
 }
+
 .notice-preview-dialog .notice-preview-content img { max-width: 100%; border-radius: 4px; }
 .notice-preview-dialog .notice-preview-content p { margin: 0 0 1em; }
 .notice-preview-dialog .notice-preview-content a { color: var(--el-color-primary); text-decoration: underline; }

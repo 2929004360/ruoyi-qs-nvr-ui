@@ -19,9 +19,9 @@
         @contextmenu.prevent="openMenu(tag, $event)"
       >
         <svg-icon v-if="tagsIcon && tag.meta && tag.meta.icon && tag.meta.icon !== '#'" :icon-class="tag.meta.icon" />
-        {{ tag.title }}
-        <span v-if="!isAffix(tag)" @click.prevent.stop="closeSelectedTag(tag)">
-          <close class="el-icon-close" style="width: 1em; height: 1em;vertical-align: middle;" />
+        <span class="tag-title">{{ tag.title }}</span>
+        <span v-if="!isAffix(tag)" class="tag-close" @click.prevent.stop="closeSelectedTag(tag)">
+          <el-icon :size="12"><close /></el-icon>
         </span>
       </router-link>
     </scroll-pane>
@@ -38,14 +38,28 @@
       </span>
       <template #dropdown>
         <el-dropdown-menu class="tags-dropdown-menu">
-          <el-dropdown-item v-if="!isAffix(selectedDropdownTag)" command="close"><close style="width: 1em; height: 1em;" />关闭当前</el-dropdown-item>
-          <el-dropdown-item command="closeOthers"><circle-close style="width: 1em; height: 1em;" />关闭其他</el-dropdown-item>
-          <el-dropdown-item command="closeLeft" :disabled="isFirstView()"><back style="width: 1em; height: 1em;" />关闭左侧</el-dropdown-item>
-          <el-dropdown-item command="closeRight" :disabled="isLastView()"><right style="width: 1em; height: 1em;" />关闭右侧</el-dropdown-item>
-          <el-dropdown-item command="closeAll"><circle-close style="width: 1em; height: 1em;" />全部关闭</el-dropdown-item>
+          <el-dropdown-item v-if="!isAffix(selectedDropdownTag)" command="close">
+            <el-icon :size="14"><close /></el-icon>关闭当前
+          </el-dropdown-item>
+          <el-dropdown-item command="closeOthers">
+            <el-icon :size="14"><circle-close /></el-icon>关闭其他
+          </el-dropdown-item>
+          <el-dropdown-item command="closeLeft" :disabled="isFirstView()">
+            <el-icon :size="14"><back /></el-icon>关闭左侧
+          </el-dropdown-item>
+          <el-dropdown-item command="closeRight" :disabled="isLastView()">
+            <el-icon :size="14"><right /></el-icon>关闭右侧
+          </el-dropdown-item>
+          <el-dropdown-item command="closeAll">
+            <el-icon :size="14"><circle-close /></el-icon>全部关闭
+          </el-dropdown-item>
           <el-dropdown-item command="fullscreen" divided>
-            <template v-if="!isFullscreen"><full-screen style="width: 1em; height: 1em;" />全屏显示</template>
-            <template v-else><close style="width: 1em; height: 1em;" />退出全屏</template>
+            <template v-if="!isFullscreen">
+              <el-icon :size="14"><full-screen /></el-icon>全屏显示
+            </template>
+            <template v-else>
+              <el-icon :size="14"><close /></el-icon>退出全屏
+            </template>
           </el-dropdown-item>
         </el-dropdown-menu>
       </template>
@@ -53,17 +67,29 @@
 
     <!-- 刷新按钮 -->
     <span class="tags-action-btn tags-refresh-btn" title="刷新页面" @click="refreshSelectedTag(selectedDropdownTag)">
-      <el-icon><refresh-right/></el-icon> 刷新
+      <el-icon><refresh-right /></el-icon> 刷新
     </span>
 
     <!-- 右键上下文菜单 -->
     <ul v-show="visible" :style="{ left: left + 'px', top: top + 'px' }" class="contextmenu">
-      <li @click="refreshSelectedTag(selectedTag)"><refresh-right style="width: 1em; height: 1em;" />刷新页面</li>
-      <li v-if="!isAffix(selectedTag)" @click="closeSelectedTag(selectedTag)"><close style="width: 1em; height: 1em;" />关闭当前</li>
-      <li @click="closeOthersTags"><circle-close style="width: 1em; height: 1em;" />关闭其他</li>
-      <li v-if="!isFirstView()" @click="closeLeftTags"><back style="width: 1em; height: 1em;" />关闭左侧</li>
-      <li v-if="!isLastView()" @click="closeRightTags"><right style="width: 1em; height: 1em;" />关闭右侧</li>
-      <li @click="closeAllTags(selectedTag)"><circle-close style="width: 1em; height: 1em;" />全部关闭</li>
+      <li @click="refreshSelectedTag(selectedTag)">
+        <el-icon :size="14"><refresh-right /></el-icon>刷新页面
+      </li>
+      <li v-if="!isAffix(selectedTag)" @click="closeSelectedTag(selectedTag)">
+        <el-icon :size="14"><close /></el-icon>关闭当前
+      </li>
+      <li @click="closeOthersTags">
+        <el-icon :size="14"><circle-close /></el-icon>关闭其他
+      </li>
+      <li v-if="!isFirstView()" @click="closeLeftTags">
+        <el-icon :size="14"><back /></el-icon>关闭左侧
+      </li>
+      <li v-if="!isLastView()" @click="closeRightTags">
+        <el-icon :size="14"><right /></el-icon>关闭右侧
+      </li>
+      <li @click="closeAllTags(selectedTag)">
+        <el-icon :size="14"><circle-close /></el-icon>全部关闭
+      </li>
     </ul>
   </div>
 </template>
@@ -373,46 +399,61 @@ function handleScroll(): void {
 
 <style lang="scss" scoped>
 .tags-view-container {
-  height: 34px;
+  // 局部变量
+  --tag-bg: var(--tags-item-bg, #fff);
+  --tag-border: var(--tags-item-border, #e4e7ed);
+  --tag-text: var(--tags-item-text, #606266);
+  --tag-hover-bg: var(--tags-item-hover, #f5f7fa);
+  --tag-active-text: #fff;
+  --tag-radius: 6px;
+  --tag-height: 28px;
+  --btn-hover-bg: var(--el-fill-color-light, #f0f2f5);
+  --btn-color: #333333;
+  --btn-disabled: #a8abb2;
+
+  height: 40px;
   width: 100%;
   background: var(--tags-bg, #fff);
-  border-bottom: 1px solid var(--tags-item-border, #d8dce5);
+  border-bottom: 1px solid var(--tag-border);
   display: flex;
   align-items: center;
   overflow: hidden;
-
-  $btn-width: 28px;
-  $btn-color: #71717a;
-  $btn-hover-bg: #f0f2f5;
-  $btn-hover-color: #303133;
-  $btn-disabled-color: #c0c4cc;
-  $divider: 1px solid var(--tags-item-border, #d8dce5);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  animation: tagsSlideDown 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
 
   .tags-nav-btn {
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: $btn-width;
-    height: 34px;
+    width: 36px;
+    height: 36px;
+    margin: 0 2px;
     cursor: pointer;
-    color: $btn-color;
-    font-size: 13px;
+    color: var(--btn-color);
+    font-size: 14px;
     user-select: none;
-    transition: background 0.15s, color 0.15s;
+    border-radius: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     &:hover:not(.disabled) {
-      background: $btn-hover-bg;
-      color: $btn-hover-color;
+      background: var(--btn-hover-bg);
+      color: var(--el-color-primary);
+      transform: scale(1.05);
+    }
+
+    &:active:not(.disabled) {
+      transform: scale(0.95);
     }
 
     &.disabled {
-      color: $btn-disabled-color;
+      color: var(--btn-disabled);
       cursor: not-allowed;
     }
 
-    &--left  { border-right: $divider; }
-    &--right { border-left: $divider; }
+    &--left  { border-right: none; }
+    &--right { border-left: none; }
   }
 
   .tags-view-wrapper {
@@ -421,43 +462,94 @@ function handleScroll(): void {
     height: 100%;
 
     .tags-view-item {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
       position: relative;
       cursor: pointer;
-      height: 26px;
-      line-height: 26px;
-      border: 1px solid var(--tags-item-border, #d8dce5);
-      color: var(--tags-item-text, #495060);
-      background: var(--tags-item-bg, #fff);
-      padding: 0 8px;
-      font-size: 12px;
-      margin-left: 5px;
-      border-radius: 3px;
+      height: var(--tag-height);
+      line-height: var(--tag-height);
+      border: 1px solid var(--tag-border);
+      color: var(--tag-text);
+      background: var(--tag-bg);
+      padding: 0 12px;
+      font-size: 13px;
+      margin-left: 6px;
+      border-radius: var(--tag-radius);
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      animation: tagFadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
 
-      &:first-of-type { margin-left: 6px; }
-      &:last-of-type  { margin-right: 15px; }
+      @for $i from 1 through 20 {
+        &:nth-of-type(#{$i}) {
+          animation-delay: #{$i * 0.03}s;
+        }
+      }
+
+      &:first-of-type { margin-left: 8px; }
+      &:last-of-type  { margin-right: 12px; }
+
+      &:hover:not(.active) {
+        background: var(--tag-hover-bg);
+        color: var(--el-color-primary);
+        border-color: var(--el-color-primary-light-7);
+        transform: translateY(-1px);
+      }
 
       &.active {
-        background-color: #42b983;
-        color: #fff;
-        border-color: #42b983;
+        color: var(--tag-active-text);
 
         &::before {
           content: '';
-          background: #fff;
           display: inline-block;
-          width: 8px;
-          height: 8px;
+          width: 6px;
+          height: 6px;
           border-radius: 50%;
-          position: relative;
-          margin-right: 5px;
+          background: rgba(255, 255, 255, 0.9);
+          margin-right: 6px;
+          box-shadow: 0 0 4px rgba(255, 255, 255, 0.4);
+          animation: dotPulse 2s ease-in-out infinite;
         }
       }
-    }
-  }
 
-  .tags-view-item.active.has-icon::before {
-    content: none !important;
+      &.active.has-icon::before {
+        display: none !important;
+      }
+
+      .tag-title {
+        position: relative;
+        top: 0.5px;
+      }
+
+      .tag-close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 6px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        color: inherit;
+
+        .el-icon {
+          transition: transform 0.3s ease;
+        }
+
+        &:hover {
+          background-color: var(--tags-close-hover, #b4bccc);
+          color: #fff;
+
+          .el-icon {
+            transform: rotate(90deg);
+          }
+        }
+      }
+
+      &.active .tag-close:hover {
+        background-color: rgba(255, 255, 255, 0.25);
+      }
+    }
   }
 
   .tags-action-dropdown {
@@ -470,23 +562,38 @@ function handleScroll(): void {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: $btn-width;
-    height: 34px;
+    gap: 4px;
+    height: 32px;
+    padding: 0 10px;
+    margin: 0 2px;
     cursor: pointer;
-    color: $btn-color;
+    color: var(--btn-color);
     font-size: 13px;
-    border-left: $divider;
+    border-radius: 8px;
     user-select: none;
-    transition: background 0.15s, color 0.15s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     &:hover {
-      background: $btn-hover-bg;
-      color: $btn-hover-color;
+      background: var(--btn-hover-bg);
+      color: var(--el-color-primary);
+    }
+
+    .el-icon {
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    &:hover .el-icon {
+      transform: scale(1.1);
     }
   }
 
   .tags-refresh-btn {
-    width: 60px;
+    padding: 0 12px;
+    font-size: 13px;
+
+    &:hover .el-icon {
+      transform: rotate(180deg);
+    }
   }
 
   .contextmenu {
@@ -495,55 +602,247 @@ function handleScroll(): void {
     z-index: 3000;
     position: fixed;
     list-style-type: none;
-    padding: 5px 0;
-    border-radius: 4px;
-    font-size: 12px;
+    padding: 6px;
+    border-radius: 10px;
+    font-size: 13px;
     font-weight: 400;
-    color: var(--tags-item-text, #333);
-    box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, .3);
+    color: var(--el-text-color-regular, #333);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     border: 1px solid var(--el-border-color-light, #e4e7ed);
+    min-width: 160px;
+    animation: contextMenuFadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) both;
 
     li {
       margin: 0;
-      padding: 7px 16px;
+      padding: 8px 14px;
       cursor: pointer;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
 
       &:hover {
-        background: var(--tags-item-hover, #eee);
+        background: var(--el-fill-color-light, #f5f7fa);
+        color: var(--el-color-primary);
+      }
+
+      .el-icon {
+        color: var(--el-text-color-secondary);
+        transition: color 0.2s ease;
+        flex-shrink: 0;
+      }
+
+      &:hover .el-icon {
+        color: var(--el-color-primary);
       }
     }
+  }
+}
+
+html.dark .tags-view-container {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+
+  .tags-action-btn {
+    background: var(--el-bg-color-overlay);
+    border-color: var(--el-border-color);
+    color: var(--el-text-color-regular);
+
+    &:hover {
+      background: var(--el-fill-color-light);
+      border-color: var(--el-color-primary-light-7);
+      color: var(--el-color-primary);
+    }
+  }
+
+  .contextmenu {
+    background: var(--el-bg-color-overlay);
+    border-color: var(--el-border-color-light);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+
+    li:hover {
+      background: var(--el-fill-color-light);
+    }
+  }
+}
+
+// 下拉菜单全局样式
+:global(.tags-dropdown-menu.el-dropdown__menu) {
+  border-radius: 12px;
+  padding: 8px;
+  min-width: 180px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--el-border-color-light);
+  animation: dropdownFadeIn 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
+
+  .el-dropdown-menu__item {
+    border-radius: 8px;
+    padding: 9px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--el-text-color-regular);
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%) scaleY(0);
+      width: 3px;
+      height: 60%;
+      background: var(--el-color-primary);
+      border-radius: 0 3px 3px 0;
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .el-icon {
+      color: var(--el-text-color-secondary);
+      transition: color 0.2s ease, transform 0.3s ease;
+      flex-shrink: 0;
+    }
+
+    &:hover {
+      background: var(--el-fill-color-light);
+      color: var(--el-color-primary);
+
+      &::before {
+        transform: translateY(-50%) scaleY(1);
+      }
+
+      .el-icon {
+        color: var(--el-color-primary);
+        transform: scale(1.1);
+      }
+    }
+
+    &.is-disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+
+      &:hover {
+        background: transparent;
+        color: var(--el-text-color-regular);
+
+        &::before {
+          transform: translateY(-50%) scaleY(0);
+        }
+
+        .el-icon {
+          color: var(--el-text-color-secondary);
+          transform: none;
+        }
+      }
+    }
+
+    &.el-dropdown-menu__item--divided {
+      margin: 6px 0;
+      border-top: 1px solid var(--el-border-color-lighter);
+      padding-top: 7px;
+
+      &::before {
+        display: none;
+      }
+    }
+  }
+}
+
+:global(html.dark .tags-dropdown-menu.el-dropdown__menu) {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+
+  .el-dropdown-menu__item {
+    color: var(--el-text-color-regular);
+
+    .el-icon {
+      color: var(--el-text-color-secondary);
+    }
+
+    &:hover {
+      background: var(--el-fill-color-light);
+      color: var(--el-color-primary);
+
+      .el-icon {
+        color: var(--el-color-primary);
+      }
+    }
+
+    &.is-disabled:hover {
+      background: transparent;
+      color: var(--el-text-color-regular);
+
+      .el-icon {
+        color: var(--el-text-color-secondary);
+      }
+    }
+
+    &.el-dropdown-menu__item--divided {
+      border-top-color: var(--el-border-color);
+    }
+  }
+}
+
+// 动画定义
+@keyframes tagsSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tagFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes contextMenuFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes dotPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.85);
   }
 }
 </style>
 
 <style lang="scss">
-.tags-view-wrapper {
-  .tags-view-item {
-    .el-icon-close {
-      width: 16px;
-      height: 16px;
-      vertical-align: 2px;
-      border-radius: 50%;
-      text-align: center;
-      transition: all .3s cubic-bezier(.645, .045, .355, 1);
-      transform-origin: 100% 50%;
-
-      &:before {
-        transform: scale(.6);
-        display: inline-block;
-        vertical-align: -3px;
-      }
-
-      &:hover {
-        background-color: var(--tags-close-hover, #b4bccc);
-        color: #fff;
-        width: 12px !important;
-        height: 12px !important;
-      }
-    }
-  }
-}
-
 /* 页签全屏模式样式 */
 .main-container.fullscreen-mode {
   position: fixed;
@@ -570,14 +869,14 @@ function handleScroll(): void {
 
 .main-container.fullscreen-mode .app-main {
   position: fixed;
-  top: 34px;
+  top: 40px;
   left: 0;
   right: 0;
   bottom: 0;
   margin: 0 !important;
   padding: 0 !important;
-  height: calc(100vh - 34px) !important;
-  min-height: calc(100vh - 34px) !important;
+  height: calc(100vh - 40px) !important;
+  min-height: calc(100vh - 40px) !important;
   overflow: auto;
 }
 </style>

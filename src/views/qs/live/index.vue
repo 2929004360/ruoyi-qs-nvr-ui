@@ -95,7 +95,8 @@
                               :hasAudio="enableAudio[i-1] === '1'"
                               :isMute="enableAudio[i-1] === '1'"
                               :isLive="isLive"
-                              :videoUrl="videoUrl[i-1]"/>
+                              :videoUrl="videoUrl[i-1]"
+                              @ptz="(data) => handlePtz(data, i-1)"/>
                         </div>
                       </div>
                     </div>
@@ -120,7 +121,7 @@ import screenFull from 'screenfull'
 import {ElMessageBox} from "element-plus";
 import {PullConfig, RTPServerParam} from "@/types/api";
 import {loadRecord, rtpPlay, streamPullPlay, streamPullPush, startGb28181Play, startJt1078Play} from "@/api/qs/zlm";
-import {getDevice, getVideoSnapshot} from "@/api/qs/device";
+import {getDevice, getVideoSnapshot, startPtz, endPtz} from "@/api/qs/device";
 import {FullScreen, Close, VideoPlay, Delete, Document, RefreshLeft, Monitor} from '@element-plus/icons-vue'
 
 const {proxy} = getCurrentInstance()
@@ -144,6 +145,12 @@ const defaultQuality = ref('高清');
 const isPtz = ref(true);
 const isQuality = ref(true);
 const isLive = ref(true);
+
+// 云台控制
+const controSpeed = ref(5);
+const controSpeedMax = ref(10);
+const lastPtzCommand = ref('up');
+const deviceRows = ref([])  // 保存每个播放器对应的设备信息
 
 // 分屏选项 - 带可视化预览数据
 const splitOptions = [
@@ -276,9 +283,12 @@ async function sendDevicePush(id) {
 
           quality.value = []
           defaultQuality.value = ''
-          isPtz.value = false
+          isPtz.value = row.type === '5' || row.type === '12'  // ONVIF 和 GB28181 支持云台
           isQuality.value = false
           isLive.value = true
+          
+          // 保存当前设备信息
+          deviceRows.value[idxTmp] = row
 
           await nextTick()
           const playerRef = proxy.$refs[`player${idxTmp}`]
@@ -307,9 +317,12 @@ async function sendDevicePush(id) {
 
           quality.value = []
           defaultQuality.value = ''
-          isPtz.value = false
+          isPtz.value = row.type === '5' || row.type === '12'  // ONVIF 和 GB28181 支持云台
           isQuality.value = false
           isLive.value = true
+          
+          // 保存当前设备信息
+          deviceRows.value[idxTmp] = row
 
           await nextTick()
           const playerRef = proxy.$refs[`player${idxTmp}`]
@@ -356,9 +369,12 @@ async function sendDevicePush(id) {
 
           quality.value = []
           defaultQuality.value = ''
-          isPtz.value = false
+          isPtz.value = row.type === '5' || row.type === '12'  // ONVIF 和 GB28181 支持云台
           isQuality.value = false
           isLive.value = true
+          
+          // 保存当前设备信息
+          deviceRows.value[idxTmp] = row
 
           await nextTick()
           const playerRef = proxy.$refs[`player${idxTmp}`]
@@ -387,9 +403,12 @@ async function sendDevicePush(id) {
 
           quality.value = []
           defaultQuality.value = ''
-          isPtz.value = false
+          isPtz.value = row.type === '5' || row.type === '12'  // ONVIF 和 GB28181 支持云台
           isQuality.value = false
           isLive.value = true
+          
+          // 保存当前设备信息
+          deviceRows.value[idxTmp] = row
 
           await nextTick()
           const playerRef = proxy.$refs[`player${idxTmp}`]
@@ -418,9 +437,12 @@ async function sendDevicePush(id) {
 
           quality.value = []
           defaultQuality.value = ''
-          isPtz.value = false
+          isPtz.value = row.type === '5' || row.type === '12'  // ONVIF 和 GB28181 支持云台
           isQuality.value = false
           isLive.value = true
+          
+          // 保存当前设备信息
+          deviceRows.value[idxTmp] = row
 
           await nextTick()
           const playerRef = proxy.$refs[`player${idxTmp}`]
@@ -449,9 +471,12 @@ async function sendDevicePush(id) {
 
           quality.value = []
           defaultQuality.value = ''
-          isPtz.value = false
+          isPtz.value = row.type === '5' || row.type === '12'  // ONVIF 和 GB28181 支持云台
           isQuality.value = false
           isLive.value = true
+          
+          // 保存当前设备信息
+          deviceRows.value[idxTmp] = row
 
           await nextTick()
           const playerRef = proxy.$refs[`player${idxTmp}`]
@@ -518,6 +543,7 @@ function deleteClick(index) {
       .then(() => {
         videoUrl.value.splice(index, 1);
         videoTip.value.splice(index, 1);
+        deviceRows.value.splice(index, 1);
         proxy.$modal.msgSuccess("删除成功")
       })
       .catch(() => {
@@ -536,6 +562,7 @@ function handleSplitChange(index) {
     videoUrl.value.push('')
     videoTip.value.push('')
     enableAudio.value.push('')
+    deviceRows.value.push(null)
   }
 }
 
@@ -557,6 +584,7 @@ function handleClearAll() {
         videoUrl.value = Array(total).fill('')
         videoTip.value = Array(total).fill('')
         enableAudio.value = Array(total).fill('')
+        deviceRows.value = Array(total).fill(null)
         proxy.$modal.msgSuccess("清空成功")
       })
       .catch(() => {
@@ -572,7 +600,8 @@ function handleSaveLayout() {
     spiltIndex: spiltIndex.value,
     videoUrl: [...videoUrl.value],
     videoTip: [...videoTip.value],
-    enableAudio: [...enableAudio.value]
+    enableAudio: [...enableAudio.value],
+    deviceRows: [...deviceRows.value]
   }
   localStorage.setItem(STORAGE_KEY, JSON.stringify(config))
   proxy.$modal.msgSuccess("布局已保存")
@@ -590,6 +619,7 @@ function handleRestoreLayout() {
       videoUrl.value = [...config.videoUrl]
       videoTip.value = [...config.videoTip]
       enableAudio.value = [...config.enableAudio]
+      deviceRows.value = config.deviceRows ? [...config.deviceRows] : []
       proxy.$modal.msgSuccess("布局已恢复")
     } catch (e) {
       console.error('恢复布局失败', e)
@@ -608,6 +638,54 @@ const convertWsToHttp = (wsUrl: string) => {
     }
   }
   return wsUrl;
+}
+
+/**
+ * 云台方向控制
+ * @param command
+ * @param idx 播放器索引
+ */
+const ptzCamera = async (command, idx) => {
+  if (!deviceRows.value[idx] || !deviceRows.value[idx].id) {
+    proxy.$modal.msgError('请先选择设备')
+    return
+  }
+  
+  try {
+    if (command !== 'stop') {
+      await startPtz(deviceRows.value[idx].id, command, controSpeed.value)
+    } else {
+      await endPtz(deviceRows.value[idx].id, 'up', controSpeed.value)
+    }
+  } catch (error) {
+    console.error('云台控制失败', error)
+    proxy.$modal.msgError('云台控制失败')
+  }
+}
+
+/**
+ * EasyPlayer 云台事件处理
+ * @param data 云台数据
+ * @param idx 播放器索引
+ */
+const handlePtz = async (data, idx) => {
+  console.log('handlePtz', data, idx)
+  if (!deviceRows.value[idx] || !deviceRows.value[idx].id) {
+    proxy.$modal.msgError('请先选择设备')
+    return
+  }
+  
+  try {
+    if (data === 'stop') {
+      await endPtz(deviceRows.value[idx].id, lastPtzCommand.value, controSpeed.value)
+    } else {
+      lastPtzCommand.value = data
+      await startPtz(deviceRows.value[idx].id, data, controSpeed.value)
+    }
+  } catch (error) {
+    console.error('云台控制失败', error)
+    proxy.$modal.msgError('云台控制失败')
+  }
 }
 </script>
 

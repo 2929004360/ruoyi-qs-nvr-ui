@@ -1,8 +1,8 @@
 <template>
   <div>
     <el-dropdown trigger="click" @command="handleSetSize">
-      <div class="size-icon--style">
-        <svg-icon class-name="size-icon" icon-class="size" />
+      <div class="size-icon-wrapper">
+        <el-icon :size="18"><ScaleToOriginal /></el-icon>
       </div>
       <template #dropdown>
         <el-dropdown-menu>
@@ -16,6 +16,7 @@
 </template>
 
 <script setup lang="ts">
+import { ScaleToOriginal } from '@element-plus/icons-vue'
 import useAppStore from "@/store/modules/app"
 
 interface SizeOption {
@@ -42,9 +43,10 @@ function handleSetSize(size: 'large' | 'default' | 'small'): void {
 </script>
 
 <style lang='scss' scoped>
-.size-icon--style {
-  font-size: 18px;
-  line-height: 50px;
-  padding-right: 7px;
+.size-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
 }
 </style>

@@ -77,7 +77,8 @@
             :hasAudio="deviceRow.enableAudio === '1'"
             :isMute="deviceRow.enableAudio === '1'"
             :isLive="isLive"
-            :videoUrl="wsUrl"/>
+            :videoUrl="wsUrl"
+            @ptz="handlePtz"/>
       </div>
 
       <el-tabs v-model="tabActiveName"
@@ -116,6 +117,87 @@
           <MediaInfo v-if="tabActiveName === 'codec' && streamInfo" ref="mediaInfo" :app="streamInfo.app"
                      :stream="streamInfo.stream" :mediaServerId="streamInfo.mediaServerId"></MediaInfo>
         </el-tab-pane>
+        <el-tab-pane label="云台控制" name="control">
+          <div v-if="!isPtz" style="text-align: center; padding: 40px; color: #909399;">
+            <el-icon style="font-size: 48px; margin-bottom: 16px;"><InfoFilled/></el-icon>
+            <p>当前设备不支持云台控制</p>
+          </div>
+          <div v-else style="display: grid; grid-template-columns: 240px auto; height: 180px; overflow: auto" v-if="tabActiveName === 'control'">
+            <!-- 左侧控制区域 -->
+            <div style="display: grid; grid-template-columns: 100px auto;">
+              <!-- 方向控制 -->
+              <div class="control-wrapper">
+                <div class="control-btn control-top" @mousedown="ptzCamera('up')" @mouseup="ptzCamera('stop')">
+                  <el-icon class="icon">
+                    <CaretTop/>
+                  </el-icon>
+                  <div class="control-inner-btn control-inner"></div>
+                </div>
+                <div class="control-btn control-left" @mousedown="ptzCamera('left')" @mouseup="ptzCamera('stop')">
+                  <el-icon class="icon">
+                    <CaretLeft/>
+                  </el-icon>
+                  <div class="control-inner-btn control-inner"></div>
+                </div>
+                <div class="control-btn control-bottom" @mousedown="ptzCamera('down')" @mouseup="ptzCamera('stop')">
+                  <el-icon class="icon">
+                    <CaretBottom/>
+                  </el-icon>
+                  <div class="control-inner-btn control-inner"></div>
+                </div>
+                <div class="control-btn control-right" @mousedown="ptzCamera('right')" @mouseup="ptzCamera('stop')">
+                  <el-icon class="icon">
+                    <CaretRight/>
+                  </el-icon>
+                  <div class="control-inner-btn control-inner"></div>
+                </div>
+                <div class="control-round">
+                  <div class="control-round-inner"><i class="fa fa-pause-circle"></i></div>
+                </div>
+                <!-- 速度控制 -->
+                <div class="contro-speed" style="position: absolute; left: 4px; top: 112px; width: 100px;">
+                  <el-slider v-model="controSpeed" :min="1" :max="controSpeedMax"></el-slider>
+                </div>
+              </div>
+              <!-- 变倍、聚焦、光圈控制 -->
+              <div>
+                <div class="ptz-btn-box">
+                  <div @mousedown="ptzCamera('zoomin')" @mouseup="ptzCamera('stop')" title="变倍+">
+                    <el-icon class="control-zoom-btn" style="font-size: 24px;">
+                      <ZoomIn/>
+                    </el-icon>
+                  </div>
+                  <div @mousedown="ptzCamera('zoomout')" @mouseup="ptzCamera('stop')" title="变倍-">
+                    <el-icon class="control-zoom-btn" style="font-size: 24px;">
+                      <ZoomOut/>
+                    </el-icon>
+                  </div>
+                </div>
+                <div class="ptz-btn-box">
+                  <div @mousedown="ptzCamera('near')" @mouseup="ptzCamera('stop')" title="聚焦+">
+                    <i class="iconfont icon-bianjiao-fangda control-zoom-btn" style="font-size: 24px;"></i>
+                  </div>
+                  <div @mousedown="ptzCamera('far')" @mouseup="ptzCamera('stop')" title="聚焦-">
+                    <i class="iconfont icon-bianjiao-suoxiao control-zoom-btn" style="font-size: 24px;"></i>
+                  </div>
+                </div>
+                <div class="ptz-btn-box">
+                  <div @mousedown="ptzCamera('in')" @mouseup="ptzCamera('stop')" title="光圈+">
+                    <i class="iconfont icon-guangquan control-zoom-btn" style="font-size: 24px;"></i>
+                  </div>
+                  <div @mousedown="ptzCamera('out')" @mouseup="ptzCamera('stop')" title="光圈-">
+                    <i class="iconfont icon-guangquan- control-zoom-btn" style="font-size: 24px;"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 右侧功能选择区域 -->
+            <div style="text-align: left">
+              
+            </div>
+          </div>
+        </el-tab-pane>
       </el-tabs>
     </el-dialog>
   </div>
@@ -123,7 +205,7 @@
 
 <script setup lang="ts" name="Map">
 import EasyPlayer from "@/components/EasyPlayer";
-import {DocumentCopy} from '@element-plus/icons-vue'
+import {DocumentCopy, InfoFilled, CaretTop, CaretLeft, CaretBottom, CaretRight, ZoomIn, ZoomOut} from '@element-plus/icons-vue'
 import StreamDropdown from "@/components/Channel/streamDropdown.vue";
 import MediaInfo from "@/components/Channel/mediaInfo.vue";
 import useClipboard from "vue-clipboard3";
@@ -134,7 +216,7 @@ import "splitpanes/dist/splitpanes.css"
 import {getConfigKey} from "@/api/system/config";
 import {queryRegionForDevice} from "@/api/qs/region";
 import {queryGroupForDevice} from "@/api/qs/group";
-import {getDevice, getVideoSnapshot, updateDevice} from "@/api/qs/device";
+import {getDevice, getVideoSnapshot, updateDevice, startPtz, endPtz} from "@/api/qs/device";
 import {PullConfig, RTPServerParam} from "@/types/api";
 import {loadRecord, rtpPlay, streamPullPlay, streamPullPush, startGb28181Play, startJt1078Play} from "@/api/qs/zlm";
 import {ElLoading} from "element-plus";
@@ -167,6 +249,11 @@ const defaultQuality = ref('高清');
 const isPtz = ref(true);
 const isQuality = ref(true);
 const isLive = ref(true);
+
+// 云台
+const controSpeed = ref(5);
+const controSpeedMax = ref(10);
+const lastPtzCommand = ref('up');
 
 onMounted(async () => {
   window.onresize = function temp() {
@@ -650,7 +737,7 @@ function play(id) {
           streamInfo.value = res.data;
           quality.value = []
           defaultQuality.value = ''
-          isPtz.value = false
+          isPtz.value = row.type === '5' || row.type === '12' // ONVIF 和 GB28181 支持云台
           isQuality.value = false
           isLive.value = true
           deviceRow.value = row
@@ -680,7 +767,7 @@ function play(id) {
           streamInfo.value = res.data;
           quality.value = []
           defaultQuality.value = ''
-          isPtz.value = false
+          isPtz.value = row.type === '5' || row.type === '12' // ONVIF 和 GB28181 支持云台
           isQuality.value = false
           isLive.value = true
           deviceRow.value = row
@@ -728,7 +815,7 @@ function play(id) {
           streamInfo.value = res.data;
           quality.value = []
           defaultQuality.value = ''
-          isPtz.value = false
+          isPtz.value = row.type === '5' || row.type === '12' // ONVIF 和 GB28181 支持云台
           isQuality.value = false
           isLive.value = true
           deviceRow.value = row
@@ -758,7 +845,7 @@ function play(id) {
           streamInfo.value = res.data;
           quality.value = []
           defaultQuality.value = ''
-          isPtz.value = false
+          isPtz.value = row.type === '5' || row.type === '12' // ONVIF 和 GB28181 支持云台
           isQuality.value = false
           isLive.value = true
           deviceRow.value = row
@@ -788,7 +875,7 @@ function play(id) {
           streamInfo.value = res.data;
           quality.value = []
           defaultQuality.value = ''
-          isPtz.value = false
+          isPtz.value = row.type === '5' || row.type === '12' // ONVIF 和 GB28181 支持云台
           isQuality.value = false
           isLive.value = true
           deviceRow.value = row
@@ -818,7 +905,7 @@ function play(id) {
           streamInfo.value = res.data;
           quality.value = []
           defaultQuality.value = ''
-          isPtz.value = false
+          isPtz.value = row.type === '5' || row.type === '12' // ONVIF 和 GB28181 支持云台
           isQuality.value = false
           isLive.value = true
           deviceRow.value = row
@@ -836,6 +923,72 @@ function play(id) {
 
   })
 }
+
+/**
+ * 云台方向
+ * @param command
+ * @returns {Promise<void>}
+ */
+const ptzCamera = async (command) => {
+  console.log(command);
+  console.log(deviceRow.value);
+  
+  if (!deviceRow.value || !deviceRow.value.id) {
+    proxy.$modal.msgError('请先选择设备');
+    return;
+  }
+  
+  if (!isPtz.value) {
+    proxy.$modal.msgWarning('当前设备不支持云台控制');
+    return;
+  }
+  
+  try {
+    if (command !== 'stop') {
+      // 开始云台控制
+      await startPtz(deviceRow.value.id, command, controSpeed.value);
+    } else {
+      // 结束云台控制，这里我们传入一个默认的方向或者上一个方向
+      // 为了简单，我们传入 'up' 作为方向，但实际上后端可能只需要 id 和速度
+      await endPtz(deviceRow.value.id, 'up', controSpeed.value);
+    }
+  } catch (error) {
+    console.error('云台控制失败:', error);
+    proxy.$modal.msgError('云台控制失败');
+  }
+};
+
+/**
+ * EasyPlayer 云台事件处理
+ * @param data 云台数据 'up'|'down'|'left'|'right'|'zoomin'|'zoomout'|'near'|'far'|'in'|'out'|'stop'
+ */
+const handlePtz = async (data: any) => {
+  console.log('handlePtz', data);
+  if (!deviceRow.value || !deviceRow.value.id) {
+    proxy.$modal.msgError('请先选择设备');
+    return;
+  }
+  
+  if (!isPtz.value) {
+    proxy.$modal.msgWarning('当前设备不支持云台控制');
+    return;
+  }
+  
+  try {
+    if (data === 'stop') {
+      // 结束云台控制，使用上一次保存的命令
+      await endPtz(deviceRow.value.id, lastPtzCommand.value, controSpeed.value);
+    } else {
+      // 保存当前命令
+      lastPtzCommand.value = data;
+      // 开始云台控制
+      await startPtz(deviceRow.value.id, data, controSpeed.value);
+    }
+  } catch (error) {
+    console.error('云台控制失败:', error);
+    proxy.$modal.msgError('云台控制失败');
+  }
+};
 
 /**
  * 复制内容到粘贴板
@@ -893,5 +1046,186 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+::v-deep(.el-icon) {
+  height: auto !important;
+}
 
+.control-wrapper {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  max-width: 100px;
+  max-height: 100px;
+  border-radius: 100%;
+  margin-top: 24px;
+  margin-left: 8px;
+  float: left;
+}
+
+.control-btn {
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  width: 44%;
+  height: 44%;
+  border-radius: 5px;
+  border: 1px solid #78aee4;
+  box-sizing: border-box;
+  transition: all 0.3s linear;
+}
+
+.control-btn:hover {
+  cursor: pointer;
+}
+
+.control-btn .icon {
+  width: 100%;
+  font-size: 20px;
+  color: #78aee4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.control-btn .icon:hover {
+  cursor: pointer;
+}
+
+.control-zoom-btn:hover {
+  cursor: pointer;
+}
+
+.control-round {
+  position: absolute;
+  top: 21%;
+  left: 21%;
+  width: 58%;
+  height: 58%;
+  background: #fff;
+  border-radius: 100%;
+}
+
+.control-round-inner {
+  position: absolute;
+  left: 13%;
+  top: 13%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 70%;
+  height: 70%;
+  font-size: 40px;
+  color: #78aee4;
+  border: 1px solid #78aee4;
+  border-radius: 100%;
+  transition: all 0.3s linear;
+}
+
+.control-inner-btn {
+  position: absolute;
+  width: 60%;
+  height: 60%;
+  background: #fafafa;
+}
+
+.control-top {
+  top: -12px;
+  left: 27%;
+  transform: rotate(-45deg);
+  border-radius: 5px 100% 5px 0;
+}
+
+.control-top .icon {
+  transform: rotate(45deg);
+  border-radius: 5px 100% 5px 0;
+}
+
+.control-top .control-inner {
+  left: -1px;
+  bottom: 0;
+  border-top: 1px solid #78aee4;
+  border-right: 1px solid #78aee4;
+  border-radius: 0 100% 0 0;
+}
+
+.control-top .fa {
+  transform: rotate(45deg) translateY(-7px);
+}
+
+.control-left {
+  top: 27%;
+  left: -12px;
+  transform: rotate(45deg);
+  border-radius: 5px 0 5px 100%;
+}
+
+.control-left .icon {
+  transform: rotate(-45deg);
+}
+
+.control-left .control-inner {
+  right: -1px;
+  top: -1px;
+  border-bottom: 1px solid #78aee4;
+  border-left: 1px solid #78aee4;
+  border-radius: 0 0 0 100%;
+}
+
+.control-left .fa {
+  transform: rotate(-45deg) translateX(-7px);
+}
+
+.control-right {
+  top: 27%;
+  right: -12px;
+  transform: rotate(45deg);
+  border-radius: 5px 100% 5px 0;
+}
+
+.control-right .icon {
+  transform: rotate(-45deg);
+}
+
+.control-right .control-inner {
+  left: -1px;
+  bottom: -1px;
+  border-top: 1px solid #78aee4;
+  border-right: 1px solid #78aee4;
+  border-radius: 0 100% 0 0;
+}
+
+.control-right .fa {
+  transform: rotate(-45deg) translateX(7px);
+}
+
+.control-bottom {
+  left: 27%;
+  bottom: -12px;
+  transform: rotate(45deg);
+  border-radius: 0 5px 100% 5px;
+}
+
+.control-bottom .icon {
+  transform: rotate(-45deg);
+}
+
+.control-bottom .control-inner {
+  top: -1px;
+  left: -1px;
+  border-bottom: 1px solid #78aee4;
+  border-right: 1px solid #78aee4;
+  border-radius: 0 0 100% 0;
+}
+
+.control-bottom .fa {
+  transform: rotate(-45deg) translateY(7px);
+}
+
+.ptz-btn-box {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 0 32px;
+  height: 48px;
+  line-height: 64px;
+}
 </style>

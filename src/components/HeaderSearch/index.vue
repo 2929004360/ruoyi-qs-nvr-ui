@@ -1,6 +1,8 @@
 <template>
   <div class="header-search">
-    <svg-icon class-name="search-icon" icon-class="search" @click.stop="click" />
+    <div class="search-trigger" @click.stop="click">
+      <el-icon :size="18"><Search /></el-icon>
+    </div>
     <el-dialog
       v-model="show"
       width="600"
@@ -78,6 +80,7 @@
 
 <script setup lang="ts">
 import Fuse from 'fuse.js'
+import { Search } from '@element-plus/icons-vue'
 import { getNormalPath } from '@/utils/ruoyi'
 import { isHttp } from '@/utils/validate'
 import useSettingsStore from '@/store/modules/settings'
@@ -261,10 +264,11 @@ watch(searchPool, (list: SearchItem[]) => {
 }
 
 .header-search {
-  .search-icon {
+  .search-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    font-size: 18px;
-    vertical-align: middle;
   }
 }
 

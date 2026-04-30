@@ -99,7 +99,7 @@ import {
 } from '@element-plus/icons-vue'
 import useSettingsStore from '@/store/modules/settings'
 
-const emit = defineEmits(['error', 'play', 'pause', 'fullscreen', 'screenshot'])
+const emit = defineEmits(['error', 'play', 'pause', 'fullscreen', 'screenshot', 'ptz'])
 
 const props = defineProps({
   videoUrl: { type: String },
@@ -281,6 +281,17 @@ const bindEvents = () => {
     } else {
       networkStatus.value = { type: 'poor', text: `网络较差 ${speed}KB/s` }
     }
+  })
+
+  // PTZ 事件
+  easyplayer.value.on('ptz', (data: any) => {
+    // 不支持左上、左下、右上、右下等组合方向
+    const unsupportedCommands = ['leftUp', 'leftdown', 'rightup', 'rightdown', 'upleft', 'downleft', 'upright', 'downright']
+    if (unsupportedCommands.includes(data)) {
+      console.log('不支持的云台命令:', data)
+      return
+    }
+    emit('ptz', data)
   })
 }
 

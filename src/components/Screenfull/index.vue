@@ -1,22 +1,31 @@
 <template>
-  <div>
-    <svg-icon :icon-class="isFullscreen ? 'exit-fullscreen' : 'fullscreen'" @click="toggle" />
+  <div class="screenfull-icon" @click="toggle">
+    <el-icon :size="18" :class="{ 'is-active': isFullscreen }">
+      <FullScreen />
+    </el-icon>
   </div>
 </template>
 
 <script setup lang="ts">
+import { FullScreen } from '@element-plus/icons-vue'
 import { useFullscreen } from '@vueuse/core'
 
 const { isFullscreen, toggle } = useFullscreen()
 </script>
 
 <style lang='scss' scoped>
-.screenfull-svg {
-  display: inline-block;
+.screenfull-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  fill: #5a5e66;
-  width: 20px;
-  height: 20px;
-  vertical-align: 10px;
+
+  .el-icon {
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &.is-active {
+      transform: rotate(180deg);
+    }
+  }
 }
 </style>

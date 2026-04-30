@@ -198,3 +198,27 @@ export function clearDeviceParent(data) {
         data: data
     })
 }
+
+// 开始云台控制
+export function startPtz(id: number, direction: string, controlSpeed: number): Promise<AjaxResult> {
+    return request({
+        url: `/qs/device/startPtz/${id}`,
+        method: 'get',
+        params: {
+            direction,
+            controlSpeed
+        }
+    })
+}
+
+// 结束云台控制
+export function endPtz(id: number, direction: string, controlSpeed: number): Promise<AjaxResult> {
+    return request({
+        url: `/qs/device/endPtz/${id}`,
+        method: 'get',
+        params: {
+            direction,
+            controlSpeed
+        }
+    })
+}

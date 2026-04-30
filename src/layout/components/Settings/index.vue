@@ -107,8 +107,10 @@
 
     <el-divider />
 
-    <el-button type="primary" plain icon="DocumentAdd" @click="saveSetting">保存配置</el-button>
-    <el-button plain icon="Refresh" @click="resetSetting">重置配置</el-button>
+    <div class="drawer-footer">
+      <el-button type="primary" plain icon="DocumentAdd" @click="saveSetting">保存配置</el-button>
+      <el-button plain icon="Refresh" @click="resetSetting">重置配置</el-button>
+    </div>
   </el-drawer>
 
 </template>
@@ -216,57 +218,28 @@ defineExpose({
 
 <style lang='scss' scoped>
 .setting-drawer-title {
-  margin-bottom: 12px;
-  color: var(--el-text-color-primary, rgba(0, 0, 0, 0.85));
-  line-height: 22px;
-  font-weight: bold;
+  margin-bottom: 16px;
+  color: var(--el-text-color-primary);
+  animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
 
   .drawer-title {
-    font-size: 14px;
-  }
-}
-
-.setting-drawer-block-checbox {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  margin-top: 10px;
-  margin-bottom: 20px;
-
-  .setting-drawer-block-checbox-item {
+    font-size: 15px;
+    font-weight: 600;
     position: relative;
-    margin-right: 16px;
-    border-radius: 2px;
-    cursor: pointer;
+    padding-left: 12px;
+    line-height: 24px;
 
-    img {
-      width: 48px;
-      height: 48px;
-    }
-
-    .setting-drawer-block-checbox-selectIcon {
+    &::before {
+      content: '';
       position: absolute;
-      top: 0;
-      right: 0;
-      width: 100%;
-      height: 100%;
-      padding-top: 15px;
-      padding-left: 24px;
-      color: #1890ff;
-      font-weight: 700;
-      font-size: 14px;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 16px;
+      background: var(--el-color-primary);
+      border-radius: 2px;
     }
-  }
-}
-
-.drawer-item {
-  color: var(--el-text-color-regular, rgba(0, 0, 0, 0.65));
-  padding: 12px 0;
-  font-size: 14px;
-
-  .comp-style {
-    float: right;
-    margin: -3px 8px 0px 0px;
   }
 }
 
@@ -275,61 +248,278 @@ defineExpose({
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  margin-top: 10px;
-  margin-bottom: 20px;
-
-  .activeItem {
-    border: 2px solid var(--el-color-primary) !important;
-  }
+  gap: 16px;
+  margin: 12px 0 24px;
+  animation: slideInRight 0.45s 0.05s cubic-bezier(0.4, 0, 0.2, 1) both;
 
   .item {
     position: relative;
-    margin-right: 16px;
-    cursor: pointer;
-    width: 56px;
-    height: 48px;
-    border-radius: 4px;
-    background: #f0f2f5;
+    width: 64px;
+    height: 52px;
+    border-radius: 8px;
+    background: var(--el-fill-color-light);
     border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    &.activeItem {
+      border-color: var(--el-color-primary);
+      box-shadow: 0 0 0 3px var(--el-color-primary-light-9);
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        width: 14px;
+        height: 14px;
+        background: var(--el-color-primary);
+        border-radius: 50%;
+        border: 2px solid var(--el-bg-color-overlay);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        animation: dotPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      }
+    }
   }
 
   .left {
     b:first-child {
       display: block;
-      height: 30%;
-      background: #fff;
+      height: 22%;
+      background: var(--el-bg-color);
+      border-radius: 4px 4px 0 0;
+      margin: 4px 4px 0;
     }
     b:last-child {
-      width: 30%;
-      background: #1b2a47;
       position: absolute;
-      height: 100%;
-      top: 0;
+      width: 28%;
+      height: calc(100% - 8px);
+      top: 4px;
+      left: 4px;
+      background: var(--sidebar-bg);
       border-radius: 4px 0 0 4px;
     }
   }
+
   .mix {
     b:first-child {
-      border-radius: 4px 4px 0 0;
       display: block;
-      height: 30%;
-      background: #1b2a47;
+      height: 22%;
+      background: var(--sidebar-bg);
+      border-radius: 4px 4px 0 0;
+      margin: 4px 4px 0;
     }
     b:last-child {
-      width: 30%;
-      background: #1b2a47;
       position: absolute;
-      height: 70%;
+      width: 28%;
+      height: 68%;
+      bottom: 4px;
+      left: 4px;
+      background: var(--sidebar-bg);
       border-radius: 0 0 0 4px;
     }
   }
+
   .top {
     b:first-child {
       display: block;
-      height: 30%;
-      background: #1b2a47;
+      height: 22%;
+      background: var(--sidebar-bg);
       border-radius: 4px 4px 0 0;
+      margin: 4px 4px 0;
     }
+  }
+}
+
+// 主题风格选择
+.setting-drawer-block-checbox {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 16px;
+  margin: 12px 0 24px;
+  animation: slideInRight 0.5s 0.1s cubic-bezier(0.4, 0, 0.2, 1) both;
+
+  .setting-drawer-block-checbox-item {
+    position: relative;
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    border: 2px solid transparent;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+    &:hover {
+      transform: scale(1.08) translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .setting-drawer-block-checbox-selectIcon {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(2px);
+      animation: selectIconFadeIn 0.25s ease both;
+
+      svg {
+        width: 22px;
+        height: 22px;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+      }
+    }
+  }
+}
+
+// 开关项
+.drawer-item {
+  color: var(--el-text-color-regular);
+  padding: 12px 0;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: color 0.3s ease;
+  animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+
+  @for $i from 1 through 10 {
+    &:nth-of-type(#{$i}) {
+      animation-delay: #{0.15 + $i * 0.04}s;
+    }
+  }
+
+  .comp-style {
+    margin: 0;
+  }
+}
+
+// 按钮区域
+.drawer-footer {
+  display: flex;
+  gap: 10px;
+  animation: slideInRight 0.45s 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+
+  :deep(.el-button) {
+    flex: 1;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+// 分隔线
+:deep(.el-divider) {
+  margin: 16px 0;
+  border-color: var(--el-border-color-lighter);
+  animation: fadeIn 0.5s 0.12s ease both;
+}
+
+// 暗黑模式适配
+html.dark {
+  .nav-wrap .item {
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+    &:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    &.activeItem {
+      box-shadow: 0 0 0 3px var(--el-color-primary-light-9), 0 2px 8px rgba(0, 0, 0, 0.2);
+
+      &::after {
+        border-color: var(--el-bg-color);
+      }
+    }
+
+    .left b:first-child,
+    .top b:first-child {
+      background: var(--el-bg-color-overlay);
+    }
+  }
+
+  .setting-drawer-block-checbox-item {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+
+    &:hover {
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    .setting-drawer-block-checbox-selectIcon {
+      background: rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  .drawer-footer :deep(.el-button):hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  :deep(.el-divider) {
+    border-color: var(--el-border-color);
+  }
+}
+
+// 动画定义
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes dotPop {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes selectIconFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 </style>

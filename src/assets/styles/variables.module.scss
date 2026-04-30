@@ -75,6 +75,9 @@ $--color-info: #909399;
   --navbar-bg: #ffffff;
   --navbar-text: #303133;
   
+  /* 侧边栏阴影 */
+  --sidebar-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.1);
+  
   /* splitpanes default-theme 变量 */
   --splitpanes-default-bg: #ffffff;
 
@@ -103,6 +106,9 @@ html.dark {
   --navbar-bg: #141414;
   --navbar-text: #ffffff;
   --navbar-hover: #141414;
+  
+  /* 侧边栏阴影 */
+  --sidebar-shadow: 2px 0 8px rgba(0, 0, 0, 0.4);
 
   /* 标签栏 */
   --tags-bg: #141414;
