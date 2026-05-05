@@ -790,32 +790,99 @@
             </div>
 
             <!-- 右侧功能选择区域 -->
-            <div style="text-align: left">
-              
+            <div v-if="isPtz" class="ptz-function-panel">
+              <el-tabs type="card" class="ptz-tabs">
+                <!-- 预置点管理 -->
+                <el-tab-pane v-if="isPresetSupported" label="预置点">
+                  <div class="preset-panel">
+                    <el-select v-model="selectedPresetIndex" placeholder="选择预置点" class="preset-select" clearable @change="handlePresetSelect">
+                      <el-option v-for="preset in presetList" :key="preset.index" :label="preset.name || `预置点${preset.index}`" :value="preset.index" />
+                    </el-select>
+                    <div class="preset-buttons">
+                      <el-button type="primary" size="small" @click="handleGotoPreset" :disabled="!selectedPresetIndex">
+                        调用
+                      </el-button>
+                      <el-button type="success" size="small" @click="openSetPresetDialog">
+                        设置
+                      </el-button>
+                      <el-button type="danger" size="small" @click="handleDeletePreset" :disabled="!selectedPresetIndex">
+                        删除
+                      </el-button>
+                    </div>
+                    <el-button type="primary" link @click="loadPresetList" class="refresh-btn">
+                      <el-icon><Refresh /></el-icon>
+                      刷新
+                    </el-button>
+                  </div>
+                </el-tab-pane>
+                
+                <!-- 灯光控制 -->
+                <el-tab-pane label="灯光">
+                  <div class="control-panel">
+                    <el-button type="success" @click="handleLightControl(true)" class="control-btn-on">
+                      开灯
+                    </el-button>
+                    <el-button type="danger" @click="handleLightControl(false)" class="control-btn-off">
+                      关灯
+                    </el-button>
+                  </div>
+                </el-tab-pane>
+                
+                <!-- 雨刷控制 -->
+                <el-tab-pane label="雨刷">
+                  <div class="control-panel">
+                    <el-button type="success" @click="handleWiperControl(true)" class="control-btn-on">
+                      开雨刷
+                    </el-button>
+                    <el-button type="danger" @click="handleWiperControl(false)" class="control-btn-off">
+                      关雨刷
+                    </el-button>
+                  </div>
+                </el-tab-pane>
+              </el-tabs>
+            </div>
+            <!-- 对于不支持云台的设备，显示提示信息 -->
+            <div v-else style="text-align: center; padding: 20px; color: #909399;">
+              <p>该设备暂不支持云台控制及相关功能</p>
             </div>
           </div>
         </el-tab-pane>
       </el-tabs>
     </el-dialog>
-
     <el-dialog :title="`接入地址-${deviceRow.deviceName}`" v-model="accessAddressOpen" width="600px" append-to-body
                draggable>
       <el-form :model="streamPushAddressForm" label-width="100px">
         <el-form-item label="rtsp地址">
           <el-input v-model="streamPushAddressForm.rtsp" placeholder="请输入rtsp地址" disabled>
             <template #append>
-              <el-button type="primary" :icon="DocumentCopy" @click="handleCopy(streamPushAddressForm.rtsp)"/>
+              <el-button type="primary" :icon="DocumentCopy" @click="handleCopy(streamPushAddressForm.rtsp)" />
             </template>
           </el-input>
         </el-form-item>
         <el-form-item label="rtmp地址" prop="rtmp">
           <el-input v-model="streamPushAddressForm.rtmp" placeholder="请输入rtmp地址" disabled>
             <template #append>
-              <el-button type="primary" :icon="DocumentCopy" @click="handleCopy(streamPushAddressForm.rtmp)"/>
+              <el-button type="primary" :icon="DocumentCopy" @click="handleCopy(streamPushAddressForm.rtmp)" />
             </template>
           </el-input>
         </el-form-item>
       </el-form>
+    </el-dialog>
+
+    <!-- 设置预置点对话框 -->
+    <el-dialog title="设置预置点" v-model="presetDialogVisible" width="400px" append-to-body>
+      <el-form ref="presetFormRef" :model="presetForm" :rules="presetRules" label-width="80px">
+        <el-form-item label="编号" prop="index">
+          <el-input-number v-model="presetForm.index" :min="1" :max="255" style="width: 100%;" />
+        </el-form-item>
+        <el-form-item label="名称" prop="name">
+          <el-input v-model="presetForm.name" placeholder="请输入预置点名称" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="presetDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleSetPreset">确定</el-button>
+      </template>
     </el-dialog>
 
     <SelectMapPosition ref="selectMapPositionRef" @onSubmit="selectMapPositionSubmit"/>
@@ -824,7 +891,7 @@
 </template>
 
 <script setup lang="ts" name="Device">
-import {onUnmounted} from "vue";
+import {onUnmounted, watch, nextTick, reactive, ref} from "vue";
 import useClipboard from "vue-clipboard3";
 import EasyPlayer from "@/components/EasyPlayer";
 import type {DeviceQueryParams, QsDevice} from "@/types/api/qs/device"
@@ -837,7 +904,13 @@ import {
   listDevice,
   updateDevice,
   startPtz,
-  endPtz
+  endPtz,
+  getPresetList,
+  setPreset,
+  gotoPreset,
+  deletePreset,
+  controlLight,
+  controlWiper
 } from "@/api/qs/device"
 import {listHaiKangIsupDevice} from "@/api/qs/haikang-isup";
 import {HaikangIsupDevice, PullConfig, RTPServerParam, WSDiscoveryDevice, WSOnvifDevice} from "@/types/api";
@@ -854,7 +927,7 @@ import {
   startGb28181Play, stopGb28181Play,
   startJt1078Play, stopJt1078Play
 } from "@/api/qs/zlm";
-import {DocumentCopy, InfoFilled} from '@element-plus/icons-vue'
+import {DocumentCopy, InfoFilled, Refresh, Sunny, Moon, SwitchButton, CircleClose, Position, Plus, Delete, WindPower} from '@element-plus/icons-vue'
 import StreamDropdown from "@/components/Channel/streamDropdown.vue";
 import MediaInfo from "@/components/Channel/mediaInfo.vue";
 import SelectMapPosition from '@/components/SelectMapPosition';
@@ -908,14 +981,43 @@ const streamInfo = ref({});
 const quality = ref(['普清', '高清', '超清']);
 const defaultQuality = ref('高清');
 const isPtz = ref(true);
+const isPresetSupported = ref(true); // 是否支持预置点功能
 const isQuality = ref(true);
 const isLive = ref(true);
 
 // 云台
 const controSpeed = ref(5);
 const controSpeedMax = ref(10);
-const controSpeedMin = ref(5);
+const controSpeedMin = ref(1);
 const lastPtzCommand = ref('up'); // 保存上一次的云台命令
+
+// 预置点
+const presetList = ref([]);
+const selectedPresetIndex = ref(null);
+const newPresetIndex = ref(1);
+const newPresetName = ref('');
+const presetDialogVisible = ref(false);
+const presetFormRef = ref();
+
+// 预置点表单数据
+const presetForm = reactive({
+  index: 1,
+  name: ''
+});
+
+// 预置点表单校验规则
+const presetRules = {
+  index: [
+    { required: true, message: '预置点编号不能为空', trigger: 'blur' }
+  ],
+  name: [
+    { required: true, message: '预置点名称不能为空', trigger: 'blur' }
+  ]
+};
+
+// 灯光和雨刷
+const lightOn = ref(false);
+const wiperOn = ref(false);
 
 
 // 接入地址
@@ -1514,6 +1616,7 @@ const handlePlay = (row: QsDevice) => {
         quality.value = []
         defaultQuality.value = ''
         isPtz.value = row.type === '5' // ONVIF 支持云台
+        isPresetSupported.value = row.type === '5' // ONVIF 支持预置点
         isQuality.value = false
         isLive.value = true
         deviceRow.value = row
@@ -1603,6 +1706,7 @@ const handlePlay = (row: QsDevice) => {
         quality.value = []
         defaultQuality.value = ''
         isPtz.value = true // 海康、海康ISUP、大华支持云台
+        isPresetSupported.value = true // 海康、海康ISUP、大华支持预置点
         isQuality.value = false
         isLive.value = true
         deviceRow.value = row
@@ -1670,6 +1774,7 @@ const handlePlay = (row: QsDevice) => {
         quality.value = []
         defaultQuality.value = ''
         isPtz.value = true // GB28181 支持云台
+        isPresetSupported.value = true // GB28181 支持预置点
         isQuality.value = false
         isLive.value = true
         deviceRow.value = row
@@ -1706,6 +1811,7 @@ const handlePlay = (row: QsDevice) => {
         quality.value = []
         defaultQuality.value = ''
         isPtz.value = true // JT1078 支持云台
+        isPresetSupported.value = false // JT1078 不支持预置点
         isQuality.value = false
         isLive.value = true
         deviceRow.value = row
@@ -1926,6 +2032,169 @@ onUnmounted(() => {
     timer = null;
   }
 })
+
+// ==================== 预置点功能 ====================
+
+// 加载预置点列表
+const loadPresetList = async () => {
+  if (!isPresetSupported.value || !deviceRow.value || !deviceRow.value.id) {
+    return;
+  }
+  try {
+    const res = await getPresetList(deviceRow.value.id, deviceRow.value.channel);
+    if (res && res.data) {
+      presetList.value = res.data;
+    }
+  } catch (error) {
+    console.error('获取预置点列表失败:', error);
+    proxy.$modal.msgError('获取预置点列表失败');
+  }
+}
+
+// 预置点选择
+const handlePresetSelect = (index) => {
+  selectedPresetIndex.value = index;
+  if (index) {
+    newPresetIndex.value = index;
+    const preset = presetList.value.find(p => p.index === index);
+    if (preset) {
+      newPresetName.value = preset.name || '';
+    }
+  }
+}
+
+// 打开设置预置点对话框
+const openSetPresetDialog = () => {
+  // 如果没有选择预置点也没有输入预置点编号，默认设为1
+  presetForm.index = newPresetIndex.value || 1;
+  presetForm.name = '';
+  // 如果选择了预置点，自动填充名称
+  if (selectedPresetIndex.value) {
+    const preset = presetList.value.find(p => p.index === selectedPresetIndex.value);
+    if (preset) {
+      presetForm.index = preset.index;
+      presetForm.name = preset.name || '';
+    }
+  }
+  presetDialogVisible.value = true;
+  // 重置表单校验
+  nextTick(() => {
+    presetFormRef.value?.resetFields();
+  });
+}
+
+// 设置预置点
+const handleSetPreset = async () => {
+  if (!deviceRow.value || !deviceRow.value.id) {
+    proxy.$modal.msgError('请先选择设备');
+    return;
+  }
+  // 校验表单
+  if (!presetFormRef.value) return;
+  await presetFormRef.value.validate(async (valid) => {
+    if (valid) {
+      try {
+        await setPreset(deviceRow.value.id, deviceRow.value.channel, presetForm.index, presetForm.name);
+        proxy.$modal.msgSuccess('设置预置点成功');
+        presetDialogVisible.value = false;
+        await loadPresetList();
+      } catch (error) {
+        console.error('设置预置点失败:', error);
+        proxy.$modal.msgError('设置预置点失败');
+      }
+    }
+  });
+}
+
+// 调用预置点
+const handleGotoPreset = async () => {
+  if (!deviceRow.value || !deviceRow.value.id) {
+    proxy.$modal.msgError('请先选择设备');
+    return;
+  }
+  const presetIndex = selectedPresetIndex.value || newPresetIndex.value;
+  if (!presetIndex) {
+    proxy.$modal.msgWarning('请先选择或输入预置点');
+    return;
+  }
+  try {
+    await gotoPreset(deviceRow.value.id, deviceRow.value.channel, presetIndex);
+    proxy.$modal.msgSuccess('调用预置点成功');
+  } catch (error) {
+    console.error('调用预置点失败:', error);
+    proxy.$modal.msgError('调用预置点失败');
+  }
+}
+
+// 删除预置点
+const handleDeletePreset = async () => {
+  if (!deviceRow.value || !deviceRow.value.id) {
+    proxy.$modal.msgError('请先选择设备');
+    return;
+  }
+  const presetIndex = selectedPresetIndex.value || newPresetIndex.value;
+  if (!presetIndex) {
+    proxy.$modal.msgWarning('请先选择或输入预置点');
+    return;
+  }
+  try {
+    await proxy.$modal.confirm('确定要删除该预置点吗？');
+    await deletePreset(deviceRow.value.id, deviceRow.value.channel, presetIndex);
+    proxy.$modal.msgSuccess('删除预置点成功');
+    selectedPresetIndex.value = null;
+    await loadPresetList();
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除预置点失败:', error);
+      proxy.$modal.msgError('删除预置点失败');
+    }
+  }
+}
+
+// ==================== 灯光和雨刷控制 ====================
+
+// 灯光控制
+const handleLightControl = async (value) => {
+  if (!deviceRow.value || !deviceRow.value.id) {
+    proxy.$modal.msgError('请先选择设备');
+    lightOn.value = !value;
+    return;
+  }
+  try {
+    await controlLight(deviceRow.value.id, deviceRow.value.channel, value);
+    proxy.$modal.msgSuccess(value ? '灯光已开启' : '灯光已关闭');
+  } catch (error) {
+    console.error('灯光控制失败:', error);
+    proxy.$modal.msgError('灯光控制失败');
+    lightOn.value = !value;
+  }
+}
+
+// 雨刷控制
+const handleWiperControl = async (value) => {
+  if (!deviceRow.value || !deviceRow.value.id) {
+    proxy.$modal.msgError('请先选择设备');
+    wiperOn.value = !value;
+    return;
+  }
+  try {
+    await controlWiper(deviceRow.value.id, deviceRow.value.channel, value);
+    proxy.$modal.msgSuccess(value ? '雨刷已开启' : '雨刷已关闭');
+  } catch (error) {
+    console.error('雨刷控制失败:', error);
+    proxy.$modal.msgError('雨刷控制失败');
+    wiperOn.value = !value;
+  }
+}
+
+// 监听播放对话框打开，加载预置点列表
+watch(easyPlayerOpen, (newVal) => {
+  if (newVal && isPtz.value && isPresetSupported.value) {
+    setTimeout(() => {
+      loadPresetList();
+    }, 500);
+  }
+})
 </script>
 
 <style scoped>
@@ -1955,14 +2224,6 @@ onUnmounted(() => {
   margin-top: 24px; /* 1.5rem * 16 = 24px */
   margin-left: 8px; /* 0.5rem * 16 = 8px */
   float: left;
-}
-
-.control-panel {
-  position: relative;
-  top: 0;
-  left: 80px; /* 5rem * 16 = 80px */
-  height: 176px; /* 11rem * 16 = 176px */
-  max-height: 176px; /* 11rem * 16 = 176px */
 }
 
 .control-btn {
@@ -2127,7 +2388,7 @@ onUnmounted(() => {
 
 .trank {
   width: 100%;
-  height: 180px;
+  height: 185px;
   text-align: left;
   padding: 0 10%;
   overflow: auto;
@@ -2243,4 +2504,59 @@ onUnmounted(() => {
 .mb8 {
   margin-bottom: 16px;
 }
+
+/* 云台功能面板样式 */
+.ptz-function-panel {
+  text-align: left;
+  height: 100%;
+}
+
+.ptz-tabs {
+  width: 100%;
+  height: 100%;
+}
+
+:deep(.ptz-tabs .el-tabs__header) {
+  margin-bottom: 0;
+}
+
+/* 预置点面板样式 */
+.preset-panel {
+  padding: 10px;
+}
+
+.preset-select {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.preset-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.preset-buttons .el-button {
+  flex: 1;
+}
+
+.refresh-btn {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 控制面板样式 */
+.control-panel {
+  padding: 15px 10px;
+  display: flex;
+}
+
+.control-btn-on,
+.control-btn-off {
+  width: 100%;
+}
 </style>
+

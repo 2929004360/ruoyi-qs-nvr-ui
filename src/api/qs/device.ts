@@ -222,3 +222,57 @@ export function endPtz(id: number, direction: string, controlSpeed: number): Pro
         }
     })
 }
+
+// 获取预置点列表
+export function getPresetList(id: number, channelId?: number): Promise<AjaxResult> {
+  return request({
+    url: `/qs/device/preset/list/${id}`,
+    method: 'get',
+    params: { channelId }
+  })
+}
+
+// 设置预置点
+export function setPreset(id: number, channelId?: number, presetIndex?: number, presetName?: string): Promise<AjaxResult> {
+  return request({
+    url: `/qs/device/preset/set/${id}`,
+    method: 'get',
+    params: { channelId, presetIndex, presetName }
+  })
+}
+
+// 调用预置点
+export function gotoPreset(id: number, channelId?: number, presetIndex?: number, speed?: number): Promise<AjaxResult> {
+  return request({
+    url: `/qs/device/preset/goto/${id}`,
+    method: 'get',
+    params: { channelId, presetIndex, speed }
+  })
+}
+
+// 删除预置点
+export function deletePreset(id: number, channelId?: number, presetIndex?: number): Promise<AjaxResult> {
+  return request({
+    url: `/qs/device/preset/delete/${id}`,
+    method: 'get',
+    params: { channelId, presetIndex }
+  })
+}
+
+// 灯光控制
+export function controlLight(id: number, channelId?: number, isOn?: boolean): Promise<AjaxResult> {
+  return request({
+    url: `/qs/device/light/${id}`,
+    method: 'get',
+    params: { channelId, isOn }
+  })
+}
+
+// 雨刷控制
+export function controlWiper(id: number, channelId?: number, isOn?: boolean): Promise<AjaxResult> {
+  return request({
+    url: `/qs/device/wiper/${id}`,
+    method: 'get',
+    params: { channelId, isOn }
+  })
+}
