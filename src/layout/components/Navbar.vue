@@ -40,7 +40,7 @@
         </el-tooltip>
 
         <el-tooltip content="消息通知" effect="dark" placement="bottom">
-          <header-notice id="header-notice" class="right-menu-item hover-effect" />
+          <header-notice id="header-notice" class="right-menu-item hover-effect" style="margin-top: 4px"/>
         </el-tooltip>
       </template>
 

@@ -100,6 +100,18 @@
           </el-row>
 
           <el-row :gutter="10" style="margin-top: 10px">
+            <el-col :span="3"><span style="width: 80px; line-height: 40px; text-align: right;">iframe：</span></el-col>
+            <el-col :span="21">
+              <el-input v-model="sharedIframe" :disabled="true">
+                <template #prepend>iframe：</template>
+                <template #append>
+                  <el-button type="primary" :icon="DocumentCopy" @click="handleCopy(sharedIframe)"/>
+                </template>
+              </el-input>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="10" style="margin-top: 10px">
             <el-col :span="3"><span style="width: 80px; line-height: 40px; text-align: right;">资源地址：</span></el-col>
             <el-col :span="21">
               <el-input v-model="rtcUrl" :disabled="true">
@@ -194,18 +206,58 @@
 
             <!-- 右侧功能选择区域 -->
             <div style="text-align: left">
-              
+              <el-tabs type="card" class="ptz-tabs" v-if="isPresetSupported">
+                <!-- 预置点管理 -->
+                <el-tab-pane label="预置点">
+                  <div class="preset-panel">
+                    <el-select v-model="selectedPresetIndex" placeholder="选择预置点" class="preset-select" clearable @change="handlePresetSelect">
+                      <el-option v-for="preset in presetList" :key="preset.index" :label="preset.name || `预置点${preset.index}`" :value="preset.index" />
+                    </el-select>
+                    <div class="preset-buttons">
+                      <el-button type="primary" size="small" @click="handleGotoPreset" :disabled="!selectedPresetIndex">
+                        调用
+                      </el-button>
+                      <el-button type="success" size="small" @click="openSetPresetDialog">
+                        设置
+                      </el-button>
+                      <el-button type="danger" size="small" @click="handleDeletePreset" :disabled="!selectedPresetIndex">
+                        删除
+                      </el-button>
+                    </div>
+                    <el-button type="primary" link @click="loadPresetList" class="refresh-btn">
+                      <el-icon><Refresh /></el-icon>
+                      刷新
+                    </el-button>
+                  </div>
+                </el-tab-pane>
+              </el-tabs>
             </div>
           </div>
         </el-tab-pane>
       </el-tabs>
+    </el-dialog>
+
+    <!-- 设置预置点对话框 -->
+    <el-dialog title="设置预置点" v-model="presetDialogVisible" width="400px" append-to-body>
+      <el-form ref="presetFormRef" :model="presetForm" :rules="presetRules" label-width="80px">
+        <el-form-item label="编号" prop="index">
+          <el-input-number v-model="presetForm.index" :min="1" :max="255" style="width: 100%;" />
+        </el-form-item>
+        <el-form-item label="名称" prop="name">
+          <el-input v-model="presetForm.name" placeholder="请输入预置点名称" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="presetDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleSetPreset">确定</el-button>
+      </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts" name="Map">
 import EasyPlayer from "@/components/EasyPlayer";
-import {DocumentCopy, InfoFilled, CaretTop, CaretLeft, CaretBottom, CaretRight, ZoomIn, ZoomOut} from '@element-plus/icons-vue'
+import {DocumentCopy, InfoFilled, CaretTop, CaretLeft, CaretBottom, CaretRight, ZoomIn, ZoomOut, Refresh} from '@element-plus/icons-vue'
 import StreamDropdown from "@/components/Channel/streamDropdown.vue";
 import MediaInfo from "@/components/Channel/mediaInfo.vue";
 import useClipboard from "vue-clipboard3";
@@ -216,7 +268,7 @@ import "splitpanes/dist/splitpanes.css"
 import {getConfigKey} from "@/api/system/config";
 import {queryRegionForDevice} from "@/api/qs/region";
 import {queryGroupForDevice} from "@/api/qs/group";
-import {getDevice, getVideoSnapshot, updateDevice, startPtz, endPtz} from "@/api/qs/device";
+import {getDevice, getVideoSnapshot, updateDevice, startPtz, endPtz, getPresetList, setPreset, gotoPreset, deletePreset} from "@/api/qs/device";
 import {PullConfig, RTPServerParam} from "@/types/api";
 import {loadRecord, rtpPlay, streamPullPlay, streamPullPush, startGb28181Play, startJt1078Play} from "@/api/qs/zlm";
 import {ElLoading} from "element-plus";
@@ -247,6 +299,7 @@ const streamInfo = ref({});
 const quality = ref(['普清', '高清', '超清']);
 const defaultQuality = ref('高清');
 const isPtz = ref(true);
+const isPresetSupported = ref(true); // 是否支持预置点功能
 const isQuality = ref(true);
 const isLive = ref(true);
 
@@ -254,6 +307,31 @@ const isLive = ref(true);
 const controSpeed = ref(5);
 const controSpeedMax = ref(10);
 const lastPtzCommand = ref('up');
+
+// 预置点
+const presetList = ref([]);
+const selectedPresetIndex = ref(null);
+const newPresetIndex = ref(1);
+const newPresetName = ref('');
+const presetDialogVisible = ref(false);
+const presetFormRef = ref();
+const sharedIframe = ref(null);
+
+// 预置点表单数据
+const presetForm = reactive({
+  index: 1,
+  name: ''
+});
+
+// 预置点表单校验规则
+const presetRules = {
+  index: [
+    { required: true, message: '预置点编号不能为空', trigger: 'blur' }
+  ],
+  name: [
+    { required: true, message: '预置点名称不能为空', trigger: 'blur' }
+  ]
+};
 
 onMounted(async () => {
   window.onresize = function temp() {
@@ -733,11 +811,13 @@ function play(id) {
             rtcUrl.value = res.data.rtc;
             wsUrl.value = res.data.ws_flv;
           }
+          sharedIframe.value = '<iframe src="' + window.location.origin + '/easyPlayer?url=' + encodeURIComponent(wsUrl.value) + '"></iframe>';
 
           streamInfo.value = res.data;
           quality.value = []
           defaultQuality.value = ''
-          isPtz.value = row.type === '5' || row.type === '12' // ONVIF 和 GB28181 支持云台
+          isPtz.value = row.type === '5' || row.type === '12' || row.type === '7' || row.type === '8' || row.type === '9'; // 支持云台的设备类型
+          isPresetSupported.value = row.type === '5' || row.type === '7' || row.type === '8' || row.type === '9' || row.type === '12'; // 支持预置点的设备类型
           isQuality.value = false
           isLive.value = true
           deviceRow.value = row
@@ -763,11 +843,13 @@ function play(id) {
             rtcUrl.value = res.data.rtc;
             wsUrl.value = res.data.ws_flv;
           }
+          sharedIframe.value = '<iframe src="' + window.location.origin + '/easyPlayer?url=' + encodeURIComponent(wsUrl.value) + '"></iframe>';
 
           streamInfo.value = res.data;
           quality.value = []
           defaultQuality.value = ''
-          isPtz.value = row.type === '5' || row.type === '12' // ONVIF 和 GB28181 支持云台
+          isPtz.value = row.type === '5' || row.type === '12' || row.type === '7' || row.type === '8' || row.type === '9'; // 支持云台的设备类型
+          isPresetSupported.value = row.type === '5' || row.type === '7' || row.type === '8' || row.type === '9' || row.type === '12'; // 支持预置点的设备类型
           isQuality.value = false
           isLive.value = true
           deviceRow.value = row
@@ -811,11 +893,13 @@ function play(id) {
             rtcUrl.value = res.data.rtc;
             wsUrl.value = res.data.ws_flv;
           }
+          sharedIframe.value = '<iframe src="' + window.location.origin + '/easyPlayer?url=' + encodeURIComponent(wsUrl.value) + '"></iframe>';
 
           streamInfo.value = res.data;
           quality.value = []
           defaultQuality.value = ''
-          isPtz.value = row.type === '5' || row.type === '12' // ONVIF 和 GB28181 支持云台
+          isPtz.value = row.type === '5' || row.type === '12' || row.type === '7' || row.type === '8' || row.type === '9'; // 支持云台的设备类型
+          isPresetSupported.value = row.type === '5' || row.type === '7' || row.type === '8' || row.type === '9' || row.type === '12'; // 支持预置点的设备类型
           isQuality.value = false
           isLive.value = true
           deviceRow.value = row
@@ -841,11 +925,13 @@ function play(id) {
             rtcUrl.value = res.data.rtc;
             wsUrl.value = res.data.ws_flv;
           }
+          sharedIframe.value = '<iframe src="' + window.location.origin + '/easyPlayer?url=' + encodeURIComponent(wsUrl.value) + '"></iframe>';
 
           streamInfo.value = res.data;
           quality.value = []
           defaultQuality.value = ''
-          isPtz.value = row.type === '5' || row.type === '12' // ONVIF 和 GB28181 支持云台
+          isPtz.value = row.type === '5' || row.type === '12' || row.type === '7' || row.type === '8' || row.type === '9'; // 支持云台的设备类型
+          isPresetSupported.value = row.type === '5' || row.type === '7' || row.type === '8' || row.type === '9' || row.type === '12'; // 支持预置点的设备类型
           isQuality.value = false
           isLive.value = true
           deviceRow.value = row
@@ -871,11 +957,13 @@ function play(id) {
             rtcUrl.value = res.data.rtc;
             wsUrl.value = res.data.ws_flv;
           }
+          sharedIframe.value = '<iframe src="' + window.location.origin + '/easyPlayer?url=' + encodeURIComponent(wsUrl.value) + '"></iframe>';
 
           streamInfo.value = res.data;
           quality.value = []
           defaultQuality.value = ''
-          isPtz.value = row.type === '5' || row.type === '12' // ONVIF 和 GB28181 支持云台
+          isPtz.value = row.type === '5' || row.type === '12' || row.type === '7' || row.type === '8' || row.type === '9'; // 支持云台的设备类型
+          isPresetSupported.value = row.type === '5' || row.type === '7' || row.type === '8' || row.type === '9' || row.type === '12'; // 支持预置点的设备类型
           isQuality.value = false
           isLive.value = true
           deviceRow.value = row
@@ -901,11 +989,13 @@ function play(id) {
             rtcUrl.value = res.data.rtc;
             wsUrl.value = res.data.ws_flv;
           }
+          sharedIframe.value = '<iframe src="' + window.location.origin + '/easyPlayer?url=' + encodeURIComponent(wsUrl.value) + '"></iframe>';
 
           streamInfo.value = res.data;
           quality.value = []
           defaultQuality.value = ''
-          isPtz.value = row.type === '5' || row.type === '12' // ONVIF 和 GB28181 支持云台
+          isPtz.value = true; // JT1078 支持云台
+          isPresetSupported.value = false; // JT1078 不支持预置点
           isQuality.value = false
           isLive.value = true
           deviceRow.value = row
@@ -990,6 +1080,124 @@ const handlePtz = async (data: any) => {
   }
 };
 
+// ==================== 预置点功能 ====================
+
+// 加载预置点列表
+const loadPresetList = async () => {
+  if (!isPresetSupported.value || !deviceRow.value || !deviceRow.value.id) {
+    return;
+  }
+  try {
+    const res = await getPresetList(deviceRow.value.id, deviceRow.value.channel);
+    if (res && res.data) {
+      presetList.value = res.data;
+    }
+  } catch (error) {
+    console.error('获取预置点列表失败:', error);
+    proxy.$modal.msgError('获取预置点列表失败');
+  }
+};
+
+// 预置点选择
+const handlePresetSelect = (index) => {
+  selectedPresetIndex.value = index;
+  if (index) {
+    newPresetIndex.value = index;
+    const preset = presetList.value.find(p => p.index === index);
+    if (preset) {
+      newPresetName.value = preset.name || '';
+    }
+  }
+};
+
+// 打开设置预置点对话框
+const openSetPresetDialog = () => {
+  // 如果没有选择预置点也没有输入预置点编号，默认设为 1
+  presetForm.index = newPresetIndex.value || 1;
+  presetForm.name = '';
+  // 如果选择了预置点，自动填充名称
+  if (selectedPresetIndex.value) {
+    const preset = presetList.value.find(p => p.index === selectedPresetIndex.value);
+    if (preset) {
+      presetForm.index = preset.index;
+      presetForm.name = preset.name || '';
+    }
+  }
+  presetDialogVisible.value = true;
+  // 重置表单校验
+  nextTick(() => {
+    presetFormRef.value?.resetFields();
+  });
+};
+
+// 设置预置点
+const handleSetPreset = async () => {
+  if (!deviceRow.value || !deviceRow.value.id) {
+    proxy.$modal.msgError('请先选择设备');
+    return;
+  }
+  // 校验表单
+  if (!presetFormRef.value) return;
+  await presetFormRef.value.validate(async (valid) => {
+    if (valid) {
+      try {
+        await setPreset(deviceRow.value.id, deviceRow.value.channel, presetForm.index, presetForm.name);
+        proxy.$modal.msgSuccess('设置预置点成功');
+        presetDialogVisible.value = false;
+        await loadPresetList();
+      } catch (error) {
+        console.error('设置预置点失败:', error);
+        proxy.$modal.msgError('设置预置点失败');
+      }
+    }
+  });
+};
+
+// 调用预置点
+const handleGotoPreset = async () => {
+  if (!deviceRow.value || !deviceRow.value.id) {
+    proxy.$modal.msgError('请先选择设备');
+    return;
+  }
+  const presetIndex = selectedPresetIndex.value || newPresetIndex.value;
+  if (!presetIndex) {
+    proxy.$modal.msgWarning('请先选择或输入预置点');
+    return;
+  }
+  try {
+    await gotoPreset(deviceRow.value.id, deviceRow.value.channel, presetIndex);
+    proxy.$modal.msgSuccess('调用预置点成功');
+  } catch (error) {
+    console.error('调用预置点失败:', error);
+    proxy.$modal.msgError('调用预置点失败');
+  }
+};
+
+// 删除预置点
+const handleDeletePreset = async () => {
+  if (!deviceRow.value || !deviceRow.value.id) {
+    proxy.$modal.msgError('请先选择设备');
+    return;
+  }
+  const presetIndex = selectedPresetIndex.value || newPresetIndex.value;
+  if (!presetIndex) {
+    proxy.$modal.msgWarning('请先选择或输入预置点');
+    return;
+  }
+  try {
+    await proxy.$modal.confirm('确定要删除该预置点吗？');
+    await deletePreset(deviceRow.value.id, deviceRow.value.channel, presetIndex);
+    proxy.$modal.msgSuccess('删除预置点成功');
+    selectedPresetIndex.value = null;
+    await loadPresetList();
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('删除预置点失败:', error);
+      proxy.$modal.msgError('删除预置点失败');
+    }
+  }
+};
+
 /**
  * 复制内容到粘贴板
  *
@@ -1033,6 +1241,15 @@ window.handlePosition = (id) => {
     }
   })
 }
+
+// 监听播放对话框打开，加载预置点列表
+watch(easyPlayerOpen, (newVal) => {
+  if (newVal && isPtz.value && isPresetSupported.value) {
+    setTimeout(() => {
+      loadPresetList();
+    }, 500);
+  }
+})
 
 onBeforeUnmount(() => {
   // 可选：清理地图实例（天地图官方未提供 destroy，但可清空容器）
@@ -1227,5 +1444,29 @@ onBeforeUnmount(() => {
   padding: 0 32px;
   height: 48px;
   line-height: 64px;
+}
+
+/* 预置点面板样式 */
+.preset-panel {
+  padding: 16px;
+}
+
+.preset-select {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.preset-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.preset-buttons .el-button {
+  flex: 1;
+}
+
+.refresh-btn {
+  padding: 8px 0;
 }
 </style>

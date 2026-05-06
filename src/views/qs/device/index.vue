@@ -697,6 +697,18 @@
           </el-row>
 
           <el-row :gutter="10" style="margin-top: 10px">
+            <el-col :span="3"><span style="width: 80px; line-height: 40px; text-align: right;">iframe：</span></el-col>
+            <el-col :span="21">
+              <el-input v-model="sharedIframe" :disabled="true">
+                <template #prepend>iframe：</template>
+                <template #append>
+                  <el-button type="primary" :icon="DocumentCopy" @click="handleCopy(sharedIframe)"/>
+                </template>
+              </el-input>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="10" style="margin-top: 10px">
             <el-col :span="3"><span style="width: 80px; line-height: 40px; text-align: right;">资源地址：</span></el-col>
             <el-col :span="21">
               <el-input v-model="rtcUrl" :disabled="true">
@@ -984,6 +996,7 @@ const isPtz = ref(true);
 const isPresetSupported = ref(true); // 是否支持预置点功能
 const isQuality = ref(true);
 const isLive = ref(true);
+const sharedIframe = ref(null);
 
 // 云台
 const controSpeed = ref(5);
@@ -1612,6 +1625,8 @@ const handlePlay = (row: QsDevice) => {
           wsUrl.value = res.data.ws_flv;
         }
 
+        sharedIframe.value = '<iframe src="' + window.location.origin + '/easyPlayer?url=' + encodeURIComponent(wsUrl.value) + '"></iframe>'
+
         streamInfo.value = res.data;
         quality.value = []
         defaultQuality.value = ''
@@ -1643,6 +1658,8 @@ const handlePlay = (row: QsDevice) => {
           rtcUrl.value = res.data.rtc;
           wsUrl.value = res.data.ws_flv;
         }
+
+        sharedIframe.value = '<iframe src="' + window.location.origin + '/easyPlayer?url=' + encodeURIComponent(wsUrl.value) + '"></iframe>'
 
         streamInfo.value = res.data;
         quality.value = []
@@ -1702,6 +1719,8 @@ const handlePlay = (row: QsDevice) => {
           wsUrl.value = res.data.ws_flv;
         }
 
+        sharedIframe.value = '<iframe src="' + window.location.origin + '/easyPlayer?url=' + encodeURIComponent(wsUrl.value) + '"></iframe>'
+
         streamInfo.value = res.data;
         quality.value = []
         defaultQuality.value = ''
@@ -1733,6 +1752,8 @@ const handlePlay = (row: QsDevice) => {
           rtcUrl.value = res.data.rtc;
           wsUrl.value = res.data.ws_flv;
         }
+
+        sharedIframe.value = '<iframe src="' + window.location.origin + '/easyPlayer?url=' + encodeURIComponent(wsUrl.value) + '"></iframe>'
 
         streamInfo.value = res.data;
         quality.value = []
@@ -1770,6 +1791,8 @@ const handlePlay = (row: QsDevice) => {
           wsUrl.value = res.data.ws_flv;
         }
 
+        sharedIframe.value = '<iframe src="' + window.location.origin + '/easyPlayer?url=' + encodeURIComponent(wsUrl.value) + '"></iframe>'
+
         streamInfo.value = res.data;
         quality.value = []
         defaultQuality.value = ''
@@ -1806,6 +1829,8 @@ const handlePlay = (row: QsDevice) => {
           rtcUrl.value = res.data.rtc;
           wsUrl.value = res.data.ws_flv;
         }
+
+        sharedIframe.value = '<iframe src="' + window.location.origin + '/easyPlayer?url=' + encodeURIComponent(wsUrl.value) + '"></iframe>'
 
         streamInfo.value = res.data;
         quality.value = []

@@ -10,8 +10,10 @@
         <el-icon class="is-loading"><Loading /></el-icon> 加载中...
       </div>
       <div v-else-if="noticeList.length === 0" class="notice-empty">
-        <el-icon style="font-size:24px;display:block;margin-bottom:6px;"><Postcard /></el-icon>
-        暂无公告
+        <div class="notice-empty-content">
+          <el-icon class="notice-empty-icon"><Postcard /></el-icon>
+          <span class="notice-empty-text">暂无公告</span>
+        </div>
       </div>
       <div v-else>
         <div v-for="item in noticeList" :key="item.noticeId" class="notice-item" :class="{ 'is-read': item.isRead }" @click="previewNotice(item)">
@@ -233,6 +235,23 @@ function markAllRead(): void {
   color: var(--el-text-color-placeholder, #bbb);
   font-size: 13px;
   line-height: 1.8;
+}
+
+.notice-popover .notice-empty-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.notice-popover .notice-empty-icon {
+  font-size: 24px;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.notice-popover .notice-empty-text {
+  display: block;
 }
 
 .notice-popover .notice-item {

@@ -89,7 +89,12 @@ export const constantRoutes = [
         meta: { title: '个人中心', icon: 'user' }
       }
     ]
-  }
+  },
+  {
+    path: '/easyPlayer',
+    hidden: true,
+    component: () => import('@/views/components/easyPlayer.vue')
+  },
 ]
 
 // 动态路由，基于用户权限动态去加载
