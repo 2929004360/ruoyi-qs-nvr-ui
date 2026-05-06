@@ -83,10 +83,24 @@
         >删除
         </el-button>
       </el-col>
+      <el-col :span="2" class="view-switch">
+        <el-radio-group v-model="viewMode" size="small">
+          <el-tooltip content="列表视图" placement="bottom" :show-after="500">
+            <el-radio-button value="list">
+              <el-icon><List /></el-icon>
+            </el-radio-button>
+          </el-tooltip>
+          <el-tooltip content="卡片视图" placement="bottom" :show-after="500">
+            <el-radio-button value="card">
+              <el-icon><Grid /></el-icon>
+            </el-radio-button>
+          </el-tooltip>
+        </el-radio-group>
+      </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="deviceList" @selection-change="handleSelectionChange" border>
+    <el-table v-if="viewMode === 'list'" v-loading="loading" :data="deviceList" @selection-change="handleSelectionChange" border>
       <el-table-column type="selection" width="55" align="center" fixed/>
       <el-table-column label="编号" align="center" prop="id" width="60" fixed/>
       <el-table-column label="设备名称" align="center" prop="deviceName" fixed/>
@@ -168,6 +182,126 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <!-- 卡片视图 -->
+    <div v-else class="card-view" v-loading="loading">
+      <el-row :gutter="16">
+        <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6" v-for="item in deviceList" :key="item.id">
+          <div class="device-card" :class="{ 'is-selected': item.checked, 'is-online': item.deviceStatus === 'ON' }">
+            <!-- 媒体区 -->
+            <div class="card-media">
+              <div class="media-inner">
+                <image-preview v-if="item.snap" :src="item.snap" :width="'100%'" :height="'100%'" />
+                <div v-else class="snapshot-placeholder">
+                  <el-icon><Picture /></el-icon>
+                  <span>暂无截图</span>
+                </div>
+              </div>
+              
+              <!-- 左上角复选框 -->
+              <el-checkbox v-model="item.checked" @change="handleCardSelection" class="card-checkbox" />
+              
+              <!-- 底部玻璃信息条 -->
+              <div class="media-glass-bar">
+                <h3 class="bar-device-name" :title="item.deviceName">{{ item.deviceName }}</h3>
+                <div class="status-indicator" :class="item.deviceStatus === 'ON' ? 'online' : 'offline'">
+                  <span class="status-dot" :class="item.deviceStatus === 'ON' ? 'pulse' : 'breathe'"></span>
+                  <span class="status-text">{{ item.deviceStatus === 'ON' ? '在线' : '离线' }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 信息区 -->
+            <div class="card-info">
+              <div class="info-tags">
+                <span class="info-tag">
+                  <span class="tag-label">ID</span>
+                  <span class="tag-val">{{ item.id }}</span>
+                </span>
+                <span class="info-tag">
+                  <span class="tag-label">IP</span>
+                  <span class="tag-val">{{ item.ipAddress || '-' }}</span>
+                </span>
+                <dict-tag :options="qs_live_stream_type" :value="item.type" size="small" class="type-tag" />
+              </div>
+
+              <div class="info-channel">
+                <span class="channel-label">通道</span>
+                <span class="channel-val">{{ item.channel || item.gbChannelId || '-' }}</span>
+              </div>
+
+              <div class="info-footer">
+                <el-switch
+                  v-model="item.status"
+                  active-value="ENABLE"
+                  inactive-value="DEACTIVATE"
+                  @change="handleStatusChange(item)"
+                  size="small"
+                />
+                <span class="remark" v-if="item.remark" :title="item.remark">{{ item.remark }}</span>
+              </div>
+            </div>
+
+            <!-- 操作栏 -->
+            <div class="card-toolbar">
+              <el-button
+                type="primary"
+                size="small"
+                icon="VideoPlay"
+                @click="handlePlay(item)"
+                :loading="item.loading"
+                :disabled="item.deviceStatus !== 'ON'"
+                class="btn-play"
+              >
+                播放
+              </el-button>
+              <div class="toolbar-actions">
+                <el-tooltip content="停止" v-if="item.streamStatus === '1' && item.type !== '13'">
+                  <el-button
+                    type="danger"
+                    text
+                    bg
+                    size="small"
+                    icon="SwitchButton"
+                    @click="handleStopPlay(item)"
+                  />
+                </el-tooltip>
+                <el-tooltip content="接入地址" v-if="item.type === '13'">
+                  <el-button
+                    type="success"
+                    text
+                    bg
+                    size="small"
+                    icon="Position"
+                    @click="handleAccessAddress(item)"
+                  />
+                </el-tooltip>
+                <el-tooltip content="编辑">
+                  <el-button
+                    type="primary"
+                    text
+                    bg
+                    size="small"
+                    icon="Edit"
+                    @click="handleUpdate(item)"
+                  />
+                </el-tooltip>
+                <el-tooltip content="删除">
+                  <el-button
+                    type="danger"
+                    text
+                    bg
+                    size="small"
+                    icon="Delete"
+                    @click="handleDelete(item)"
+                  />
+                </el-tooltip>
+              </div>
+            </div>
+          </div>
+        </el-col>
+      </el-row>
+    </div>
 
     <pagination
         v-show="total>0"
@@ -903,7 +1037,7 @@
 </template>
 
 <script setup lang="ts" name="Device">
-import {onUnmounted, watch, nextTick, reactive, ref} from "vue";
+import {onUnmounted, watch, nextTick, reactive, ref, getCurrentInstance, toRefs} from "vue";
 import useClipboard from "vue-clipboard3";
 import EasyPlayer from "@/components/EasyPlayer";
 import type {DeviceQueryParams, QsDevice} from "@/types/api/qs/device"
@@ -939,7 +1073,7 @@ import {
   startGb28181Play, stopGb28181Play,
   startJt1078Play, stopJt1078Play
 } from "@/api/qs/zlm";
-import {DocumentCopy, InfoFilled, Refresh, Sunny, Moon, SwitchButton, CircleClose, Position, Plus, Delete, WindPower} from '@element-plus/icons-vue'
+import {DocumentCopy, InfoFilled, Refresh, Sunny, Moon, SwitchButton, CircleClose, Position, Plus, Delete, WindPower, List, Grid, CircleCheck, Picture} from '@element-plus/icons-vue'
 import StreamDropdown from "@/components/Channel/streamDropdown.vue";
 import MediaInfo from "@/components/Channel/mediaInfo.vue";
 import SelectMapPosition from '@/components/SelectMapPosition';
@@ -965,6 +1099,7 @@ const {
 } = proxy.useDict('qs_status', 'qs_live_stream_type', 'qs_stream_type', 'qs_protocol', 'qs_device_status', 'qs_online_type', 'qs_onvif_auth')
 
 const deviceList = ref<QsDevice[]>([])
+const viewMode = ref<string>('card') // 'list' 或 'card'
 const open = ref<boolean>(false)
 const loading = ref<boolean>(true)
 const showSearch = ref<boolean>(true)
@@ -1085,7 +1220,11 @@ function getList() {
   loading.value = true
   queryParams.value.params = {}
   listDevice(queryParams.value).then(response => {
-    deviceList.value = response.rows
+    // 为每个设备添加 checked 属性用于卡片视图的选择
+    deviceList.value = response.rows.map((item: any) => ({
+      ...item,
+      checked: ids.value.includes(item.id)
+    }))
     total.value = response.total
     loading.value = false
   })
@@ -1155,6 +1294,14 @@ function handleSelectionChange(selection: QsDevice[]) {
   ids.value = selection.map(item => item.id)
   single.value = selection.length != 1
   multiple.value = !selection.length
+}
+
+// 卡片视图多选框选中处理
+function handleCardSelection() {
+  const selectedItems = deviceList.value.filter(item => item.checked)
+  ids.value = selectedItems.map(item => item.id!)
+  single.value = selectedItems.length != 1
+  multiple.value = !selectedItems.length
 }
 
 /** 新增按钮操作 */
@@ -2582,6 +2729,484 @@ watch(easyPlayerOpen, (newVal) => {
 .control-btn-on,
 .control-btn-off {
   width: 100%;
+}
+
+/* 视图切换样式 */
+.view-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.view-switch :deep(.el-radio-group) {
+  background: var(--el-fill-color-lighter);
+  border-radius: 6px;
+  padding: 2px;
+  box-shadow: none;
+  border: none;
+  display: flex;
+}
+
+.view-switch :deep(.el-radio-button) {
+  margin: 0;
+}
+
+.view-switch :deep(.el-radio-button__inner) {
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: transparent;
+  color: var(--el-text-color-secondary);
+  font-weight: 500;
+  position: relative;
+}
+
+.view-switch :deep(.el-radio-button__inner:hover) {
+  color: var(--el-color-primary);
+  background: rgba(64, 158, 255, 0.08);
+  transform: translateY(-1px);
+}
+
+.view-switch :deep(.el-radio-button__orig-radio:checked + .el-radio-button__inner) {
+  background: var(--el-bg-color);
+  color: var(--el-color-primary);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+.view-switch :deep(.el-icon) {
+  font-size: 16px;
+  vertical-align: middle;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.view-switch :deep(.el-radio-button__inner:hover .el-icon) {
+  transform: scale(1.1);
+}
+
+.view-switch :deep(.el-radio-button__orig-radio:checked + .el-radio-button__inner .el-icon) {
+  transform: scale(1.15);
+}
+
+/* 卡片视图样式 */
+.card-view {
+  padding: 8px 0;
+}
+
+.device-card {
+  position: relative;
+  margin-bottom: 16px;
+  background: var(--el-bg-color);
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: cardFadeIn 0.5s ease-out forwards;
+  opacity: 0;
+  transform: translateY(16px);
+  box-shadow: 
+    0 1px 2px rgba(0,0,0,0.04),
+    0 4px 8px rgba(0,0,0,0.04),
+    0 8px 16px rgba(0,0,0,0.02);
+}
+
+.device-card:nth-child(1) { animation-delay: 0.04s; }
+.device-card:nth-child(2) { animation-delay: 0.08s; }
+.device-card:nth-child(3) { animation-delay: 0.12s; }
+.device-card:nth-child(4) { animation-delay: 0.16s; }
+.device-card:nth-child(5) { animation-delay: 0.20s; }
+.device-card:nth-child(6) { animation-delay: 0.24s; }
+.device-card:nth-child(7) { animation-delay: 0.28s; }
+.device-card:nth-child(8) { animation-delay: 0.32s; }
+
+@keyframes cardFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.device-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 
+    0 4px 8px rgba(0,0,0,0.05),
+    0 12px 24px rgba(0,0,0,0.06),
+    0 24px 48px rgba(0,0,0,0.04);
+  border-color: rgba(64, 158, 255, 0.25);
+}
+
+.device-card.is-selected {
+  border-color: rgba(64, 158, 255, 0.5);
+  box-shadow: 
+    0 0 0 3px rgba(64, 158, 255, 0.1),
+    0 8px 24px -4px rgba(64, 158, 255, 0.2),
+    0 4px 12px rgba(64, 158, 255, 0.1);
+}
+
+/* 媒体区 */
+.card-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: linear-gradient(135deg, var(--el-fill-color-lighter) 0%, var(--el-fill-color) 100%);
+  overflow: hidden;
+}
+
+.media-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 让 image-preview / el-image 占满媒体区 */
+.media-inner > * {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* 覆盖 ImagePreview 组件内部的圆角和阴影 */
+.media-inner :deep(.el-image) {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* 接管图片缩放动画 */
+.media-inner :deep(.el-image__inner) {
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.media-inner :deep(.el-image__inner:hover) {
+  transform: none !important;
+}
+
+.device-card:hover .media-inner :deep(.el-image__inner) {
+  transform: scale(1.08) !important;
+}
+
+.snapshot-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--el-text-color-placeholder);
+  gap: 6px;
+}
+
+.snapshot-placeholder .el-icon {
+  font-size: 40px;
+  opacity: 0.4;
+}
+
+.snapshot-placeholder span {
+  font-size: 12px;
+}
+
+/* 底部玻璃信息条 */
+.media-glass-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  z-index: 3;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.65) 0%,
+    rgba(0, 0, 0, 0.4) 55%,
+    transparent 100%
+  );
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+.card-checkbox {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+}
+
+.card-checkbox :deep(.el-checkbox__inner) {
+  border-radius: 6px;
+  width: 18px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+}
+
+.card-checkbox :deep(.el-checkbox__inner:hover) {
+  background: rgba(255, 255, 255, 0.4);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.card-checkbox :deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
+  background-color: var(--el-color-primary);
+  border-color: var(--el-color-primary);
+}
+
+.card-checkbox :deep(.el-checkbox__inner::after) {
+  left: 8px;
+  top: 8px;
+  border-color: #fff;
+}
+
+.bar-device-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  min-width: 0;
+}
+
+/* 状态指示器 - 高对比发光版 */
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+  letter-spacing: 0.5px;
+}
+
+.status-indicator.online {
+  background: rgba(103, 194, 58, 0.92);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  animation: statusGlowOnline 3s ease-in-out infinite;
+}
+
+.status-indicator.offline {
+  background: rgba(245, 108, 108, 0.92);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  animation: statusGlowOffline 4s ease-in-out infinite;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.status-dot.pulse {
+  animation: dotPulse 2s ease-in-out infinite;
+}
+
+.status-dot.breathe {
+  animation: dotBreathe 3s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 4px #fff, 0 0 10px currentColor;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    box-shadow: 0 0 10px #fff, 0 0 20px currentColor;
+    transform: scale(1.4);
+  }
+}
+
+@keyframes dotBreathe {
+  0%, 100% {
+    opacity: 0.5;
+    box-shadow: 0 0 2px currentColor;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.9;
+    box-shadow: 0 0 8px currentColor;
+    transform: scale(1.25);
+  }
+}
+
+@keyframes statusGlowOnline {
+  0%, 100% {
+    box-shadow: 
+      0 0 0 1px rgba(103, 194, 58, 0.3),
+      0 4px 14px rgba(103, 194, 58, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 0 0 1px rgba(103, 194, 58, 0.3),
+      0 4px 22px rgba(103, 194, 58, 0.65),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+}
+
+@keyframes statusGlowOffline {
+  0%, 100% {
+    box-shadow: 
+      0 0 0 1px rgba(245, 108, 108, 0.3),
+      0 4px 14px rgba(245, 108, 108, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    box-shadow: 
+      0 0 0 1px rgba(245, 108, 108, 0.3),
+      0 4px 22px rgba(245, 108, 108, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* 信息区 */
+.card-info {
+  padding: 14px 16px 10px;
+}
+
+.info-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.info-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: var(--el-fill-color-lighter);
+  border: 1px solid var(--el-border-color-lighter);
+  font-size: 11.5px;
+  line-height: 1.5;
+  backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
+}
+
+.info-tag:hover {
+  border-color: var(--el-color-primary-light-5);
+  background: var(--el-color-primary-light-9);
+}
+
+.type-tag {
+  margin-left: auto;
+}
+
+.tag-label {
+  color: var(--el-text-color-secondary);
+  font-weight: 500;
+}
+
+.tag-val {
+  color: var(--el-text-color-primary);
+  font-weight: 500;
+}
+
+/* 通道单独一行 */
+.info-channel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  background: var(--el-fill-color-lighter);
+  border: 1px solid var(--el-border-color-lighter);
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.info-channel:hover {
+  border-color: var(--el-color-primary-light-5);
+  background: var(--el-color-primary-light-9);
+}
+
+.channel-label {
+  color: var(--el-text-color-secondary);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.channel-val {
+  color: var(--el-text-color-primary);
+  font-weight: 500;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.info-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.remark {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  text-align: right;
+}
+
+/* 操作栏 */
+.card-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px 14px;
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+
+.btn-play {
+  flex-shrink: 0;
+  min-width: 72px;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.25);
+  transition: all 0.3s ease;
+}
+
+.btn-play:not(:disabled):hover {
+  box-shadow: 0 4px 14px rgba(64, 158, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolbar-actions .el-button {
+  padding: 7px 10px;
+  height: auto;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.toolbar-actions .el-button:hover {
+  transform: scale(1.08);
 }
 </style>
 

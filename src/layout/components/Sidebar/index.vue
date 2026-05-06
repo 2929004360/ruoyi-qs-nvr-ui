@@ -72,20 +72,40 @@ const activeMenu = computed(() => {
 .sidebar-container {
   --sidebar-menu-text: v-bind(getMenuTextColor);
   --sidebar-menu-bg: v-bind(getMenuBackground);
+  --menu-hover-bg: rgba(64, 158, 255, 0.08);
+  --menu-active-bg: rgba(64, 158, 255, 0.18);
 
   background-color: var(--sidebar-menu-bg);
+  backdrop-filter: blur(10px);
+
+  &.theme-dark {
+    --menu-hover-bg: rgba(64, 158, 255, 0.15);
+    --menu-active-bg: rgba(64, 158, 255, 0.25);
+  }
+
+  &.theme-light {
+    --menu-hover-bg: rgba(64, 158, 255, 0.08);
+    --menu-active-bg: rgba(64, 158, 255, 0.12);
+  }
 
   .scrollbar-wrapper {
     background-color: var(--sidebar-menu-bg);
   }
 
   .el-scrollbar__bar.is-vertical {
-    width: 3px;
+    width: 4px;
 
     .el-scrollbar__thumb {
       background: var(--el-text-color-placeholder);
-      border-radius: 3px;
-      opacity: 0.25;
+      border-radius: 4px;
+      opacity: 0.2;
+      transition: opacity 0.3s ease;
+    }
+
+    &:hover {
+      .el-scrollbar__thumb {
+        opacity: 0.5;
+      }
     }
   }
 
@@ -93,34 +113,141 @@ const activeMenu = computed(() => {
     border: none;
     height: 100%;
     width: 100% !important;
-    padding: 6px 0;
+    padding: 8px 0;
 
     .el-menu-item, .el-sub-menu__title {
-      border-radius: 6px;
-      margin: 2px 10px;
-      width: calc(100% - 20px) !important;
-      transition: all 0.2s ease;
+      border-radius: 10px;
+      margin: 4px 12px;
+      width: calc(100% - 24px) !important;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      height: 46px !important;
+      line-height: 46px !important;
+      position: relative;
+      overflow: hidden;
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at center, rgba(64, 158, 255, 0.15) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+      }
+
+      &:hover::after {
+        opacity: 1;
+        animation: ripple 0.6s ease-out;
+      }
     }
 
     .el-menu-item {
       color: var(--sidebar-menu-text);
       font-weight: 450;
+      overflow: visible;
+
+      &::before {
+        content: '';
+        position: absolute;
+        left: -12px;
+        top: 50%;
+        transform: translateY(-50%) scaleX(0);
+        width: 4px;
+        height: 22px;
+        background: linear-gradient(180deg, var(--el-color-primary), var(--el-color-primary-light-3));
+        border-radius: 0 4px 4px 0;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 0 10px rgba(64, 158, 255, 0.3);
+      }
 
       &.is-active {
         color: var(--el-color-primary);
-        background-color: rgba(64, 158, 255, 0.1) !important;
-        font-weight: 500;
+        background-color: var(--menu-active-bg) !important;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(64, 158, 255, 0.15);
+        transform: translateX(2px);
+
+        &::before {
+          transform: translateY(-50%) scaleX(1);
+        }
+
+        &::after {
+          opacity: 1;
+        }
+      }
+
+      &:hover:not(.is-active) {
+        background-color: var(--menu-hover-bg) !important;
+        transform: translateX(3px);
       }
     }
 
     .el-sub-menu__title {
       color: var(--sidebar-menu-text);
+      font-weight: 450;
+
+      &:hover {
+        background-color: var(--menu-hover-bg) !important;
+        transform: translateX(3px);
+      }
+
+      .el-sub-menu__icon-arrow {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+    }
+
+    .el-sub-menu.is-active > .el-sub-menu__title {
+      color: var(--el-color-primary);
+      font-weight: 550;
+
+      .el-sub-menu__icon-arrow {
+        transform: rotate(180deg);
+      }
     }
 
     .nest-menu .el-menu-item {
-      margin: 2px 10px 2px 22px;
-      width: calc(100% - 32px) !important;
+      margin: 4px 12px 4px 30px;
+      width: calc(100% - 42px) !important;
+      font-size: 13.5px;
+
+      &::before {
+        left: -30px;
+        height: 18px;
+        width: 3px;
+      }
     }
+
+    .nest-menu .el-sub-menu__title {
+      margin: 4px 12px 4px 30px;
+      width: calc(100% - 42px) !important;
+      font-size: 13.5px;
+    }
+
+    .el-sub-menu .el-menu {
+      padding: 6px 0;
+    }
+  }
+}
+
+:deep(.el-menu--collapse) {
+  .el-menu-item,
+  .el-sub-menu__title {
+    margin: 4px 8px !important;
+    width: calc(100% - 16px) !important;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
   }
 }
 </style>

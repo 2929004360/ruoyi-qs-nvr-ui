@@ -34,6 +34,7 @@
               <div class="date-panel">
                 <el-button :icon="ArrowLeft" @click="prevDay" circle class="date-nav-btn"/>
                 <el-date-picker
+                    :clearable="false"
                     v-model="selectedDate"
                     type="date"
                     placeholder="选择日期"
@@ -68,7 +69,6 @@
                       </div>
                       <div class="record-info">
                         <el-tag type="success" size="small" effect="light" class="duration-tag">
-                          <el-icon><Clock /></el-icon>
                           {{ formatTime(record.timeLen) }}
                         </el-tag>
                       </div>
@@ -328,7 +328,7 @@ const timer = ref(null);
 const playSpeed = ref(1);
 const isFullScreen = ref(false);
 const playSpeedRange = ref([1, 2, 4]);
-const jessibucaHeight = ref("500px");
+const jessibucaHeight = ref<string>(document.documentElement.clientHeight - 260 + "px;");
 const isPaused = ref(false);
 
 
@@ -465,7 +465,8 @@ const handlePlay = async (row: ZlmCloudRecord) => {
       playerTime.value = 0
       playSpeed.value = 1
       isFullScreen.value = false
-      jessibucaHeight.value = "500px"
+
+      jessibucaHeight.value = document.documentElement.clientHeight - 260 + "px;"
       step.value = 100 / (cloudRecordRow.value.timeLen / 1000);
       timer.value = setInterval(() => {
         if (isPaused.value) return;
@@ -565,7 +566,7 @@ const fullScreen = () => {
   if (isFullScreen.value) {
     screenfull.exit()
     isFullScreen.value = false
-    jessibucaHeight.value = "500px"
+    jessibucaHeight.value = document.documentElement.clientHeight - 260 + "px;"
     return
   }
   screenfull.request(document.getElementById('recordPlayer'))
@@ -573,7 +574,7 @@ const fullScreen = () => {
     isFullScreen.value = screenfull.isFullscreen
   })
   isFullScreen.value = true
-  jessibucaHeight.value = "95%"
+  jessibucaHeight.value = "100%"
 }
 
 /**
@@ -818,7 +819,7 @@ const updateFullscreenState = () => {
   if (!isFullScreen.value) {
     screenfull.exit()
     isFullScreen.value = false
-    jessibucaHeight.value = "400px"
+    jessibucaHeight.value = document.documentElement.clientHeight - 260 + "px;"
   }
 };
 
@@ -841,7 +842,6 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 .app-container {
   padding: 12px;
-  height: calc(100vh - 36px);
   box-sizing: border-box;
 }
 
@@ -937,37 +937,52 @@ html.dark .record-splitpanes {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 10px;
-  gap: 6px;
-  background: var(--el-bg-color-page);
+  padding: 14px 12px;
+  gap: 10px;
+  background: linear-gradient(135deg, var(--el-bg-color-page) 0%, var(--el-fill-color-lighter) 100%);
   border-bottom: 1px solid var(--el-border-color-lighter);
   flex-shrink: 0;
 
   .date-nav-btn {
-    transition: all 0.15s ease;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    background: var(--el-bg-color);
+    border: 1px solid var(--el-border-color-lighter);
 
     &:hover {
-      background: var(--el-color-primary-light-9);
-      color: var(--el-color-primary);
+      background: var(--el-color-primary);
+      color: #fff;
+      border-color: var(--el-color-primary);
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
     }
   }
 
   .today-btn {
-    border-radius: 6px;
-    font-weight: 400;
-    transition: all 0.15s ease;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    padding: 0 14px;
+    height: 32px;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(64, 158, 255, 0.25);
+    }
   }
 }
 
 :deep(.record-date-picker) {
-  width: 130px;
+  width: 150px;
 
   .el-input__wrapper {
-    border-radius: 6px;
+    border-radius: 8px;
     box-shadow: 0 0 0 1px var(--el-border-color) inset;
+    background: var(--el-bg-color);
+    transition: all 0.3s ease;
+    height: 32px;
 
     &:hover, &.is-focus {
-      box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+      box-shadow: 0 0 0 2px var(--el-color-primary) inset;
     }
   }
 }
@@ -975,13 +990,31 @@ html.dark .record-splitpanes {
 /* 录像列表 */
 .record-list {
   flex: 1;
-  padding: 8px;
+  padding: 12px;
   overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--el-border-color);
+    border-radius: 3px;
+    transition: background 0.3s ease;
+
+    &:hover {
+      background: var(--el-text-color-placeholder);
+    }
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
   .record-items-wrap {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 8px;
   }
 
   .list-empty {
@@ -989,66 +1022,155 @@ html.dark .record-splitpanes {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 40px 16px;
+    padding: 60px 16px;
     color: var(--el-text-color-secondary);
     font-size: 13px;
     text-align: center;
 
     .empty-animation {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: var(--el-fill-color-light);
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, var(--el-fill-color-light) 0%, var(--el-fill-color-lighter) 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
       color: var(--el-text-color-placeholder);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      animation: float 3s ease-in-out infinite;
     }
 
     span {
-      font-weight: 500;
+      font-weight: 600;
       color: var(--el-text-color-primary);
-      margin-bottom: 4px;
+      margin-bottom: 6px;
+      font-size: 14px;
     }
 
     p {
       margin: 0;
       font-size: 12px;
       color: var(--el-text-color-placeholder);
+      max-width: 200px;
+      line-height: 1.6;
     }
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
   }
 }
 
 .record-item {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 8px;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
   cursor: pointer;
-  transition: all 0.15s ease;
-  border-radius: 6px;
-  border: 1px solid transparent;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border-radius: 12px;
+  border: 1px solid var(--el-border-color-lighter);
+  background: var(--el-bg-color);
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  animation: slideIn 0.4s ease forwards;
 
-  &:hover {
-    background: var(--el-fill-color-light);
-    border-color: var(--el-border-color-lighter);
-
-    .record-dot {
-      background: var(--el-color-primary);
-    }
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, transparent 0%, rgba(64, 158, 255, 0.03) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
   }
 
-  &.active {
-    background: var(--el-color-primary-light-9);
-    border-color: var(--el-color-primary-light-7);
+  &:hover {
+    background: var(--el-bg-color-page);
+    border-color: var(--el-color-primary-light-5);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
 
-    .record-dot {
-      background: var(--el-color-primary);
+    &::after {
+      opacity: 1;
+    }
+
+    .record-indicator {
+      .record-dot {
+        background: var(--el-color-primary);
+        transform: scale(1.3);
+        box-shadow: 0 0 0 6px rgba(64, 158, 255, 0.12);
+      }
+
+      .record-line {
+        background: linear-gradient(to bottom, var(--el-color-primary-light-5), transparent);
+      }
     }
 
     .record-time {
       color: var(--el-color-primary);
+    }
+
+    .duration-tag {
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(103, 194, 58, 0.25);
+    }
+  }
+
+  &.active {
+    background: linear-gradient(135deg, var(--el-color-primary-light-9) 0%, var(--el-color-primary-light-8) 100%);
+    border-color: var(--el-color-primary-light-4);
+    box-shadow: 0 8px 28px rgba(64, 158, 255, 0.18);
+    transform: translateY(-2px);
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: linear-gradient(to bottom, var(--el-color-primary), var(--el-color-primary-light-3));
+      border-radius: 0 4px 4px 0;
+    }
+
+    .record-indicator {
+      .record-dot {
+        background: var(--el-color-primary);
+        transform: scale(1.5);
+        box-shadow: 0 0 0 8px rgba(64, 158, 255, 0.2);
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      .record-line {
+        background: linear-gradient(to bottom, var(--el-color-primary-light-4), transparent);
+      }
+    }
+
+    .record-time {
+      color: var(--el-color-primary);
+      font-weight: 600;
+
+      .el-icon {
+        color: var(--el-color-primary);
+      }
+    }
+
+    .duration-tag {
+      background: var(--el-color-primary);
+      color: #fff;
+      border-color: var(--el-color-primary);
+      box-shadow: 0 4px 16px rgba(64, 158, 255, 0.35);
     }
   }
 
@@ -1058,21 +1180,27 @@ html.dark .record-splitpanes {
     align-items: center;
     padding-top: 4px;
     flex-shrink: 0;
+    z-index: 1;
 
     .record-dot {
-      width: 6px;
-      height: 6px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
       background: var(--el-border-color);
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      border: 2px solid var(--el-bg-color);
+      position: relative;
+      z-index: 2;
     }
 
     .record-line {
       width: 2px;
       flex: 1;
-      min-height: 20px;
+      min-height: 28px;
       background: var(--el-border-color-lighter);
       margin-top: 4px;
       border-radius: 1px;
+      transition: background 0.3s ease;
     }
   }
 
@@ -1080,22 +1208,30 @@ html.dark .record-splitpanes {
     flex: 1;
     min-width: 0;
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    z-index: 1;
   }
 
   .record-time {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 8px;
     color: var(--el-text-color-primary);
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 500;
+    transition: color 0.3s ease;
 
     .el-icon {
-      font-size: 13px;
+      font-size: 16px;
       color: var(--el-text-color-secondary);
       flex-shrink: 0;
+      transition: color 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   }
 
@@ -1104,14 +1240,45 @@ html.dark .record-splitpanes {
     align-items: center;
 
     .duration-tag {
-      font-weight: 400;
-      border-radius: 4px;
+      font-weight: 500;
+      border-radius: 8px;
+      padding: 5px 12px;
+      height: 28px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      font-size: 13px;
 
       .el-icon {
-        margin-right: 2px;
-        font-size: 12px;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
     }
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1.5);
+    box-shadow: 0 0 0 8px rgba(64, 158, 255, 0.2);
+  }
+  50% {
+    transform: scale(1.6);
+    box-shadow: 0 0 0 12px rgba(64, 158, 255, 0.3);
   }
 }
 
@@ -1385,25 +1552,56 @@ html.dark {
   }
 
   .date-panel {
-    background: rgba(255, 255, 255, 0.02);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.03) 100%);
     border-bottom-color: var(--el-border-color-darker);
+
+    .date-nav-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
   }
 
   .record-item {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.06);
+
+    &::after {
+      background: linear-gradient(135deg, transparent 0%, rgba(64, 158, 255, 0.05) 100%);
+    }
+
     &:hover {
       background: rgba(255, 255, 255, 0.04);
-      border-color: var(--el-border-color);
+      border-color: rgba(64, 158, 255, 0.25);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+      .duration-tag {
+        box-shadow: 0 4px 16px rgba(103, 194, 58, 0.35);
+      }
     }
 
     &.active {
-      background: var(--el-color-primary-light-5);
-      border-color: var(--el-color-primary-light-3);
+      background: linear-gradient(135deg, rgba(64, 158, 255, 0.18) 0%, rgba(64, 158, 255, 0.12) 100%);
+      border-color: rgba(64, 158, 255, 0.4);
+      box-shadow: 0 8px 36px rgba(64, 158, 255, 0.25);
+
+      .duration-tag {
+        box-shadow: 0 4px 20px rgba(64, 158, 255, 0.4);
+      }
+
+      .record-indicator .record-dot {
+        border-color: rgba(30, 30, 30, 1);
+      }
+    }
+
+    .record-indicator .record-dot {
+      border-color: rgba(30, 30, 30, 1);
     }
   }
 
   .record-list .list-empty {
     .empty-animation {
-      background: rgba(255, 255, 255, 0.04);
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.03) 100%);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
     }
   }
 }

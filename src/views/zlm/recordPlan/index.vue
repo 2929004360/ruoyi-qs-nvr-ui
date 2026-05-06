@@ -51,10 +51,24 @@
         >删除
         </el-button>
       </el-col>
+      <el-col :span="2" class="view-switch">
+        <el-radio-group v-model="viewMode" size="small">
+          <el-tooltip content="列表视图" placement="bottom" :show-after="500">
+            <el-radio-button value="list">
+              <el-icon><List /></el-icon>
+            </el-radio-button>
+          </el-tooltip>
+          <el-tooltip content="卡片视图" placement="bottom" :show-after="500">
+            <el-radio-button value="card">
+              <el-icon><Grid /></el-icon>
+            </el-radio-button>
+          </el-tooltip>
+        </el-radio-group>
+      </el-col>
       <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="recordPlanList" @selection-change="handleSelectionChange" border>
+    <el-table v-if="viewMode === 'list'" v-loading="loading" :data="recordPlanList" @selection-change="handleSelectionChange" border>
       <el-table-column type="selection" width="55" align="center"/>
       <el-table-column label="编号" align="center" prop="id" width="100"/>
       <el-table-column label="计划名称" align="center" prop="name"/>
@@ -75,6 +89,64 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <div v-else class="card-view" v-loading="loading">
+      <el-row :gutter="16">
+        <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6" v-for="item in recordPlanList" :key="item.id">
+          <div class="device-card" :class="{ 'is-selected': item.checked }">
+            <!-- 头部区域 -->
+            <div class="card-header-area">
+              <el-checkbox v-model="item.checked" @change="handleCardSelection" class="card-checkbox" />
+              <div class="header-content">
+                <el-icon class="header-icon"><VideoCamera /></el-icon>
+                <h3 class="header-title" :title="item.name">{{ item.name }}</h3>
+              </div>
+              <el-tag :type="item.snap === 'ENABLE' ? 'success' : 'info'" size="small" class="header-tag">
+                {{ item.snap === 'ENABLE' ? '启用' : '停用' }}
+              </el-tag>
+            </div>
+
+            <!-- 信息区 -->
+            <div class="card-info">
+              <div class="info-tags">
+                <span class="info-tag">
+                  <span class="tag-label">ID</span>
+                  <span class="tag-val">{{ item.id }}</span>
+                </span>
+                <span class="info-tag">
+                  <span class="tag-label">设备数</span>
+                  <span class="tag-val">{{ item.channelCount || 0 }}</span>
+                </span>
+              </div>
+
+              <div class="info-channel">
+                <span class="channel-label">创建时间</span>
+                <span class="channel-val">{{ item.createTime }}</span>
+              </div>
+
+              <div class="info-footer">
+                <span class="time-range">更新于 {{ item.updateTime }}</span>
+              </div>
+            </div>
+
+            <!-- 操作栏 -->
+            <div class="card-toolbar">
+              <el-button type="primary" size="small" icon="Link" @click="handleLink(item)" class="btn-play">
+                关联
+              </el-button>
+              <div class="toolbar-actions">
+                <el-tooltip content="编辑">
+                  <el-button type="primary" text bg size="small" icon="Edit" @click="handleUpdate(item)" />
+                </el-tooltip>
+                <el-tooltip content="删除">
+                  <el-button type="danger" text bg size="small" icon="Delete" @click="handleDelete(item)" />
+                </el-tooltip>
+              </div>
+            </div>
+          </div>
+        </el-col>
+      </el-row>
+    </div>
 
     <pagination
         v-show="total>0"
@@ -121,6 +193,7 @@ import ByteWeekTimePicker from "./byteWeekTimePicker.vue";
 import AssociatedSevice from "./associatedDevice.vue";
 import {addRecordPlan, delRecordPlan, getRecordPlan, listRecordPlan, updateRecordPlan} from "@/api/qs/recordPlan"
 import {QsDevice} from "@/types/api";
+import {List, Grid, VideoCamera} from '@element-plus/icons-vue'
 
 const {proxy} = getCurrentInstance()
 
@@ -135,6 +208,7 @@ const total = ref<number>(0)
 const title = ref<string>("")
 const byteTime = ref("");
 const id = ref(null);
+const viewMode = ref<string>('card')
 
 
 const openLink = ref(false);
@@ -159,7 +233,10 @@ const {queryParams, form, rules} = toRefs(data)
 function getList() {
   loading.value = true
   listRecordPlan(queryParams.value).then(response => {
-    recordPlanList.value = response.rows
+    recordPlanList.value = response.rows.map((item: any) => ({
+      ...item,
+      checked: ids.value.includes(item.id)
+    }))
     total.value = response.total
     loading.value = false
   })
@@ -202,6 +279,14 @@ function handleSelectionChange(selection: ZlmRecordPlan[]) {
   ids.value = selection.map(item => item.id)
   single.value = selection.length != 1
   multiple.value = !selection.length
+}
+
+// 卡片视图多选框选中处理
+function handleCardSelection() {
+  const selectedItems = recordPlanList.value.filter(item => item.checked)
+  ids.value = selectedItems.map(item => item.id!)
+  single.value = selectedItems.length !== 1
+  multiple.value = !selectedItems.length
 }
 
 /** 新增按钮操作 */
@@ -357,3 +442,363 @@ const plan2Byte = (planList) => {
 
 getList()
 </script>
+
+<style lang="scss" scoped>
+.view-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.view-switch :deep(.el-radio-group) {
+  background: var(--el-fill-color-lighter);
+  border-radius: 6px;
+  padding: 2px;
+  box-shadow: none;
+  border: none;
+  display: flex;
+}
+
+.view-switch :deep(.el-radio-button) {
+  margin: 0;
+}
+
+.view-switch :deep(.el-radio-button__inner) {
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: transparent;
+  color: var(--el-text-color-secondary);
+  font-weight: 500;
+  position: relative;
+}
+
+.view-switch :deep(.el-radio-button__inner:hover) {
+  color: var(--el-color-primary);
+  background: rgba(64, 158, 255, 0.08);
+  transform: translateY(-1px);
+}
+
+.view-switch :deep(.el-radio-button__orig-radio:checked + .el-radio-button__inner) {
+  background: var(--el-bg-color);
+  color: var(--el-color-primary);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+.view-switch :deep(.el-icon) {
+  font-size: 16px;
+  vertical-align: middle;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.view-switch :deep(.el-radio-button__inner:hover .el-icon) {
+  transform: scale(1.1);
+}
+
+.view-switch :deep(.el-radio-button__orig-radio:checked + .el-radio-button__inner .el-icon) {
+  transform: scale(1.15);
+}
+
+/* 卡片视图样式 */
+.card-view {
+  padding: 8px 0;
+}
+
+.device-card {
+  position: relative;
+  margin-bottom: 16px;
+  background: var(--el-bg-color);
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: cardFadeIn 0.5s ease-out forwards;
+  opacity: 0;
+  transform: translateY(16px);
+  box-shadow: 
+    0 1px 2px rgba(0,0,0,0.04),
+    0 4px 8px rgba(0,0,0,0.04),
+    0 8px 16px rgba(0,0,0,0.02);
+}
+
+.device-card:nth-child(1) { animation-delay: 0.04s; }
+.device-card:nth-child(2) { animation-delay: 0.08s; }
+.device-card:nth-child(3) { animation-delay: 0.12s; }
+.device-card:nth-child(4) { animation-delay: 0.16s; }
+.device-card:nth-child(5) { animation-delay: 0.20s; }
+.device-card:nth-child(6) { animation-delay: 0.24s; }
+.device-card:nth-child(7) { animation-delay: 0.28s; }
+.device-card:nth-child(8) { animation-delay: 0.32s; }
+
+@keyframes cardFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.device-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 
+    0 4px 8px rgba(0,0,0,0.05),
+    0 12px 24px rgba(0,0,0,0.06),
+    0 24px 48px rgba(0,0,0,0.04);
+  border-color: rgba(64, 158, 255, 0.25);
+}
+
+.device-card.is-selected {
+  border-color: rgba(64, 158, 255, 0.5);
+  box-shadow: 
+    0 0 0 3px rgba(64, 158, 255, 0.1),
+    0 8px 24px -4px rgba(64, 158, 255, 0.2),
+    0 4px 12px rgba(64, 158, 255, 0.1);
+}
+
+/* 头部区域（替代图片区） */
+.card-header-area {
+  position: relative;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--el-color-primary-light-9) 0%, var(--el-fill-color-lighter) 100%);
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 64px;
+}
+
+.card-header-area .card-checkbox {
+  position: relative;
+  top: auto;
+  left: auto;
+  z-index: 2;
+}
+
+.card-header-area .card-checkbox :deep(.el-checkbox__inner) {
+  border-radius: 6px;
+  width: 18px;
+  height: 18px;
+  transition: all 0.2s ease;
+}
+
+.header-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.header-icon {
+  font-size: 20px;
+  color: var(--el-color-primary);
+  flex-shrink: 0;
+  animation: iconPulse 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 4px rgba(64, 158, 255, 0.3));
+}
+
+@keyframes iconPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.header-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+}
+
+.header-tag {
+  flex-shrink: 0;
+}
+
+/* 信息区 */
+.card-info {
+  padding: 14px 16px 10px;
+}
+
+.info-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.info-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: var(--el-fill-color-lighter);
+  border: 1px solid var(--el-border-color-lighter);
+  font-size: 11.5px;
+  line-height: 1.5;
+  backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
+}
+
+.info-tag:hover {
+  border-color: var(--el-color-primary-light-5);
+  background: var(--el-color-primary-light-9);
+}
+
+.type-tag {
+  margin-left: auto;
+}
+
+.tag-label {
+  color: var(--el-text-color-secondary);
+  font-weight: 500;
+}
+
+.tag-val {
+  color: var(--el-text-color-primary);
+  font-weight: 500;
+}
+
+/* 通道/节点单独一行 */
+.info-channel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  background: var(--el-fill-color-lighter);
+  border: 1px solid var(--el-border-color-lighter);
+  font-size: 12px;
+  transition: all 0.2s ease;
+}
+
+.info-channel:hover {
+  border-color: var(--el-color-primary-light-5);
+  background: var(--el-color-primary-light-9);
+}
+
+.channel-label {
+  color: var(--el-text-color-secondary);
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.channel-val {
+  color: var(--el-text-color-primary);
+  font-weight: 500;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.info-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.time-range {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  text-align: right;
+}
+
+/* 操作栏 */
+.card-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 16px 14px;
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+
+.btn-play {
+  flex-shrink: 0;
+  min-width: 72px;
+  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.25);
+  transition: all 0.3s ease;
+}
+
+.btn-play:not(:disabled):hover {
+  box-shadow: 0 4px 14px rgba(64, 158, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.toolbar-actions .el-button {
+  padding: 7px 10px;
+  height: auto;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.toolbar-actions .el-button:hover {
+  transform: scale(1.08);
+}
+
+/* 暗黑模式适配 */
+html.dark {
+  /* 卡片暗黑增强 */
+  .device-card {
+    box-shadow:
+      0 1px 2px rgba(0,0,0,0.3),
+      0 4px 8px rgba(0,0,0,0.25),
+      0 8px 16px rgba(0,0,0,0.2);
+  }
+
+  .device-card:hover {
+    box-shadow:
+      0 4px 8px rgba(0,0,0,0.35),
+      0 12px 24px rgba(0,0,0,0.3),
+      0 24px 48px rgba(0,0,0,0.2);
+    border-color: rgba(64, 158, 255, 0.35);
+  }
+
+  .device-card.is-selected {
+    border-color: rgba(64, 158, 255, 0.6);
+    box-shadow:
+      0 0 0 3px rgba(64, 158, 255, 0.15),
+      0 8px 24px -4px rgba(64, 158, 255, 0.25),
+      0 4px 12px rgba(64, 158, 255, 0.15);
+  }
+
+  .card-header-area {
+    background: linear-gradient(135deg, rgba(64, 158, 255, 0.12) 0%, var(--el-fill-color) 100%);
+  }
+
+  .info-tag,
+  .info-channel {
+    background: var(--el-fill-color);
+    border-color: var(--el-border-color);
+  }
+
+  .info-tag:hover,
+  .info-channel:hover {
+    border-color: var(--el-color-primary-light-3);
+    background: rgba(64, 158, 255, 0.08);
+  }
+
+  .card-toolbar {
+    border-color: var(--el-border-color);
+  }
+}
+</style>

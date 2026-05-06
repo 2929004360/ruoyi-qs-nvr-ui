@@ -299,6 +299,9 @@ const play = (url?: string) => {
   const targetUrl = url || props.videoUrl
   if (!targetUrl) return
 
+  hasError.value = false
+  isLoading.value = true
+
   if (easyplayer.value && live.value === 'STOP') {
     live.value = 'LIVE'
     easyplayer.value.play(targetUrl)
@@ -313,6 +316,11 @@ const play = (url?: string) => {
 }
 
 const playback = (url: string) => {
+  if (!url) return
+
+  hasError.value = false
+  isLoading.value = true
+
   if (easyplayer.value) easyplayer.value.playback(url)
 }
 

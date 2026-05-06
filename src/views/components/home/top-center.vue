@@ -7,7 +7,12 @@
 <script setup name="TopCenter" lang="ts">
 import * as echarts from 'echarts';
 import {defineExpose} from "vue";
-defineExpose({setData})
+import {getChartTheme, chartPalette, getBaseOption} from '@/utils/echarts-theme';
+defineExpose({setData, refreshChart})
+
+function refreshChart() {
+  initChart();
+}
 
 const apiResponseList = ref([])
 
@@ -17,6 +22,7 @@ let chartInstance = null;
 const initChart = () => {
   if (!chartRef.value) return;
   chartInstance = echarts.init(chartRef.value);
+  const t = getChartTheme();
   const seriesList = [];
 
   apiResponseList.value.forEach((node, index) => {
@@ -36,14 +42,14 @@ const initChart = () => {
     seriesList.push({
       name: `${node.id} - 负载`,
       type: 'bar',
-      stack: 'total_load', // 堆叠模式，方便看总负载
+      stack: 'total_load',
       data: nodeLoadData,
-
+      itemStyle: { borderRadius: index === apiResponseList.value.length - 1 ? [4, 4, 0, 0] : 0 },
       emphasis: {
         itemStyle: {
-          shadowBlur: 10,
+          shadowBlur: 12,
           shadowOffsetX: 0,
-          shadowColor: 'rgba(0, 0, 0, 0.5)'
+          shadowColor: 'rgba(0, 0, 0, 0.2)'
         }
       }
     });
@@ -52,25 +58,33 @@ const initChart = () => {
     seriesList.push({
       name: `${node.id} - 延迟`,
       type: 'line',
-      yAxisIndex: 1, // 使用右侧 Y 轴
+      yAxisIndex: 1,
       data: nodeDelayData,
-      lineStyle: {width: 2, type: 'dashed'}, // 虚线区分
+      lineStyle: { width: 2, type: 'dashed' },
       symbol: 'circle',
       symbolSize: 6,
       smooth: true
     });
   });
 
-  // --- 3. ECharts 配置 ---
   const option = {
+    ...getBaseOption(),
+    color: chartPalette,
     tooltip: {
       trigger: 'axis',
-      axisPointer: {type: 'cross'}
+      axisPointer: { type: 'cross' },
+      backgroundColor: t.tooltipBg,
+      borderColor: t.tooltipBorder,
+      borderWidth: 1,
+      textStyle: { color: t.tooltipText },
+      padding: [10, 14],
+      extraCssText: 'box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 8px;'
     },
     legend: {
-      data: seriesList.map(s => s.name), // 动态生成图例
+      data: seriesList.map(s => s.name),
       top: 5,
-      type: 'scroll' // 如果节点多，开启滚动
+      type: 'scroll',
+      textStyle: { color: t.text }
     },
     grid: {
       left: '3%',
@@ -81,7 +95,6 @@ const initChart = () => {
     xAxis: [
       {
         type: 'category',
-        // 合并所有线程名称作为 X 轴
         data: [
           ...apiResponseList.value[0].threadsLoad.map(i => i.name),
           ...apiResponseList.value[0].workThreadsLoad.map(i => i.name)
@@ -89,10 +102,11 @@ const initChart = () => {
         axisLabel: {
           interval: 0,
           rotate: 45,
-          formatter: (value) => {
-            return value.substring(value.lastIndexOf(' ') + 1);
-          }
-        }
+          color: t.text,
+          formatter: (value) => value.substring(value.lastIndexOf(' ') + 1)
+        },
+        axisLine: { lineStyle: { color: t.axisLine } },
+        axisTick: { lineStyle: { color: t.axisLine } }
       }
     ],
     yAxis: [
@@ -100,16 +114,19 @@ const initChart = () => {
         type: 'value',
         name: '负载 (Load)',
         position: 'left',
-        axisLine: {show: true, lineStyle: {color: '#5470C6'}},
-        axisLabel: {color: '#5470C6'}
+        nameTextStyle: { color: t.text },
+        axisLine: { show: true, lineStyle: { color: t.axisLine } },
+        axisLabel: { color: t.subText },
+        splitLine: { lineStyle: { color: t.splitLine, type: 'dashed' } }
       },
       {
         type: 'value',
         name: '延迟 (ms)',
         position: 'right',
-        axisLine: {show: true, lineStyle: {color: '#EE6666'}},
-        axisLabel: {color: '#EE6666'},
-        splitLine: {show: false}
+        nameTextStyle: { color: t.text },
+        axisLine: { show: true, lineStyle: { color: t.axisLine } },
+        axisLabel: { color: t.subText },
+        splitLine: { show: false }
       }
     ],
     series: seriesList
@@ -119,7 +136,6 @@ const initChart = () => {
 };
 
 const handleResize = () => chartInstance?.resize();
-
 
 function setData(data) {
   apiResponseList.value = data

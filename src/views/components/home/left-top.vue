@@ -7,8 +7,13 @@
 <script setup name="LeftTop" lang="ts">
 import {defineExpose, onBeforeUnmount, ref} from 'vue';
 import * as echarts from 'echarts';
+import {getChartTheme, chartPalette, getBaseOption} from '@/utils/echarts-theme';
 
-defineExpose({setData})
+defineExpose({setData, refreshChart})
+
+function refreshChart() {
+  initChart();
+}
 let apiData = {};
 
 const chartRef = ref(null);
@@ -42,74 +47,73 @@ function setData(data) {
 const initChart = () => {
   if (!chartRef.value) return;
   chartInstance = echarts.init(chartRef.value);
+  const t = getChartTheme();
 
   // 过滤掉值为 0 或 null 的项，避免图表过于杂乱
   const pieData = Object.keys(fieldMap)
       .map(key => ({
         name: fieldMap[key],
-        value: apiData[key] || 0 // 兼容 null 值
+        value: apiData[key] || 0
       }))
-      .filter(item => item.value > 0); // 只显示有数据的类型
+      .filter(item => item.value > 0);
 
   const option = {
+    ...getBaseOption(),
+    color: chartPalette,
     title: {
-      // text: '设备总数', // 可以加一个主标题，也可以留空
       subtext: `总数: ${apiData.totalDeviceCount}`,
       left: 'center',
-
-      // --- 核心修改：主标题样式 (如果 text 为空，这个可以忽略) ---
-      textStyle: {
-        fontSize: 14,
-        color: '#999'
-      },
-
-      // --- 核心修改：副标题样式 (这是你现在显示的文字) ---
-      subtextStyle: {
-        fontSize: 24,      // 调大字号，默认是 12-14
-        color: '#333',     // 加深颜色，让它更显眼
-        fontWeight: 'bold' // 加粗
-      }
+      top: 8,
+      textStyle: { fontSize: 14, color: t.subText },
+      subtextStyle: { fontSize: 22, color: t.text, fontWeight: 'bold' }
     },
     tooltip: {
       trigger: 'item',
-      formatter: '{b}: {c} ({d}%)' // 显示名称、数量、百分比
+      backgroundColor: t.tooltipBg,
+      borderColor: t.tooltipBorder,
+      borderWidth: 1,
+      textStyle: { color: t.tooltipText },
+      padding: [10, 14],
+      extraCssText: 'box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 8px;',
+      formatter: '{b}: {c} ({d}%)'
     },
     legend: {
       orient: 'vertical',
-      left: 'left',
+      left: 8,
       top: 'middle',
+      textStyle: { color: t.text, fontSize: 12 },
+      itemGap: 12,
       data: pieData.map(item => item.name)
     },
     series: [
       {
         name: '设备类型',
         type: 'pie',
-        radius: ['40%', '70%'], // 环形图设置，内半径40%，外半径70%
-        center: ['60%', '55%'], // 图表位置偏移，给左侧图例留空间
-        avoidLabelOverlap: false,
+        radius: ['38%', '65%'],
+        center: ['62%', '52%'],
+        avoidLabelOverlap: true,
         itemStyle: {
-          borderRadius: 10,
-          borderColor: '#fff',
+          borderRadius: 8,
+          borderColor: t.itemBorder,
           borderWidth: 2
         },
         label: {
           show: true,
-          formatter: '{b}\n{d}%' // 标签显示名称和百分比
+          color: t.text,
+          formatter: '{b}\n{d}%',
+          fontSize: 12
         },
         emphasis: {
-          label: {
-            show: true,
-            fontSize: 16,
-            fontWeight: 'bold'
-          },
+          label: { show: true, fontSize: 14, fontWeight: 'bold' },
           itemStyle: {
-            shadowBlur: 10,
+            shadowBlur: 20,
             shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
+            shadowColor: t.primaryGlow
           }
         },
         labelLine: {
-          show: true
+          show: true,
+          lineStyle: { color: t.axisLine }
         },
         data: pieData
       }
@@ -120,7 +124,6 @@ const initChart = () => {
 };
 
 const handleResize = () => chartInstance?.resize();
-
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize);
