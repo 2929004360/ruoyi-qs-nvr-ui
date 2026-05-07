@@ -8,8 +8,6 @@
       <div class="header-switch">
         <el-switch
             v-model="showRegion"
-            active-color="#10b981"
-            inactive-color="#3b82f6"
             active-text="行政区划"
             inactive-text="业务分组"
             @change="change"
@@ -120,13 +118,13 @@ defineExpose({
   flex-wrap: wrap;
   gap: 12px;
   min-height: 30px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--el-border-color-lighter);
 }
 
 .header-title {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2937;
+  color: var(--el-text-color-primary);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -176,7 +174,7 @@ defineExpose({
 }
 
 :deep(.el-tree-node__content:hover) {
-  background: rgba(59, 130, 246, 0.08);
+  background: rgba(var(--el-color-primary-rgb), 0.08);
   transform: translateX(2px);
 }
 
@@ -184,12 +182,12 @@ defineExpose({
   word-break: break-word !important;
   white-space: normal !important;
   font-weight: 500;
-  color: #374151;
+  color: var(--el-text-color-regular);
 }
 
 :deep(.el-tree-node.is-current > .el-tree-node__content) {
-  background: rgba(59, 130, 246, 0.12);
-  color: #2563eb;
+  background: rgba(var(--el-color-primary-rgb), 0.12);
+  color: var(--el-color-primary);
   font-weight: 600;
 }
 
@@ -241,5 +239,27 @@ defineExpose({
   .title-icon {
     font-size: 16px;
   }
+}
+
+/* ===== 暗黑模式 ===== */
+html.dark .device-tree-header {
+  border-bottom-color: var(--el-border-color);
+  background: var(--el-bg-color-page);
+}
+
+html.dark :deep(.el-tree-node__content:hover) {
+  background: rgba(var(--el-color-primary-rgb), 0.15);
+}
+
+html.dark :deep(.el-tree-node.is-current > .el-tree-node__content) {
+  background: rgba(var(--el-color-primary-rgb), 0.2);
+}
+
+html.dark :deep(.el-tree-node__label) {
+  color: var(--el-text-color-regular);
+}
+
+html.dark .device-tree-container {
+  background: var(--el-bg-color-page);
 }
 </style>

@@ -1,10 +1,11 @@
 <template>
-  <div>
+  <div class="associated-wrap">
     <el-tabs v-model="hasLink" class="demo-tabs" @tab-click="handleClick">
       <el-tab-pane label="未关联" :name="false"/>
       <el-tab-pane label="已关联" :name="true"/>
 
-      <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+      <div class="search-panel" v-show="showSearch">
+        <el-form :model="queryParams" ref="queryRef" :inline="true" label-width="68px">
         <el-form-item label="设备名称" prop="deviceName">
           <el-input
               v-model="queryParams.deviceName"
@@ -45,7 +46,8 @@
           <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
           <el-button icon="Refresh" @click="resetQuery">重置</el-button>
         </el-form-item>
-      </el-form>
+        </el-form>
+      </div>
 
       <el-row :gutter="10" class="mb8">
         <el-col :span="1.5" v-if="!hasLink">
@@ -268,5 +270,184 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.associated-wrap {
+  animation: wrapEnter 0.45s ease-out;
+}
 
+@keyframes wrapEnter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== Tabs 现代化 ===== */
+:deep(.el-tabs__header) {
+  margin-bottom: 20px;
+}
+
+:deep(.el-tabs__nav-wrap::after) {
+  display: none;
+}
+
+:deep(.el-tabs__active-bar) {
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--el-color-primary), var(--el-color-primary-light-3));
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:deep(.el-tabs__item) {
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0 20px;
+  transition: all 0.3s ease;
+  height: 40px;
+  line-height: 40px;
+}
+
+:deep(.el-tabs__item:hover) {
+  color: var(--el-color-primary);
+}
+
+:deep(.el-tabs__item.is-active) {
+  font-weight: 600;
+}
+
+/* ===== 搜索面板玻璃卡片 ===== */
+.search-panel {
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  background: var(--el-bg-color-page);
+  backdrop-filter: blur(10px) saturate(1.1);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: 14px;
+  box-shadow: var(--el-box-shadow-lighter);
+  animation: panelEnter 0.4s ease-out 0.08s backwards;
+}
+
+@keyframes panelEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ===== 操作栏 ===== */
+.mb8 {
+  animation: panelEnter 0.4s ease-out 0.14s backwards;
+}
+
+:deep(.mb8 .el-button) {
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+:deep(.mb8 .el-button:hover:not(:disabled)) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--el-color-primary-rgb), 0.2);
+}
+
+:deep(.mb8 .el-button--danger:hover:not(:disabled)) {
+  box-shadow: 0 4px 12px rgba(var(--el-color-danger-rgb), 0.2);
+}
+
+/* ===== 表格优化 ===== */
+:deep(.el-table) {
+  border-radius: 14px;
+  overflow: hidden;
+  animation: panelEnter 0.4s ease-out 0.2s backwards;
+  box-shadow: var(--el-box-shadow-lighter);
+}
+
+:deep(.el-table__header-wrapper th.el-table__cell) {
+  background: var(--el-fill-color-lighter) !important;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  transition: background 0.2s;
+}
+
+:deep(.el-table__body-wrapper .el-table__row) {
+  transition: all 0.2s ease;
+  animation: rowEnter 0.3s ease-out backwards;
+}
+
+:deep(.el-table__body-wrapper .el-table__row:nth-child(1)) { animation-delay: 0.04s; }
+:deep(.el-table__body-wrapper .el-table__row:nth-child(2)) { animation-delay: 0.08s; }
+:deep(.el-table__body-wrapper .el-table__row:nth-child(3)) { animation-delay: 0.12s; }
+:deep(.el-table__body-wrapper .el-table__row:nth-child(4)) { animation-delay: 0.16s; }
+:deep(.el-table__body-wrapper .el-table__row:nth-child(5)) { animation-delay: 0.20s; }
+:deep(.el-table__body-wrapper .el-table__row:nth-child(6)) { animation-delay: 0.24s; }
+:deep(.el-table__body-wrapper .el-table__row:nth-child(7)) { animation-delay: 0.28s; }
+:deep(.el-table__body-wrapper .el-table__row:nth-child(8)) { animation-delay: 0.32s; }
+:deep(.el-table__body-wrapper .el-table__row:nth-child(9)) { animation-delay: 0.36s; }
+:deep(.el-table__body-wrapper .el-table__row:nth-child(10)) { animation-delay: 0.40s; }
+
+@keyframes rowEnter {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+:deep(.el-table__body-wrapper .el-table__row:hover > td.el-table__cell) {
+  background: var(--el-fill-color-light) !important;
+}
+
+:deep(.el-table__body-wrapper .el-table__row td.el-table__cell) {
+  transition: background 0.2s ease;
+}
+
+/* 表格中的 DictTag 入场 */
+:deep(.el-table .dict-tag),
+:deep(.el-table .dict-text) {
+  animation: tagIn 0.3s ease-out backwards;
+}
+
+@keyframes tagIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ===== 分页 ===== */
+:deep(.pagination-container) {
+  animation: panelEnter 0.4s ease-out 0.25s backwards;
+}
+
+/* ===== 暗黑模式 ===== */
+html.dark .search-panel {
+  background: var(--el-bg-color-page);
+  border-color: var(--el-border-color);
+  box-shadow: var(--el-box-shadow-dark);
+}
+
+html.dark :deep(.el-table) {
+  box-shadow: var(--el-box-shadow-dark);
+}
+
+html.dark :deep(.el-table__header-wrapper th.el-table__cell) {
+  background: var(--el-fill-color) !important;
+}
+
+html.dark :deep(.el-table__body-wrapper .el-table__row:hover > td.el-table__cell) {
+  background: var(--el-fill-color) !important;
+}
 </style>

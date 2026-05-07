@@ -200,6 +200,166 @@ function insertImage(file: File) {
 .editor-img-uploader {
   display: none;
 }
+
+/* 编辑器容器入场动画 */
+.editor {
+  animation: editorFadeIn 0.4s ease-out;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  transition: box-shadow 0.3s ease;
+}
+
+.editor:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+@keyframes editorFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 工具栏按钮 hover 动画 */
+.ql-toolbar button {
+  transition: all 0.2s ease;
+  border-radius: 4px;
+}
+
+.ql-toolbar button:hover {
+  background: rgba(64, 158, 255, 0.08);
+  transform: scale(1.1);
+}
+
+.ql-toolbar .ql-picker {
+  transition: color 0.2s ease;
+}
+
+.ql-toolbar .ql-picker:hover {
+  color: var(--el-color-primary);
+}
+
+/* 编辑器 focus 发光 */
+.ql-container.ql-snow {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  border-color: #e0e0e0;
+}
+
+.ql-container.ql-snow:focus-within {
+  border-color: var(--el-color-primary);
+  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.08);
+}
+
+/* 暗色模式 */
+html.dark .editor {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+}
+
+html.dark .editor:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+}
+
+/* 工具栏 */
+html.dark .ql-toolbar.ql-snow {
+  background: #1e1e1e;
+  border-color: #333;
+}
+
+html.dark .ql-toolbar button:hover {
+  background: rgba(64, 158, 255, 0.15);
+}
+
+html.dark .ql-toolbar button:hover .ql-stroke {
+  stroke: var(--el-color-primary);
+}
+
+html.dark .ql-toolbar button:hover .ql-fill {
+  fill: var(--el-color-primary);
+}
+
+/* 图标颜色 */
+html.dark .ql-snow .ql-stroke {
+  stroke: #aaa;
+}
+
+html.dark .ql-snow .ql-fill {
+  fill: #aaa;
+}
+
+html.dark .ql-snow .ql-picker {
+  color: #ccc;
+}
+
+html.dark .ql-snow .ql-picker:hover {
+  color: var(--el-color-primary);
+}
+
+/* 下拉菜单 */
+html.dark .ql-snow .ql-picker-options {
+  background: #2a2a2a;
+  border-color: #444;
+}
+
+html.dark .ql-snow .ql-picker-item:hover {
+  color: var(--el-color-primary);
+}
+
+/* 编辑器内容区 */
+html.dark .ql-container.ql-snow {
+  background: #1e1e1e;
+  border-color: #333;
+  color: #e2e8f0;
+}
+
+html.dark .ql-editor {
+  color: #e2e8f0;
+}
+
+html.dark .ql-editor.ql-blank::before {
+  color: #666;
+}
+
+html.dark .ql-container.ql-snow:focus-within {
+  border-color: var(--el-color-primary);
+  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.12);
+}
+
+/* tooltip 弹窗 */
+html.dark .ql-snow .ql-tooltip {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+html.dark .ql-snow .ql-tooltip input[type=text] {
+  background: #1e1e1e;
+  border-color: #444;
+  color: #e2e8f0;
+}
+
+/* 代码块样式 */
+html.dark .ql-editor pre.ql-syntax {
+  background: #2d2d2d;
+  color: #e2e8f0;
+}
+
+/* 引用块 */
+html.dark .ql-editor blockquote {
+  border-left-color: #444;
+  color: #aaa;
+}
+
+/* 分割线 */
+html.dark .ql-editor hr {
+  border-color: #444;
+}
+
 .editor, .ql-toolbar {
   white-space: pre-wrap !important;
   line-height: normal !important;

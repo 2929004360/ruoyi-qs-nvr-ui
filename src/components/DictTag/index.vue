@@ -6,6 +6,7 @@
           v-if="(item.elTagType == 'default' || item.elTagType == '') && (item.elTagClass == '' || item.elTagClass == null)"
           :key="item.value"
           :index="index"
+          class="dict-text"
           :class="item.elTagClass"
         >{{ item.label + " " }}</span>
         <el-tag
@@ -14,6 +15,7 @@
           :key="item.value + ''"
           :index="index"
           :type="item.elTagType"
+          class="dict-tag"
           :class="item.elTagClass"
         >{{ item.label + " " }}</el-tag>
       </template>
@@ -85,5 +87,51 @@ function isValueMatch(itemValue: string | number): boolean {
 <style scoped>
 .el-tag + .el-tag {
   margin-left: 10px;
+}
+
+/* 标签柔和淡入 */
+.dict-text,
+:deep(.dict-tag) {
+  animation: tagFadeIn 0.25s ease-out backwards;
+}
+
+/* 文本标签 hover */
+.dict-text {
+  transition: color 0.2s ease;
+  cursor: default;
+}
+
+.dict-text:hover {
+  color: var(--el-color-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* el-tag hover */
+:deep(.dict-tag) {
+  transition: filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+:deep(.dict-tag:hover) {
+  filter: brightness(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+@keyframes tagFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 暗黑模式 */
+html.dark {
+  :deep(.dict-tag:hover) {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
 }
 </style>

@@ -72,20 +72,20 @@ const activeMenu = computed(() => {
 .sidebar-container {
   --sidebar-menu-text: v-bind(getMenuTextColor);
   --sidebar-menu-bg: v-bind(getMenuBackground);
-  --menu-hover-bg: rgba(64, 158, 255, 0.08);
-  --menu-active-bg: rgba(64, 158, 255, 0.18);
+  --menu-hover-bg: rgba(var(--el-color-primary-rgb), 0.08);
+  --menu-active-bg: rgba(var(--el-color-primary-rgb), 0.18);
 
   background-color: var(--sidebar-menu-bg);
   backdrop-filter: blur(10px);
 
   &.theme-dark {
-    --menu-hover-bg: rgba(64, 158, 255, 0.15);
-    --menu-active-bg: rgba(64, 158, 255, 0.25);
+    --menu-hover-bg: rgba(var(--el-color-primary-rgb), 0.15);
+    --menu-active-bg: rgba(var(--el-color-primary-rgb), 0.25);
   }
 
   &.theme-light {
-    --menu-hover-bg: rgba(64, 158, 255, 0.08);
-    --menu-active-bg: rgba(64, 158, 255, 0.12);
+    --menu-hover-bg: rgba(var(--el-color-primary-rgb), 0.08);
+    --menu-active-bg: rgba(var(--el-color-primary-rgb), 0.12);
   }
 
   .scrollbar-wrapper {
@@ -132,7 +132,7 @@ const activeMenu = computed(() => {
         left: 0;
         width: 100%;
         height: 100%;
-        background: radial-gradient(circle at center, rgba(64, 158, 255, 0.15) 0%, transparent 70%);
+        background: radial-gradient(circle at center, rgba(var(--el-color-primary-rgb), 0.15) 0%, transparent 70%);
         opacity: 0;
         transition: opacity 0.3s ease;
         pointer-events: none;
@@ -160,14 +160,14 @@ const activeMenu = computed(() => {
         background: linear-gradient(180deg, var(--el-color-primary), var(--el-color-primary-light-3));
         border-radius: 0 4px 4px 0;
         transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 0 10px rgba(64, 158, 255, 0.3);
+        box-shadow: 0 0 10px rgba(var(--el-color-primary-rgb), 0.3);
       }
 
       &.is-active {
         color: var(--el-color-primary);
         background-color: var(--menu-active-bg) !important;
         font-weight: 600;
-        box-shadow: 0 4px 12px rgba(64, 158, 255, 0.15);
+        box-shadow: 0 4px 12px rgba(var(--el-color-primary-rgb), 0.15);
         transform: translateX(2px);
 
         &::before {
@@ -248,6 +248,41 @@ const activeMenu = computed(() => {
   100% {
     transform: scale(1.2);
     opacity: 0;
+  }
+}
+
+html.dark,
+.theme-dark {
+  .sidebar-container {
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(180deg, transparent, var(--el-border-color), transparent);
+      opacity: 0.5;
+    }
+
+    .el-menu {
+      .el-menu-item,
+      .el-sub-menu__title {
+        &::after {
+          background: radial-gradient(circle at center, rgba(var(--el-color-primary-rgb), 0.2) 0%, transparent 70%);
+        }
+      }
+
+      .el-menu-item {
+        &.is-active {
+          box-shadow: 0 4px 12px rgba(var(--el-color-primary-rgb), 0.25);
+        }
+
+        &::before {
+          box-shadow: 0 0 12px rgba(var(--el-color-primary-rgb), 0.4);
+        }
+      }
+    }
   }
 }
 </style>

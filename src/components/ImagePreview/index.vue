@@ -63,24 +63,73 @@ const realHeight = computed(() =>
 
 <style lang="scss" scoped>
 .el-image {
-  border-radius: 5px;
-  background-color: #ebeef5;
-  box-shadow: 0 0 5px 1px #ccc;
+  border-radius: 12px;
+  background-color: #f3f4f6;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 8px rgba(0,0,0,0.04);
+  transition: box-shadow 0.3s ease;
+  overflow: hidden;
+  animation: imageFadeIn 0.4s ease-out;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 8px 24px rgba(0,0,0,0.06);
+  }
+
   :deep(.el-image__inner) {
-    transition: all 0.3s;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     cursor: pointer;
+
     &:hover {
-      transform: scale(1.2);
+      transform: scale(1.05);
     }
   }
+
   :deep(.image-slot) {
     display: flex;
     justify-content: center;
     align-items: center;
     width: 100%;
     height: 100%;
-    color: #909399;
+    color: #a0aec0;
     font-size: 30px;
+    animation: iconBreathe 2s ease-in-out infinite;
+  }
+}
+
+@keyframes imageFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes iconBreathe {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+/* 暗黑模式 */
+html.dark {
+  .el-image {
+    background-color: #2d2d2d;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2), 0 4px 8px rgba(0,0,0,0.15);
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.2);
+    }
+  }
+
+  :deep(.image-slot) {
+    color: #4a5568;
   }
 }
 </style>

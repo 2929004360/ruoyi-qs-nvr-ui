@@ -500,78 +500,85 @@ async function queryForDeviceFun() {
 
         const sContent = `
               <div style="
-                width: 300px;
-                position: relative;
+                width: 240px;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                font-size: 14px;
+                font-size: 13px;
                 color: #333;
+                line-height: 1.6;
               ">
-                <!-- 标题 -->
-                <div style="font-size: 16px; font-weight: bold; margin-bottom: 12px; color: #1a73e8;">
-                   ${escapeHtml(channel.name)}
+                <div style="
+                  font-size: 15px;
+                  font-weight: 700;
+                  color: #1a202c;
+                  padding-bottom: 8px;
+                  margin-bottom: 8px;
+                  border-bottom: 1px solid rgba(0,0,0,0.06);
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                ">
+                  <span style="
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    background: ${channel.status === 'ON' ? '#52c41a' : '#ff4d4f'};
+                    display: inline-block;
+                  "></span>
+                  ${escapeHtml(channel.name)}
                 </div>
-
-                <!-- 字段列表 -->
-                <div style="line-height: 1.6;">
-                  <div>
-                    <span style="color: #666; display: inline-block; width: 80px;">ip：</span>
-                    <span>${escapeHtml(channel.ipAddress || '未知')}</span>
+                <div style="color: #555;">
+                  <div style="display: flex; justify-content: space-between; padding: 2px 0;">
+                    <span style="color: #888;">IP</span>
+                    <span style="font-weight: 500;">${escapeHtml(channel.ipAddress || '未知')}</span>
                   </div>
-                  <div style="margin-top: 6px;">
-                    <span style="color: #666; display: inline-block; width: 80px;">生产厂商：</span>
+                  <div style="display: flex; justify-content: space-between; padding: 2px 0;">
+                    <span style="color: #888;">厂商</span>
                     <span>${escapeHtml(channel.manufacturer || '未知')}</span>
                   </div>
-                  <div style="margin-top: 6px;">
-                    <span style="color: #666; display: inline-block; width: 80px;">安装地址：</span>
+                  <div style="display: flex; justify-content: space-between; padding: 2px 0;">
+                    <span style="color: #888;">地址</span>
                     <span>${escapeHtml(channel.address || '未知')}</span>
                   </div>
-                  <div style="margin-top: 6px;">
-                    <span style="color: #666; display: inline-block; width: 80px;">设备状态：</span>
-                    <span>${channel.status === 'ON' ? '在线' : '离线'}</span>
+                  <div style="display: flex; justify-content: space-between; padding: 2px 0;">
+                    <span style="color: #888;">状态</span>
+                    <span style="color: ${channel.status === 'ON' ? '#52c41a' : '#ff4d4f'}; font-weight: 600;">${channel.status === 'ON' ? '在线' : '离线'}</span>
                   </div>
                 </div>
-
-                <!-- 操作按钮区域 -->
-                <div style="
-                  margin-top: 14px;
-                  display: flex;
-                  gap: 8px;
-                  justify-content: center;
-                  flex-wrap: wrap;
-                ">
+                <div style="margin-top: 10px; display: flex; gap: 8px; justify-content: flex-end;">
                   <button
                     ${channel.status !== 'ON' ? 'disabled' : ''}
                     style="
-                      padding: 6px 12px;
-                      font-size: 13px;
+                      padding: 5px 14px;
+                      font-size: 12px;
                       border: none;
-                      border-radius: 4px;
-                      background: #1a73e8;
+                      border-radius: 6px;
+                      background: #409EFF;
                       color: white;
-                      cursor: pointer;
-                      opacity: ${channel.status === 'ON' ? 1 : 0.5};
+                      cursor: ${channel.status === 'ON' ? 'pointer' : 'not-allowed'};
+                      opacity: ${channel.status === 'ON' ? 1 : 0.45};
+                      font-weight: 500;
+                      transition: all 0.25s ease;
                     "
+                    onmouseover="if(!this.disabled){this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(64,158,255,0.35)';}"
+                    onmouseout="this.style.transform='';this.style.boxShadow='';"
                     onclick="window.handlePlay('${channel.id}')"
-                    title="播放"
-                  >
-                    ▶ 播放
-                  </button>
-
+                  >▶ 播放</button>
                   <button
                     style="
-                      padding: 6px 12px;
-                      font-size: 13px;
+                      padding: 5px 14px;
+                      font-size: 12px;
                       border: none;
-                      border-radius: 4px;
-                      background: #fbbc04;
-                      color: #202124;
+                      border-radius: 6px;
+                      background: #f0f0f0;
+                      color: #555;
                       cursor: pointer;
+                      font-weight: 500;
+                      transition: all 0.25s ease;
                     "
+                    onmouseover="this.style.transform='translateY(-2px)';this.style.background='#e8e8e8';"
+                    onmouseout="this.style.transform='';this.style.background='#f0f0f0';"
                     onclick="window.handlePosition('${channel.id}')"
-                    title="位置"
-                  >
-                    📍 位置
-                  </button>
+                  >📍 位置</button>
                 </div>
               </div>
               `.trim();
@@ -645,77 +652,85 @@ async function treeChannelClickEvent(id) {
     var infoWin1 = new T.InfoWindow();
     const sContent = `
               <div style="
-                width: 300px;
-                position: relative;
+                width: 240px;
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-                font-size: 14px;
+                font-size: 13px;
                 color: #333;
+                line-height: 1.6;
               ">
-                <!-- 标题 -->
-                <div style="font-size: 16px; font-weight: bold; margin-bottom: 12px; color: #1a73e8;">
+                <div style="
+                  font-size: 15px;
+                  font-weight: 700;
+                  color: #1a202c;
+                  padding-bottom: 8px;
+                  margin-bottom: 8px;
+                  border-bottom: 1px solid rgba(0,0,0,0.06);
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                ">
+                  <span style="
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    background: ${data.deviceStatus === 'ON' ? '#52c41a' : '#ff4d4f'};
+                    display: inline-block;
+                  "></span>
                   ${escapeHtml(data.deviceName)}
                 </div>
-
-                <!-- 字段列表 -->
-                <div style="line-height: 1.6;">
-                  <div>
-                    <span style="color: #666; display: inline-block; width: 80px;">ip：</span>
-                    <span>${escapeHtml(data.ipAddress || '未知')}</span>
+                <div style="color: #555;">
+                  <div style="display: flex; justify-content: space-between; padding: 2px 0;">
+                    <span style="color: #888;">IP</span>
+                    <span style="font-weight: 500;">${escapeHtml(data.ipAddress || '未知')}</span>
                   </div>
-                  <div style="margin-top: 6px;">
-                    <span style="color: #666; display: inline-block; width: 80px;">生产厂商：</span>
+                  <div style="display: flex; justify-content: space-between; padding: 2px 0;">
+                    <span style="color: #888;">厂商</span>
                     <span>${escapeHtml(data.manufacturer || '未知')}</span>
                   </div>
-                  <div style="margin-top: 6px;">
-                    <span style="color: #666; display: inline-block; width: 80px;">安装地址：</span>
+                  <div style="display: flex; justify-content: space-between; padding: 2px 0;">
+                    <span style="color: #888;">地址</span>
                     <span>${escapeHtml(data.address || '未知')}</span>
                   </div>
-                  <div style="margin-top: 6px;">
-                    <span style="color: #666; display: inline-block; width: 80px;">设备状态：</span>
-                    <span>${data.deviceStatus === 'ON' ? '在线' : '离线'}</span>
+                  <div style="display: flex; justify-content: space-between; padding: 2px 0;">
+                    <span style="color: #888;">状态</span>
+                    <span style="color: ${data.deviceStatus === 'ON' ? '#52c41a' : '#ff4d4f'}; font-weight: 600;">${data.deviceStatus === 'ON' ? '在线' : '离线'}</span>
                   </div>
                 </div>
-
-                <!-- 操作按钮区域 -->
-                <div style="
-                  margin-top: 14px;
-                  display: flex;
-                  gap: 8px;
-                  justify-content: center;
-                  flex-wrap: wrap;
-                ">
+                <div style="margin-top: 10px; display: flex; gap: 8px; justify-content: flex-end;">
                   <button
                     ${data.deviceStatus !== 'ON' ? 'disabled' : ''}
                     style="
-                      padding: 6px 12px;
-                      font-size: 13px;
+                      padding: 5px 14px;
+                      font-size: 12px;
                       border: none;
-                      border-radius: 4px;
-                      background: #1a73e8;
+                      border-radius: 6px;
+                      background: #409EFF;
                       color: white;
-                      cursor: pointer;
-                      opacity: ${data.deviceStatus === 'ON' ? 1 : 0.5};
+                      cursor: ${data.deviceStatus === 'ON' ? 'pointer' : 'not-allowed'};
+                      opacity: ${data.deviceStatus === 'ON' ? 1 : 0.45};
+                      font-weight: 500;
+                      transition: all 0.25s ease;
                     "
+                    onmouseover="if(!this.disabled){this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 12px rgba(64,158,255,0.35)';}"
+                    onmouseout="this.style.transform='';this.style.boxShadow='';"
                     onclick="window.handlePlay('${data.id}')"
-                    title="播放"
-                  >
-                    ▶ 播放
-                  </button>
+                  >▶ 播放</button>
                   <button
                     style="
-                      padding: 6px 12px;
-                      font-size: 13px;
+                      padding: 5px 14px;
+                      font-size: 12px;
                       border: none;
-                      border-radius: 4px;
-                      background: #fbbc04;
-                      color: #202124;
+                      border-radius: 6px;
+                      background: #f0f0f0;
+                      color: #555;
                       cursor: pointer;
+                      font-weight: 500;
+                      transition: all 0.25s ease;
                     "
+                    onmouseover="this.style.transform='translateY(-2px)';this.style.background='#e8e8e8';"
+                    onmouseout="this.style.transform='';this.style.background='#f0f0f0';"
                     onclick="window.handlePosition('${data.id}')"
-                    title="位置"
-                  >
-                    📍 位置
-                  </button>
+                  >📍 位置</button>
                 </div>
               </div>
               `.trim();
@@ -1267,6 +1282,7 @@ onBeforeUnmount(() => {
   height: auto !important;
 }
 
+/* ========== 云台控制区域 ========== */
 .control-wrapper {
   position: relative;
   width: 100px;
@@ -1277,6 +1293,7 @@ onBeforeUnmount(() => {
   margin-top: 24px;
   margin-left: 8px;
   float: left;
+  filter: drop-shadow(0 2px 8px rgba(64, 158, 255, 0.15));
 }
 
 .control-btn {
@@ -1286,30 +1303,48 @@ onBeforeUnmount(() => {
   width: 44%;
   height: 44%;
   border-radius: 5px;
-  border: 1px solid #78aee4;
+  border: 1px solid rgba(64, 158, 255, 0.5);
   box-sizing: border-box;
-  transition: all 0.3s linear;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(4px);
 }
 
 .control-btn:hover {
   cursor: pointer;
+  border-color: var(--el-color-primary);
+  background: rgba(64, 158, 255, 0.08);
+  transform: scale(1.08);
+  box-shadow: 0 0 16px rgba(64, 158, 255, 0.25);
+}
+
+.control-btn:active {
+  transform: scale(0.95);
 }
 
 .control-btn .icon {
   width: 100%;
   font-size: 20px;
-  color: #78aee4;
+  color: var(--el-color-primary);
   display: flex;
   justify-content: center;
   align-items: center;
+  transition: color 0.3s;
 }
 
-.control-btn .icon:hover {
-  cursor: pointer;
+.control-btn:hover .icon {
+  color: var(--el-color-primary);
+}
+
+.control-zoom-btn {
+  color: var(--el-color-primary);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .control-zoom-btn:hover {
   cursor: pointer;
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 6px rgba(64, 158, 255, 0.4));
 }
 
 .control-round {
@@ -1320,6 +1355,7 @@ onBeforeUnmount(() => {
   height: 58%;
   background: #fff;
   border-radius: 100%;
+  box-shadow: 0 2px 12px rgba(64, 158, 255, 0.1);
 }
 
 .control-round-inner {
@@ -1332,10 +1368,22 @@ onBeforeUnmount(() => {
   width: 70%;
   height: 70%;
   font-size: 40px;
-  color: #78aee4;
-  border: 1px solid #78aee4;
+  color: var(--el-color-primary);
+  border: 1px solid rgba(64, 158, 255, 0.3);
   border-radius: 100%;
-  transition: all 0.3s linear;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: centerPulse 3s ease-in-out infinite;
+}
+
+@keyframes centerPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(64, 158, 255, 0.15);
+    border-color: rgba(64, 158, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(64, 158, 255, 0.05);
+    border-color: rgba(64, 158, 255, 0.5);
+  }
 }
 
 .control-inner-btn {
@@ -1360,8 +1408,8 @@ onBeforeUnmount(() => {
 .control-top .control-inner {
   left: -1px;
   bottom: 0;
-  border-top: 1px solid #78aee4;
-  border-right: 1px solid #78aee4;
+  border-top: 1px solid rgba(64, 158, 255, 0.4);
+  border-right: 1px solid rgba(64, 158, 255, 0.4);
   border-radius: 0 100% 0 0;
 }
 
@@ -1383,8 +1431,8 @@ onBeforeUnmount(() => {
 .control-left .control-inner {
   right: -1px;
   top: -1px;
-  border-bottom: 1px solid #78aee4;
-  border-left: 1px solid #78aee4;
+  border-bottom: 1px solid rgba(64, 158, 255, 0.4);
+  border-left: 1px solid rgba(64, 158, 255, 0.4);
   border-radius: 0 0 0 100%;
 }
 
@@ -1406,8 +1454,8 @@ onBeforeUnmount(() => {
 .control-right .control-inner {
   left: -1px;
   bottom: -1px;
-  border-top: 1px solid #78aee4;
-  border-right: 1px solid #78aee4;
+  border-top: 1px solid rgba(64, 158, 255, 0.4);
+  border-right: 1px solid rgba(64, 158, 255, 0.4);
   border-radius: 0 100% 0 0;
 }
 
@@ -1429,8 +1477,8 @@ onBeforeUnmount(() => {
 .control-bottom .control-inner {
   top: -1px;
   left: -1px;
-  border-bottom: 1px solid #78aee4;
-  border-right: 1px solid #78aee4;
+  border-bottom: 1px solid rgba(64, 158, 255, 0.4);
+  border-right: 1px solid rgba(64, 158, 255, 0.4);
   border-radius: 0 0 100% 0;
 }
 
@@ -1446,14 +1494,24 @@ onBeforeUnmount(() => {
   line-height: 64px;
 }
 
-/* 预置点面板样式 */
+/* ========== 预置点面板 ========== */
 .preset-panel {
-  padding: 16px;
+  padding: 20px;
+  animation: panelFadeIn 0.4s ease-out;
+}
+
+@keyframes panelFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .preset-select {
   width: 100%;
   margin-bottom: 16px;
+}
+
+.preset-select :deep(.el-input__wrapper) {
+  border-radius: 8px;
 }
 
 .preset-buttons {
@@ -1464,9 +1522,105 @@ onBeforeUnmount(() => {
 
 .preset-buttons .el-button {
   flex: 1;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.preset-buttons .el-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .refresh-btn {
   padding: 8px 0;
+  transition: all 0.3s;
+}
+
+.refresh-btn:hover {
+  transform: rotate(180deg);
+}
+
+/* ========== 对话框动画 ========== */
+:deep(.el-dialog) {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+:deep(.el-dialog__header) {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+:deep(.el-dialog__body) {
+  padding: 20px;
+}
+
+:deep(.el-dialog__footer) {
+  padding: 12px 20px;
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+
+/* 视频播放对话框标签页 */
+:deep(.el-tabs__nav) {
+  border-radius: 8px;
+}
+
+:deep(.el-tabs__item) {
+  transition: all 0.3s;
+}
+
+:deep(.el-tabs__item.is-active) {
+  font-weight: 600;
+}
+
+/* 云台标签页 */
+.ptz-tabs :deep(.el-tabs__header) {
+  margin-bottom: 12px;
+}
+
+/* 滑块 */
+.contro-speed :deep(.el-slider__runway) {
+  margin: 8px 0;
+}
+
+.contro-speed :deep(.el-slider__button) {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.contro-speed :deep(.el-slider__button:hover) {
+  transform: scale(1.3);
+}
+
+/* 复制按钮 */
+:deep(.el-input-group__append .el-button) {
+  transition: all 0.3s;
+}
+
+:deep(.el-input-group__append .el-button:hover) {
+  transform: scale(1.05);
+}
+
+/* 暗黑模式适配 */
+html.dark .control-btn {
+  background: rgba(30, 30, 40, 0.6);
+  border-color: rgba(64, 158, 255, 0.35);
+}
+
+html.dark .control-btn:hover {
+  background: rgba(64, 158, 255, 0.12);
+  box-shadow: 0 0 16px rgba(64, 158, 255, 0.3);
+}
+
+html.dark .control-round {
+  background: rgba(30, 30, 40, 0.8);
+}
+
+html.dark .control-round-inner {
+  color: #409EFF;
+  border-color: rgba(64, 158, 255, 0.35);
+}
+
+html.dark .control-inner-btn {
+  background: rgba(20, 20, 30, 0.5);
 }
 </style>

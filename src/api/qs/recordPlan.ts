@@ -44,4 +44,17 @@ export function delRecordPlan(id: number | number[]): Promise<AjaxResult> {
   })
 }
 
+// 状态修改
+export function changeRecordPlanStatus(id: number, status: string): Promise<AjaxResult> {
+  const data = {
+    id,
+    status
+  }
+  return request({
+    url: '/zlm/recordPlan/changeStatus',
+    method: 'put',
+    data: data
+  })
+}
+
 

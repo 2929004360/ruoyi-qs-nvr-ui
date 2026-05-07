@@ -270,28 +270,48 @@ p {
   line-height: 32px;
   color: var(--el-text-color-secondary, #606266);
   user-select: none;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .weektime .weektime-main {
-  border: 1px solid var(--el-border-color, #dcdfe6);
-  border-radius: 8px;
+  border: 1px solid rgba(var(--el-border-color-rgb, 217, 217, 217), 0.8);
+  border-radius: 12px;
   overflow: hidden;
-  background: var(--el-bg-color-overlay, #ffffff);
+  background: var(--el-bg-color-page);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--el-box-shadow-lighter);
+  transition: all 0.3s ease;
 }
 
 .weektime .weektime-hd {
   display: flex;
-  background: var(--el-bg-color-page, #f5f7fa);
+  background: var(--el-fill-color-lighter);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
 .weektime .weektime-hd-title {
   display: flex;
   align-items: center;
+  justify-content: center;
   padding: 0 6px;
   width: 80px;
   height: 65px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--el-text-color-primary, #303133);
+  letter-spacing: 0.5px;
 }
 
 .weektime .weektime-hd-con {
@@ -303,7 +323,7 @@ p {
 
 .weektime .weektime-hd-con-top {
   display: flex;
-  border-bottom: 1px solid var(--el-border-color-lighter, #ebeef5);
+  border-bottom: 1px solid var(--el-border-color-lighter);
 }
 
 .weektime .weektime-date-range {
@@ -311,7 +331,10 @@ p {
   height: 32px;
   line-height: 32px;
   text-align: center;
-  border-left: 1px solid var(--el-border-color-lighter, #ebeef5);
+  border-left: 1px solid var(--el-border-color-lighter);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--el-text-color-secondary);
 }
 
 .weektime .weektime-hd-con-bottom {
@@ -323,8 +346,15 @@ p {
   height: 32px;
   line-height: 32px;
   text-align: center;
-  border-left: 1px solid var(--el-border-color-lighter, #ebeef5);
-  font-size: 12px;
+  border-left: 1px solid var(--el-border-color-lighter);
+  font-size: 11px;
+  color: var(--el-text-color-secondary);
+  transition: all 0.2s ease;
+}
+
+.weektime .weektime-date-cell:hover {
+  color: var(--el-color-primary);
+  background: var(--el-fill-color-light);
 }
 
 .weektime .weektime-bd {
@@ -337,11 +367,19 @@ p {
 }
 
 .weektime .week-item {
-  border-top: 1px solid var(--el-border-color-lighter, #ebeef5);
+  border-top: 1px solid var(--el-border-color-lighter);
   text-align: center;
   height: 30px;
   line-height: 30px;
-  color: var(--el-text-color-primary, #303133);
+  color: var(--el-text-color-primary);
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.weektime .week-item:hover {
+  color: var(--el-color-primary);
+  background: var(--el-fill-color-lighter);
 }
 
 .weektime .time-body {
@@ -358,25 +396,41 @@ p {
   position: relative;
   width: 12px;
   height: 30px;
-  border-left: 1px solid var(--el-border-color-extra-light, #f2f6fc);
-  border-top: 1px solid var(--el-border-color-extra-light, #f2f6fc);
+  border-left: 1px solid var(--el-border-color-extra-light);
+  border-top: 1px solid var(--el-border-color-extra-light);
   overflow: hidden;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   outline-width: 0;
   cursor: pointer;
+  border-radius: 2px;
 }
 
 .weektime .time-cell:hover:not(.disable) {
-  background: var(--el-bg-color-page, #f5f7fa);
+  background: var(--el-fill-color-light);
+  transform: scale(1.15);
+  z-index: 10;
+  border-radius: 4px;
 }
 
 .weektime .time-cell.active {
-  background: var(--el-color-primary, #409eff);
+  background: linear-gradient(135deg, var(--el-color-primary), var(--el-color-primary-light-3));
+  animation: cellPulse 2s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(var(--el-color-primary-rgb), 0.3);
+}
+
+@keyframes cellPulse {
+  0%, 100% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(1.15);
+  }
 }
 
 .weektime .time-cell.disable {
   cursor: no-drop;
-  background: var(--el-bg-color-disabled, #f5f7fa);
+  background: var(--el-fill-color-extra-light);
+  opacity: 0.5;
 }
 
 .weektime .time-cell::after {
@@ -390,10 +444,23 @@ p {
   opacity: 0.4;
   transition: all 0.2s ease;
   z-index: 99999;
+  border-radius: 2px;
 }
 
 .weektime .pre-active::after {
-  background: var(--el-color-primary-light-3, #79bbff);
+  background: var(--el-color-primary-light-3);
+  animation: preActiveFade 0.2s ease;
+}
+
+@keyframes preActiveFade {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 0.4;
+    transform: scale(1);
+  }
 }
 
 .weektime .disable::after {
@@ -412,11 +479,15 @@ p {
 
 .weektime .weektime-help {
   width: 658px;
-  border: 1px solid var(--el-border-color, #dcdfe6);
+  border: 1px solid rgba(var(--el-border-color-rgb), 0.8);
   border-top: none;
-  border-radius: 0 0 8px 8px;
-  padding: 10px 15px;
-  background: var(--el-bg-color-overlay, #ffffff);
+  border-radius: 0 0 12px 12px;
+  padding: 12px 16px;
+  background: var(--el-bg-color-page);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--el-box-shadow-lighter);
+  animation: fadeInUp 0.4s ease-out 0.1s backwards;
 }
 
 .weektime .weektime-help-tx {
@@ -428,6 +499,7 @@ p {
 
 .weektime .weektime-help-week-tx {
   color: var(--el-text-color-secondary, #909399);
+  font-weight: 500;
 }
 
 .weektime .weektime-help-bd {
@@ -442,109 +514,123 @@ p {
 .weektime .weektime-help .color-box {
   width: 16px;
   height: 16px;
-  background: var(--el-bg-color-page, #f5f7fa);
-  border: 1px solid var(--el-border-color, #dcdfe6);
-  border-radius: 3px;
+  background: var(--el-fill-color-extra-light);
+  border: 1px solid var(--el-border-color-light);
+  border-radius: 4px;
   display: block;
   margin-right: 6px;
+  transition: all 0.3s ease;
 }
 
 .weektime .weektime-help-bd .color-box.color-active {
-  background: var(--el-color-primary, #409eff);
-  border-color: var(--el-color-primary, #409eff);
+  background: linear-gradient(135deg, var(--el-color-primary), var(--el-color-primary-light-3));
+  border-color: var(--el-color-primary);
+  box-shadow: 0 0 6px rgba(var(--el-color-primary-rgb), 0.25);
 }
 
 .weektime .weektime-help .text-box {
   margin-right: 15px;
-  color: var(--el-text-color-regular, #606266);
+  color: var(--el-text-color-regular);
+  font-weight: 500;
 }
 
 .weektime .weektime-help .weektime-help-ft {
-  color: var(--el-color-primary, #409eff);
+  color: var(--el-color-primary);
   cursor: pointer;
-  transition: color 0.2s;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 6px;
+  background: var(--el-fill-color-lighter);
+  border: 1px solid var(--el-border-color-light);
   
   &:hover {
-    color: var(--el-color-primary-light-3, #79bbff);
+    color: var(--el-color-primary-light-3);
+    background: var(--el-fill-color-light);
+    border-color: var(--el-border-color);
+    transform: translateY(-1px);
   }
 }
 
 .weektime-help-select {
-  padding-top: 8px;
-  border-top: 1px solid var(--el-border-color-lighter, #ebeef5);
+  padding-top: 10px;
+  border-top: 1px solid var(--el-border-color-lighter);
   font-size: 13px;
-  color: var(--el-text-color-regular, #606266);
+  color: var(--el-text-color-regular);
+  line-height: 1.8;
 }
 
 /* 暗黑模式适配 */
 html.dark {
   .weektime {
-    color: var(--el-text-color-secondary, #a3a6ad);
+    color: var(--el-text-color-secondary);
   }
 
   .weektime .weektime-main {
-    border-color: var(--el-border-color, #4c4d4f);
-    background: var(--el-bg-color-overlay, #1d1e1f);
+    border-color: rgba(var(--el-border-color-rgb), 0.6);
+    background: var(--el-bg-color-page);
+    box-shadow: var(--el-box-shadow-dark);
   }
 
   .weektime .weektime-hd {
-    background: var(--el-bg-color-page, #141414);
+    background: var(--el-fill-color-lighter);
   }
 
   .weektime .weektime-hd-title {
-    color: var(--el-text-color-primary, #e5eaf3);
+    color: var(--el-text-color-primary);
   }
 
   .weektime .weektime-hd-con-top {
-    border-color: var(--el-border-color-lighter, #363637);
+    border-color: var(--el-border-color-lighter);
   }
 
   .weektime .weektime-date-range {
-    border-color: var(--el-border-color-lighter, #363637);
+    border-color: var(--el-border-color-lighter);
   }
 
   .weektime .weektime-date-cell {
-    border-color: var(--el-border-color-lighter, #363637);
+    border-color: var(--el-border-color-lighter);
   }
 
   .weektime .week-item {
-    border-color: var(--el-border-color-lighter, #363637);
-    color: var(--el-text-color-primary, #e5eaf3);
+    border-color: var(--el-border-color-lighter);
+    color: var(--el-text-color-primary);
   }
 
   .weektime .time-cell {
-    border-color: var(--el-border-color-extra-light, #262727);
+    border-color: var(--el-border-color-extra-light);
   }
 
   .weektime .time-cell:hover:not(.disable) {
-    background: var(--el-bg-color-page, #141414);
+    background: var(--el-fill-color-light);
   }
 
   .weektime .time-cell.disable {
-    background: var(--el-bg-color-disabled, #262727);
+    background: var(--el-fill-color-extra-light);
   }
 
   .weektime .weektime-help {
-    border-color: var(--el-border-color, #4c4d4f);
-    background: var(--el-bg-color-overlay, #1d1e1f);
+    border-color: rgba(var(--el-border-color-rgb), 0.6);
+    background: var(--el-bg-color-page);
+    box-shadow: var(--el-box-shadow-dark);
   }
 
   .weektime .weektime-help-week-tx {
-    color: var(--el-text-color-secondary, #a3a6ad);
+    color: var(--el-text-color-secondary);
   }
 
   .weektime .weektime-help .color-box {
-    background: var(--el-bg-color-page, #141414);
-    border-color: var(--el-border-color, #4c4d4f);
+    background: var(--el-fill-color-extra-light);
+    border-color: var(--el-border-color-light);
   }
 
   .weektime .weektime-help .text-box {
-    color: var(--el-text-color-regular, #cfd3dc);
+    color: var(--el-text-color-regular);
   }
 
   .weektime-help-select {
-    border-color: var(--el-border-color-lighter, #363637);
-    color: var(--el-text-color-regular, #cfd3dc);
+    border-color: var(--el-border-color-lighter);
+    color: var(--el-text-color-regular);
   }
 }
 </style>

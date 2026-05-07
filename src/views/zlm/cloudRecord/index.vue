@@ -951,7 +951,7 @@ onUnmounted(() => {
 
 .view-switch :deep(.el-radio-button__inner:hover) {
   color: var(--el-color-primary);
-  background: rgba(64, 158, 255, 0.08);
+  background: var(--el-fill-color-light);
   transform: translateY(-1px);
 }
 
@@ -1016,19 +1016,16 @@ onUnmounted(() => {
 
 .device-card:hover {
   transform: translateY(-6px);
-  box-shadow: 
-    0 4px 8px rgba(0,0,0,0.05),
-    0 12px 24px rgba(0,0,0,0.06),
-    0 24px 48px rgba(0,0,0,0.04);
-  border-color: rgba(64, 158, 255, 0.25);
+  box-shadow: var(--el-box-shadow-light);
+  border-color: var(--el-color-primary-light-5);
 }
 
 .device-card.is-selected {
-  border-color: rgba(64, 158, 255, 0.5);
+  border-color: var(--el-color-primary);
   box-shadow: 
-    0 0 0 3px rgba(64, 158, 255, 0.1),
-    0 8px 24px -4px rgba(64, 158, 255, 0.2),
-    0 4px 12px rgba(64, 158, 255, 0.1);
+    0 0 0 3px var(--el-color-primary-light-9),
+    0 8px 24px -4px rgba(var(--el-color-primary-rgb), 0.2),
+    0 4px 12px rgba(var(--el-color-primary-rgb), 0.1);
 }
 
 /* 头部区域（替代图片区） */
@@ -1071,7 +1068,7 @@ onUnmounted(() => {
   color: var(--el-color-primary);
   flex-shrink: 0;
   animation: iconPulse 2s ease-in-out infinite;
-  filter: drop-shadow(0 0 4px rgba(64, 158, 255, 0.3));
+  filter: drop-shadow(0 0 4px rgba(var(--el-color-primary-rgb), 0.3));
 }
 
 @keyframes iconPulse {
@@ -1201,15 +1198,15 @@ onUnmounted(() => {
   border-top: 1px solid var(--el-border-color-lighter);
 }
 
-.btn-play {
+.card-toolbar .el-button.btn-play {
   flex-shrink: 0;
   min-width: 72px;
-  box-shadow: 0 2px 8px rgba(64, 158, 255, 0.25);
+  box-shadow: 0 2px 8px rgba(var(--el-color-primary-rgb), 0.25) !important;
   transition: all 0.3s ease;
 }
 
-.btn-play:not(:disabled):hover {
-  box-shadow: 0 4px 14px rgba(64, 158, 255, 0.4);
+.card-toolbar .el-button.btn-play:not(:disabled):hover {
+  box-shadow: 0 4px 14px rgba(var(--el-color-primary-rgb), 0.4) !important;
   transform: translateY(-1px);
 }
 
@@ -1235,6 +1232,49 @@ onUnmounted(() => {
 }
 
 .player-dialog {
+  :deep(.el-dialog) {
+    border-radius: 16px;
+    background: var(--el-bg-color-page);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--el-border-color-lighter);
+    box-shadow: var(--el-box-shadow-light);
+    overflow: hidden;
+  }
+
+  :deep(.el-dialog__header) {
+    padding: 16px 20px;
+    margin-right: 0;
+    border-bottom: 1px solid var(--el-border-color-lighter);
+  }
+
+  :deep(.el-dialog__title) {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--el-text-color-primary);
+  }
+
+  :deep(.el-dialog__headerbtn) {
+    top: 14px;
+    right: 16px;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+
+  :deep(.el-dialog__headerbtn:hover) {
+    background: var(--el-fill-color-light);
+  }
+
+  :deep(.el-dialog__close) {
+    color: var(--el-text-color-secondary);
+    font-size: 18px;
+  }
+
+  :deep(.el-dialog__headerbtn:hover .el-dialog__close) {
+    color: var(--el-color-primary);
+  }
+
   :deep(.el-dialog__body) {
     padding: 0;
   }
@@ -1281,7 +1321,7 @@ onUnmounted(() => {
 .player-progress-bar {
   width: 100%;
   height: 6px;
-  background-color: var(--el-color-primary, #409eff);
+  background-color: var(--el-color-primary);
   border-radius: 4px;
   transition: width 0.1s linear;
 }
@@ -1328,11 +1368,11 @@ onUnmounted(() => {
   }
 
   &.primary {
-    background: var(--el-color-primary, #409eff);
+    background: var(--el-color-primary);
   }
 
   &.danger {
-    background: rgba(245, 108, 108, 0.2);
+    background: rgba(var(--el-color-danger-rgb), 0.2);
   }
 
   &.speed-btn {
@@ -1354,38 +1394,40 @@ html.dark {
     background: linear-gradient(to bottom, #0d0d0d, #1a1a1a);
   }
 
-  .url-header {
-    .url-label {
-      color: var(--el-text-color-primary, #e5eaf3);
-    }
+  /* 播放器对话框暗黑模式 */
+  .player-dialog :deep(.el-dialog) {
+    background: var(--el-bg-color-page);
+    border-color: var(--el-border-color);
+    box-shadow: var(--el-box-shadow-dark);
+  }
+
+  .player-dialog :deep(.el-dialog__header) {
+    border-bottom-color: var(--el-border-color);
   }
 
   /* 卡片暗黑增强 */
   .device-card {
-    box-shadow:
-      0 1px 2px rgba(0,0,0,0.3),
-      0 4px 8px rgba(0,0,0,0.25),
-      0 8px 16px rgba(0,0,0,0.2);
+    box-shadow: var(--el-box-shadow-dark);
   }
 
   .device-card:hover {
-    box-shadow:
+    box-shadow: 
       0 4px 8px rgba(0,0,0,0.35),
       0 12px 24px rgba(0,0,0,0.3),
       0 24px 48px rgba(0,0,0,0.2);
-    border-color: rgba(64, 158, 255, 0.35);
+    border-color: var(--el-color-primary-light-3);
   }
 
   .device-card.is-selected {
-    border-color: rgba(64, 158, 255, 0.6);
+    border-color: var(--el-color-primary);
     box-shadow:
-      0 0 0 3px rgba(64, 158, 255, 0.15),
-      0 8px 24px -4px rgba(64, 158, 255, 0.25),
-      0 4px 12px rgba(64, 158, 255, 0.15);
+      0 0 0 3px var(--el-color-primary-light-9),
+      0 8px 24px -4px rgba(var(--el-color-primary-rgb), 0.25),
+      0 4px 12px rgba(var(--el-color-primary-rgb), 0.15);
   }
 
   .card-header-area {
-    background: linear-gradient(135deg, rgba(64, 158, 255, 0.12) 0%, var(--el-fill-color) 100%);
+    background: linear-gradient(135deg, rgba(var(--el-color-primary-rgb), 0.12) 0%, var(--el-fill-color) 100%);
   }
 
   .info-tag,
@@ -1397,11 +1439,19 @@ html.dark {
   .info-tag:hover,
   .info-channel:hover {
     border-color: var(--el-color-primary-light-3);
-    background: rgba(64, 158, 255, 0.08);
+    background: rgba(var(--el-color-primary-rgb), 0.08);
   }
 
   .card-toolbar {
     border-color: var(--el-border-color);
+  }
+
+  .card-toolbar .el-button.btn-play {
+    box-shadow: 0 2px 8px rgba(var(--el-color-primary-rgb), 0.35) !important;
+  }
+
+  .card-toolbar .el-button.btn-play:not(:disabled):hover {
+    box-shadow: 0 4px 14px rgba(var(--el-color-primary-rgb), 0.5) !important;
   }
 }
 </style>

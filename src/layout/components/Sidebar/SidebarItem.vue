@@ -207,13 +207,13 @@ function resolvePath(routePath: string, routeQuery?: string): string | { path: s
       .menu-icon {
         transform: scale(1.05) !important;
         transform-origin: center !important;
-        filter: drop-shadow(0 0 6px rgba(64, 158, 255, 0.8));
+        filter: drop-shadow(0 0 6px rgba(var(--el-color-primary-rgb), 0.8));
         animation: iconPulse 2s ease-in-out infinite;
       }
 
       .menu-title {
         font-weight: 600;
-        text-shadow: 0 0 8px rgba(64, 158, 255, 0.4);
+        text-shadow: 0 0 8px rgba(var(--el-color-primary-rgb), 0.4);
       }
     }
   }
@@ -233,13 +233,13 @@ function resolvePath(routePath: string, routeQuery?: string): string | { path: s
         .menu-icon {
           transform: scale(1.05) !important;
           transform-origin: center !important;
-          filter: drop-shadow(0 0 6px rgba(64, 158, 255, 0.8));
+          filter: drop-shadow(0 0 6px rgba(var(--el-color-primary-rgb), 0.8));
           animation: iconPulse 2s ease-in-out infinite;
         }
 
         .menu-title {
           font-weight: 600;
-          text-shadow: 0 0 8px rgba(64, 158, 255, 0.4);
+          text-shadow: 0 0 8px rgba(var(--el-color-primary-rgb), 0.4);
         }
       }
     }
@@ -294,10 +294,10 @@ function resolvePath(routePath: string, routeQuery?: string): string | { path: s
 @keyframes iconPulse {
   0%,
   100% {
-    filter: drop-shadow(0 0 4px rgba(64, 158, 255, 0.6));
+    filter: drop-shadow(0 0 4px rgba(var(--el-color-primary-rgb), 0.6));
   }
   50% {
-    filter: drop-shadow(0 0 10px rgba(64, 158, 255, 0.9));
+    filter: drop-shadow(0 0 10px rgba(var(--el-color-primary-rgb), 0.9));
   }
 }
 
@@ -310,16 +310,19 @@ html.dark,
 
     .el-menu-item.is-active .menu-icon,
     .el-sub-menu.is-active > .el-sub-menu__title .menu-icon {
-      filter: brightness(1.3) drop-shadow(0 0 8px rgba(64, 158, 255, 0.9));
+      filter: brightness(1.3) drop-shadow(0 0 8px rgba(var(--el-color-primary-rgb), 0.9));
     }
 
     .el-menu-item.is-active .menu-indicator,
     .el-sub-menu.is-active > .el-sub-menu__title .menu-indicator {
+      .corner {
+        border-color: var(--el-color-primary-light-3);
+      }
     }
 
     .el-menu-item.is-active .menu-title,
     .el-sub-menu.is-active > .el-sub-menu__title .menu-title {
-      text-shadow: 0 0 12px rgba(64, 158, 255, 0.6);
+      text-shadow: 0 0 12px rgba(var(--el-color-primary-rgb), 0.6);
     }
   }
 }

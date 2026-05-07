@@ -73,10 +73,14 @@
       <el-table-column label="编号" align="center" prop="id" width="100"/>
       <el-table-column label="计划名称" align="center" prop="name"/>
       <el-table-column prop="channelCount" label="关联设备" align="center"/>
-      <el-table-column label="状态" align="center" prop="status">
+      <el-table-column label="状态" align="center" prop="status" width="100">
         <template #default="scope">
-          <el-tag type="primary" v-if="scope.row.snap === 'ENABLE'">启用</el-tag>
-          <el-tag type="primary" v-if="scope.row.snap === 'DEACTIVATE'">停用</el-tag>
+          <el-switch
+            v-model="scope.row.status"
+            active-value="ENABLE"
+            inactive-value="DEACTIVATE"
+            @change="handleStatusChange(scope.row)"
+          ></el-switch>
         </template>
       </el-table-column>
       <el-table-column prop="createTime" label="创建时间" align="center"/>
@@ -101,9 +105,14 @@
                 <el-icon class="header-icon"><VideoCamera /></el-icon>
                 <h3 class="header-title" :title="item.name">{{ item.name }}</h3>
               </div>
-              <el-tag :type="item.snap === 'ENABLE' ? 'success' : 'info'" size="small" class="header-tag">
-                {{ item.snap === 'ENABLE' ? '启用' : '停用' }}
-              </el-tag>
+              <el-switch
+                v-model="item.status"
+                active-value="ENABLE"
+                inactive-value="DEACTIVATE"
+                @change="handleStatusChange(item)"
+                size="small"
+                class="header-switch"
+              />
             </div>
 
             <!-- 信息区 -->
@@ -157,7 +166,7 @@
     />
 
     <!-- 添加或修改录像计划对话框 -->
-    <el-dialog :title="title" v-model="open" width="800px" append-to-body draggable>
+    <el-dialog :title="title" v-model="open" width="800px" append-to-body draggable destroy-on-close class="glass-dialog record-plan-dialog">
       <el-form ref="recordPlanRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="计划名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入计划名称"/>
@@ -181,7 +190,7 @@
     </el-dialog>
 
 
-    <el-dialog title="关联设备" v-model="openLink" width="1000px" append-to-body draggable>
+    <el-dialog title="关联设备" v-model="openLink" width="1000px" append-to-body draggable destroy-on-close class="glass-dialog link-dialog">
       <AssociatedSevice :planId="recordPlanRow.id" v-if="openLink"/>
     </el-dialog>
   </div>
@@ -189,10 +198,10 @@
 
 <script setup lang="ts" name="RecordPlan">
 import type {RecordPlanQueryParams, ZlmRecordPlan} from "@/types/api/qs/recordPlan"
-import ByteWeekTimePicker from "./byteWeekTimePicker.vue";
-import AssociatedSevice from "./associatedDevice.vue";
-import {addRecordPlan, delRecordPlan, getRecordPlan, listRecordPlan, updateRecordPlan} from "@/api/qs/recordPlan"
-import {QsDevice} from "@/types/api";
+import ByteWeekTimePicker from "./byteWeekTimePicker.vue"
+import AssociatedSevice from "./associatedDevice.vue"
+import {addRecordPlan, delRecordPlan, getRecordPlan, listRecordPlan, updateRecordPlan, changeRecordPlanStatus} from "@/api/qs/recordPlan"
+import {QsDevice} from "@/types/api"
 import {List, Grid, VideoCamera} from '@element-plus/icons-vue'
 
 const {proxy} = getCurrentInstance()
@@ -440,6 +449,17 @@ const plan2Byte = (planList) => {
   return byte;
 };
 
+const handleStatusChange = (row: ZlmRecordPlan) => {
+  const text = row.status === "ENABLE" ? "启用" : "停用"
+  proxy.$modal.confirm('确认要"' + text + '"该录像计划吗?').then(function () {
+    return changeRecordPlanStatus(row.id!, row.status!)
+  }).then(() => {
+    proxy.$modal.msgSuccess(text + "成功")
+  }).catch(function () {
+    row.status = row.status === "DEACTIVATE" ? "ENABLE" : "DEACTIVATE"
+  })
+};
+
 getList()
 </script>
 
@@ -615,7 +635,7 @@ getList()
   line-height: 1.4;
 }
 
-.header-tag {
+.header-switch {
   flex-shrink: 0;
 }
 
@@ -800,5 +820,169 @@ html.dark {
   .card-toolbar {
     border-color: var(--el-border-color);
   }
+}
+</style>
+
+
+<style>
+/* ===== 玻璃对话框效果 ===== */
+.glass-dialog.record-plan-dialog .el-dialog,
+.glass-dialog.link-dialog .el-dialog {
+  border-radius: 20px;
+  background: var(--el-bg-color-page);
+  backdrop-filter: blur(20px) saturate(1.3);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  border: 1px solid var(--el-border-color-lighter);
+  box-shadow: var(--el-box-shadow-lighter);
+  overflow: hidden;
+  animation: dialogEnter 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes dialogEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 头部 */
+.glass-dialog.record-plan-dialog .el-dialog__header,
+.glass-dialog.link-dialog .el-dialog__header {
+  padding: 20px 24px 16px;
+  margin-right: 0;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  position: relative;
+}
+
+.glass-dialog.record-plan-dialog .el-dialog__header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 24px;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--el-color-primary), var(--el-color-primary-light-3));
+  border-radius: 2px;
+  opacity: 0.6;
+}
+
+.glass-dialog.record-plan-dialog .el-dialog__title,
+.glass-dialog.link-dialog .el-dialog__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  letter-spacing: 0.3px;
+}
+
+.glass-dialog.record-plan-dialog .el-dialog__headerbtn,
+.glass-dialog.link-dialog .el-dialog__headerbtn {
+  top: 18px;
+  right: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.glass-dialog.record-plan-dialog .el-dialog__headerbtn .el-dialog__close,
+.glass-dialog.link-dialog .el-dialog__headerbtn .el-dialog__close {
+  color: var(--el-text-color-secondary);
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+.glass-dialog.record-plan-dialog .el-dialog__headerbtn:hover,
+.glass-dialog.link-dialog .el-dialog__headerbtn:hover {
+  background: var(--el-fill-color-light);
+  transform: rotate(90deg) scale(1.1);
+}
+
+.glass-dialog.record-plan-dialog .el-dialog__headerbtn:hover .el-dialog__close,
+.glass-dialog.link-dialog .el-dialog__headerbtn:hover .el-dialog__close {
+  color: var(--el-color-primary);
+}
+
+/* 内容区 */
+.glass-dialog.record-plan-dialog .el-dialog__body {
+  padding: 24px;
+}
+
+.glass-dialog.link-dialog .el-dialog__body {
+  padding: 20px 24px;
+}
+
+/* 底部 */
+.glass-dialog.record-plan-dialog .el-dialog__footer,
+.glass-dialog.link-dialog .el-dialog__footer {
+  padding: 16px 24px 20px;
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+
+/* 表单内容 stagger 入场动画 */
+.glass-dialog.record-plan-dialog .el-form-item {
+  animation: formItemEnter 0.35s ease-out backwards;
+}
+.glass-dialog.record-plan-dialog .el-form-item:nth-child(1) { animation-delay: 0.06s; }
+.glass-dialog.record-plan-dialog .el-form-item:nth-child(2) { animation-delay: 0.12s; }
+.glass-dialog.record-plan-dialog .el-form-item:nth-child(3) { animation-delay: 0.18s; }
+
+@keyframes formItemEnter {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 按钮效果 */
+.glass-dialog.record-plan-dialog .dialog-footer .el-button,
+.glass-dialog.link-dialog .dialog-footer .el-button {
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  min-width: 80px;
+}
+
+.glass-dialog.record-plan-dialog .dialog-footer .el-button:hover,
+.glass-dialog.link-dialog .dialog-footer .el-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(var(--el-color-primary-rgb), 0.25);
+}
+
+.glass-dialog.record-plan-dialog .dialog-footer .el-button:active,
+.glass-dialog.link-dialog .dialog-footer .el-button:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* ===== 暗黑模式 ===== */
+html.dark .glass-dialog.record-plan-dialog .el-dialog,
+html.dark .glass-dialog.link-dialog .el-dialog {
+  background: var(--el-bg-color-page);
+  border-color: var(--el-border-color);
+  box-shadow: var(--el-box-shadow-dark);
+}
+
+html.dark .glass-dialog.record-plan-dialog .el-dialog__header,
+html.dark .glass-dialog.link-dialog .el-dialog__header {
+  border-bottom-color: var(--el-border-color);
+}
+
+html.dark .glass-dialog.record-plan-dialog .el-dialog__header::after {
+  opacity: 0.8;
+}
+
+html.dark .glass-dialog.record-plan-dialog .el-dialog__footer,
+html.dark .glass-dialog.link-dialog .el-dialog__footer {
+  border-top-color: var(--el-border-color);
+}
+
+html.dark .glass-dialog.record-plan-dialog .el-dialog__headerbtn:hover,
+html.dark .glass-dialog.link-dialog .el-dialog__headerbtn:hover {
+  background: var(--el-fill-color);
 }
 </style>

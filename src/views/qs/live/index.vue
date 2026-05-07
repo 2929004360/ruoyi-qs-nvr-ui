@@ -689,7 +689,7 @@ const handlePtz = async (data, idx) => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .live-container {
   height: calc(100vh - 124px);
   width: 100%;
@@ -713,7 +713,6 @@ const handlePtz = async (data, idx) => {
   flex-direction: column;
   overflow: hidden;
   border-radius: 20px;
-  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
   position: relative;
   margin: 0;
 }
@@ -745,7 +744,7 @@ const handlePtz = async (data, idx) => {
 .split-label {
   font-size: 15px;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--el-text-color-primary);
   letter-spacing: 0.3px;
   display: flex;
   align-items: center;
@@ -753,7 +752,7 @@ const handlePtz = async (data, idx) => {
 }
 
 .split-label .el-icon {
-  color: #409eff;
+  color: var(--el-color-primary);
 }
 
 .split-grid {
@@ -775,14 +774,14 @@ const handlePtz = async (data, idx) => {
 }
 
 .split-item:hover {
-  background: rgba(64, 158, 255, 0.08);
+  background: rgba(var(--el-color-primary-rgb), 0.08);
   transform: translateY(-2px);
 }
 
 .split-item.active {
-  background: linear-gradient(135deg, rgba(64, 158, 255, 0.15) 0%, rgba(102, 178, 255, 0.1) 100%);
-  border-color: #409eff;
-  box-shadow: 0 4px 16px rgba(64, 158, 255, 0.25);
+  background: linear-gradient(135deg, rgba(var(--el-color-primary-rgb), 0.15) 0%, rgba(var(--el-color-primary-rgb), 0.1) 100%);
+  border-color: var(--el-color-primary);
+  box-shadow: 0 4px 16px rgba(var(--el-color-primary-rgb), 0.25);
 }
 
 .split-preview {
@@ -829,25 +828,25 @@ const handlePtz = async (data, idx) => {
 }
 
 .preview-dot {
-  background: #94a3b8;
+  background: var(--el-text-color-placeholder);
   border-radius: 4px;
   transition: all 0.3s ease;
 }
 
 .split-item.active .preview-dot {
-  background: #409eff;
-  box-shadow: 0 0 8px rgba(64, 158, 255, 0.5);
+  background: var(--el-color-primary);
+  box-shadow: 0 0 8px rgba(var(--el-color-primary-rgb), 0.5);
 }
 
 .split-text {
   font-size: 10px;
   font-weight: 600;
-  color: #64748b;
+  color: var(--el-text-color-secondary);
   transition: color 0.3s ease;
 }
 
 .split-item.active .split-text {
-  color: #409eff;
+  color: var(--el-color-primary);
 }
 
 
@@ -861,28 +860,28 @@ const handlePtz = async (data, idx) => {
 .toolbar-btn {
   width: 40px;
   height: 40px;
-  color: #409eff;
-  background: rgba(64, 158, 255, 0.08);
+  color: var(--el-color-primary);
+  background: rgba(var(--el-color-primary-rgb), 0.08);
   border: none;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .toolbar-btn:hover {
-  background: #409eff;
+  background: var(--el-color-primary);
   color: white;
   transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--el-color-primary-rgb), 0.3);
 }
 
 .toolbar-btn.danger {
-  color: #ef4444;
-  background: rgba(239, 68, 68, 0.08);
+  color: var(--el-color-danger);
+  background: rgba(var(--el-color-danger-rgb), 0.08);
 }
 
 .toolbar-btn.danger:hover {
-  background: #ef4444;
+  background: var(--el-color-danger);
   color: white;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--el-color-danger-rgb), 0.3);
 }
 
 .player-container {
@@ -890,8 +889,8 @@ const handlePtz = async (data, idx) => {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
   overflow: hidden;
+  padding-top: 10px;
 }
 
 .play-grid {
@@ -910,20 +909,20 @@ const handlePtz = async (data, idx) => {
   position: relative;
   border: 2px solid transparent;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 8px 24px rgba(var(--el-color-primary-rgb), 0.12);
 }
 
 .play-box:hover {
-  border-color: #409eff;
+  border-color: var(--el-color-primary);
   transform: translateY(-4px);
   z-index: 10;
-  box-shadow: 0 16px 48px rgba(64, 158, 255, 0.4),
-              0 8px 24px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 16px 48px rgba(var(--el-color-primary-rgb), 0.25),
+              0 8px 24px rgba(var(--el-color-primary-rgb), 0.08);
 }
 
 .play-box.active {
-  border-color: #409eff;
-  box-shadow: 0 0 0 4px rgba(64, 158, 255, 0.15), 0 12px 40px rgba(64, 158, 255, 0.25);
+  border-color: var(--el-color-primary);
+  box-shadow: 0 0 0 4px rgba(var(--el-color-primary-rgb), 0.12), 0 12px 40px rgba(var(--el-color-primary-rgb), 0.18);
   z-index: 5;
 }
 
@@ -932,7 +931,7 @@ const handlePtz = async (data, idx) => {
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  color: #6b7280;
+  color: var(--el-text-color-secondary);
 }
 
 .no-signal-icon {
@@ -1015,59 +1014,64 @@ const handlePtz = async (data, idx) => {
     padding: 12px;
   }
 }
-</style>
 
-<!-- 暗黑模式适配 -->
-<style>
+/* 暗黑模式适配 */
 html.dark {
-  .split-item:hover {
-    background: rgba(64, 158, 255, 0.15);
-  }
-
-  .split-item.active {
-    background: linear-gradient(135deg, rgba(64, 158, 255, 0.25) 0%, rgba(102, 178, 255, 0.18) 100%);
-  }
-
-  .preview-dot {
-    background: #64748b;
-  }
-
-  .split-item.active .preview-dot {
-    background: #409eff;
-  }
-
-  .split-text {
-    color: #94a3b8;
-  }
-
-  .toolbar-btn {
-    background: rgba(64, 158, 255, 0.12);
-  }
-
-  .toolbar-btn:hover {
-    background: #409eff;
-  }
-
-  .toolbar-btn.danger {
-    background: rgba(239, 68, 68, 0.12);
-  }
-
-  .toolbar-btn.danger:hover {
-    background: #ef4444;
-  }
-
   .control-bar {
-    background: linear-gradient(135deg, rgba(30, 30, 30, 0.98) 0%, rgba(36, 36, 36, 0.98) 100%);
-    border-bottom-color: rgba(255, 255, 255, 0.08);
-  }
-
-  .split-label {
-    color: #e0e0e0;
+    background: var(--el-bg-color-page);
+    border-bottom-color: var(--el-border-color);
+    box-shadow: var(--el-box-shadow-dark);
   }
 
   .video-container {
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
-                0 2px 8px rgba(0, 0, 0, 0.3);
+    background: var(--el-bg-color-page);
+  }
+
+  .play-box {
+    background: var(--el-bg-color);
+    border-color: var(--el-border-color);
+  }
+
+  .play-box:hover {
+    border-color: var(--el-color-primary);
+  }
+
+  .play-box.active {
+    border-color: var(--el-color-primary);
+  }
+
+  .no-signal {
+    color: var(--el-text-color-secondary);
+  }
+
+  .no-signal-icon {
+    background: rgba(var(--el-text-color-secondary-rgb), 0.15);
+    color: var(--el-text-color-secondary);
+  }
+
+  .no-signal span {
+    color: var(--el-text-color-placeholder);
+  }
+
+  .split-item:hover {
+    background: rgba(var(--el-color-primary-rgb), 0.15);
+  }
+
+  .split-item.active {
+    background: linear-gradient(135deg, rgba(var(--el-color-primary-rgb), 0.25) 0%, rgba(var(--el-color-primary-rgb), 0.18) 100%);
+  }
+
+  .split-item.active .preview-dot {
+    background: var(--el-color-primary);
+    box-shadow: 0 0 8px rgba(var(--el-color-primary-rgb), 0.6);
+  }
+
+  .toolbar-btn {
+    background: rgba(var(--el-color-primary-rgb), 0.12);
+  }
+
+  .toolbar-btn.danger {
+    background: rgba(var(--el-color-danger-rgb), 0.12);
   }
 }
 </style>

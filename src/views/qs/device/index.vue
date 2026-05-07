@@ -312,7 +312,7 @@
     />
 
     <!-- 添加或修改视频监控设备对话框 -->
-    <el-dialog :title="title" v-model="open" width="960px" append-to-body draggable>
+    <el-dialog :title="title" v-model="open" width="960px" append-to-body draggable class="glass-dialog device-dialog">
       <el-form ref="deviceRef" :model="form" :rules="rules" label-width="110px">
         <!-- 基础信息分组 -->
         <el-card class="form-card" body-style="padding: 16px 20px;">
@@ -435,7 +435,7 @@
               >
                 <div style="display: flex; justify-content: space-between;">
                   <span>{{ item.deviceId }}</span>
-                  <span style="color: #909399; font-size: 12px;">{{ item.ip }}</span>
+                  <span style="color: var(--el-text-color-secondary); font-size: 12px;">{{ item.ip }}</span>
                 </div>
               </el-option>
             </el-select>
@@ -453,7 +453,7 @@
               >
                 <div style="display: flex; justify-content: space-between;">
                   <span>{{ item.deviceId }}</span>
-                  <span style="color: #909399; font-size: 12px;">{{ item.ip }}</span>
+                  <span style="color: var(--el-text-color-secondary); font-size: 12px;">{{ item.ip }}</span>
                 </div>
               </el-option>
             </el-select>
@@ -531,12 +531,12 @@
                           width: '6px',
                           height: '6px',
                           borderRadius: '50%',
-                          backgroundColor: item.onLine ? '#67C23A' : '#909399'
+                          backgroundColor: item.onLine ? 'var(--el-color-success)' : 'var(--el-text-color-secondary)'
                         }"
                       ></span>
                       <span style="font-weight: 500;">{{ item.name }}</span>
                     </div>
-                    <span style="color: #909399; font-size: 12px; font-family: 'Courier New', monospace;">{{ item.deviceId }}</span>
+                    <span style="color: var(--el-text-color-secondary); font-size: 12px; font-family: 'Courier New', monospace;">{{ item.deviceId }}</span>
                   </div>
                 </el-option>
               </el-select>
@@ -558,12 +558,12 @@
                           width: '6px',
                           height: '6px',
                           borderRadius: '50%',
-                          backgroundColor: (item.gbStatus || item.status) === 'ON' ? '#67C23A' : '#909399'
+                          backgroundColor: (item.gbStatus || item.status) === 'ON' ? 'var(--el-color-success)' : 'var(--el-text-color-secondary)'
                         }"
                       ></span>
                       <span style="font-weight: 500;">{{ item.gbName || item.name }}</span>
                     </div>
-                    <span style="color: #909399; font-size: 12px; font-family: 'Courier New', monospace;">{{ item.gbDeviceId || item.deviceId }}</span>
+                    <span style="color: var(--el-text-color-secondary); font-size: 12px; font-family: 'Courier New', monospace;">{{ item.gbDeviceId || item.deviceId }}</span>
                   </div>
                 </el-option>
               </el-select>
@@ -595,12 +595,12 @@
                           width: '6px',
                           height: '6px',
                           borderRadius: '50%',
-                          backgroundColor: item.online ? '#67C23A' : '#909399'
+                          backgroundColor: item.online ? 'var(--el-color-success)' : 'var(--el-text-color-secondary)'
                         }"
                       ></span>
                       <span style="font-weight: 500;">{{ item.plateNo || item.deviceId }}</span>
                     </div>
-                    <span style="color: #909399; font-size: 12px; font-family: 'Courier New', monospace;">{{ item.mobileNo }}</span>
+                    <span style="color: var(--el-text-color-secondary); font-size: 12px; font-family: 'Courier New', monospace;">{{ item.mobileNo }}</span>
                   </div>
                 </el-option>
               </el-select>
@@ -793,6 +793,7 @@
                append-to-body
                draggable
                @close="getList"
+               class="glass-dialog play-dialog"
     >
       <div style="width: 100%;height: 100%;display: flex;justify-content: center" v-if="easyPlayerOpen">
         <EasyPlayer
@@ -861,7 +862,7 @@
                      :stream="streamInfo.stream" :mediaServerId="streamInfo.mediaServerId"></MediaInfo>
         </el-tab-pane>
         <el-tab-pane label="云台控制" name="control">
-          <div v-if="!isPtz" style="text-align: center; padding: 40px; color: #909399;">
+          <div v-if="!isPtz" style="text-align: center; padding: 40px; color: var(--el-text-color-secondary);">
             <el-icon style="font-size: 48px; margin-bottom: 16px;"><InfoFilled/></el-icon>
             <p>当前设备不支持云台控制</p>
           </div>
@@ -988,7 +989,7 @@
               </el-tabs>
             </div>
             <!-- 对于不支持云台的设备，显示提示信息 -->
-            <div v-else style="text-align: center; padding: 20px; color: #909399;">
+            <div v-else style="text-align: center; padding: 20px; color: var(--el-text-color-secondary);">
               <p>该设备暂不支持云台控制及相关功能</p>
             </div>
           </div>
@@ -996,7 +997,8 @@
       </el-tabs>
     </el-dialog>
     <el-dialog :title="`接入地址-${deviceRow.deviceName}`" v-model="accessAddressOpen" width="600px" append-to-body
-               draggable>
+               draggable
+               class="glass-dialog access-dialog">
       <el-form :model="streamPushAddressForm" label-width="100px">
         <el-form-item label="rtsp地址">
           <el-input v-model="streamPushAddressForm.rtsp" placeholder="请输入rtsp地址" disabled>
@@ -2405,7 +2407,7 @@ watch(easyPlayerOpen, (newVal) => {
   width: 44%;
   height: 44%;
   border-radius: 5px;
-  border: 1px solid #78aee4;
+  border: 1px solid var(--el-color-primary-light-3);
   box-sizing: border-box;
   transition: all 0.3s linear;
 }
@@ -2418,7 +2420,7 @@ watch(easyPlayerOpen, (newVal) => {
 .control-btn .icon {
   width: 100%;
   font-size: 20px;
-  color: #78aee4;
+  color: var(--el-color-primary-light-3);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -2438,7 +2440,7 @@ watch(easyPlayerOpen, (newVal) => {
   left: 21%;
   width: 58%;
   height: 58%;
-  background: #fff;
+  background: var(--el-bg-color);
   border-radius: 100%;
 }
 
@@ -2452,8 +2454,8 @@ watch(easyPlayerOpen, (newVal) => {
   width: 70%;
   height: 70%;
   font-size: 40px;
-  color: #78aee4;
-  border: 1px solid #78aee4;
+  color: var(--el-color-primary-light-3);
+  border: 1px solid var(--el-color-primary-light-3);
   border-radius: 100%;
   transition: all 0.3s linear;
 }
@@ -2462,7 +2464,7 @@ watch(easyPlayerOpen, (newVal) => {
   position: absolute;
   width: 60%;
   height: 60%;
-  background: #fafafa;
+  background: var(--el-fill-color-lighter);
 }
 
 .control-top {
@@ -2480,8 +2482,8 @@ watch(easyPlayerOpen, (newVal) => {
 .control-top .control-inner {
   left: -1px;
   bottom: 0;
-  border-top: 1px solid #78aee4;
-  border-right: 1px solid #78aee4;
+  border-top: 1px solid var(--el-color-primary-light-3);
+  border-right: 1px solid var(--el-color-primary-light-3);
   border-radius: 0 100% 0 0;
 }
 
@@ -2503,8 +2505,8 @@ watch(easyPlayerOpen, (newVal) => {
 .control-left .control-inner {
   right: -1px;
   top: -1px;
-  border-bottom: 1px solid #78aee4;
-  border-left: 1px solid #78aee4;
+  border-bottom: 1px solid var(--el-color-primary-light-3);
+  border-left: 1px solid var(--el-color-primary-light-3);
   border-radius: 0 0 0 100%;
 }
 
@@ -2526,8 +2528,8 @@ watch(easyPlayerOpen, (newVal) => {
 .control-right .control-inner {
   left: -1px;
   bottom: -1px;
-  border-top: 1px solid #78aee4;
-  border-right: 1px solid #78aee4;
+  border-top: 1px solid var(--el-color-primary-light-3);
+  border-right: 1px solid var(--el-color-primary-light-3);
   border-radius: 0 100% 0 0;
 }
 
@@ -2549,8 +2551,8 @@ watch(easyPlayerOpen, (newVal) => {
 .control-bottom .control-inner {
   top: -1px;
   left: -1px;
-  border-bottom: 1px solid #78aee4;
-  border-right: 1px solid #78aee4;
+  border-bottom: 1px solid var(--el-color-primary-light-3);
+  border-right: 1px solid var(--el-color-primary-light-3);
   border-radius: 0 0 100% 0;
 }
 
@@ -2571,9 +2573,7 @@ watch(easyPlayerOpen, (newVal) => {
   padding: 0 10%;
 }
 
-.el-dialog__body {
-  padding: 10px 20px;
-}
+/* 全局 dialog body 样式已迁移到 .glass-dialog.device-dialog 作用域内 */
 
 .ptz-btn-box {
   display: grid;
@@ -2586,25 +2586,51 @@ watch(easyPlayerOpen, (newVal) => {
 
 .form-card {
   margin-bottom: 16px;
-  border: 1px solid #ebeef5;
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(12px) saturate(1.2);
+  -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 16px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.03),
+    0 4px 12px rgba(0, 0, 0, 0.04),
+    0 8px 24px rgba(0, 0, 0, 0.02);
   transition: all 0.3s ease;
+  animation: cardEnter 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards;
 }
 
 .form-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border-color: #dcdfe6;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.05),
+    0 8px 24px rgba(0, 0, 0, 0.06),
+    0 16px 48px rgba(0, 0, 0, 0.04);
+  transform: translateY(-2px);
+  border-color: rgba(var(--el-color-primary-rgb), 0.25);
 }
 
 .form-card:last-child {
   margin-bottom: 0;
 }
 
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 :deep(.el-card__header) {
   background: transparent;
-  border-bottom: 1px solid #ebeef5;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
   padding: 14px 20px;
+}
+
+:deep(.el-card__header span) {
+  color: var(--el-text-color-primary) !important;
 }
 
 :deep(.el-form-item) {
@@ -2638,7 +2664,7 @@ watch(easyPlayerOpen, (newVal) => {
 
 :deep(.el-table th) {
   background: #f8f9fa;
-  color: #303133;
+  color: var(--el-text-color-primary);
   font-weight: 500;
 }
 
@@ -2654,19 +2680,143 @@ watch(easyPlayerOpen, (newVal) => {
   margin-right: 24px;
 }
 
-:deep(.el-dialog) {
-  border-radius: 8px;
+/* ===== 玻璃对话框 ===== */
+.glass-dialog.device-dialog :deep(.el-dialog) {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(20px) saturate(1.3);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+  animation: dialogEnter 0.45s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-:deep(.el-dialog__header) {
-  border-bottom: 1px solid #f0f0f0;
+@keyframes dialogEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.glass-dialog.device-dialog :deep(.el-dialog__header) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
   padding: 18px 24px;
   margin-right: 0;
 }
 
-:deep(.el-dialog__footer) {
-  border-top: 1px solid #f0f0f0;
+.glass-dialog.device-dialog :deep(.el-dialog__header .el-dialog__title) {
+  color: var(--el-text-color-primary);
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.3px;
+}
+
+.glass-dialog.device-dialog :deep(.el-dialog__headerbtn) {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.glass-dialog.device-dialog :deep(.el-dialog__headerbtn:hover) {
+  background: rgba(var(--el-color-primary-rgb), 0.1);
+  transform: rotate(90deg) scale(1.1);
+}
+
+.glass-dialog.device-dialog :deep(.el-dialog__body) {
   padding: 16px 24px;
+}
+
+.glass-dialog.device-dialog :deep(.el-dialog__footer) {
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  padding: 16px 24px;
+}
+
+.glass-dialog.device-dialog :deep(.el-dialog__footer .el-button) {
+  min-width: 88px;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  height: 36px;
+}
+
+.glass-dialog.device-dialog :deep(.el-dialog__footer .el-button--primary:hover) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(var(--el-color-primary-rgb), 0.35);
+}
+
+.glass-dialog.device-dialog :deep(.el-dialog__footer .el-button:not(.el-button--primary):hover) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== 输入框 focus 光晕 ===== */
+.glass-dialog.device-dialog :deep(.el-input__wrapper) {
+  transition: all 0.25s ease;
+}
+
+.glass-dialog.device-dialog :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px var(--el-color-primary) inset, 0 0 10px rgba(var(--el-color-primary-rgb), 0.12);
+}
+
+/* ===== 表单项入场动画 ===== */
+.glass-dialog.device-dialog :deep(.el-form-item) {
+  animation: formItemEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+@keyframes formItemEnter {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ===== 暗黑模式 ===== */
+html.dark .glass-dialog.device-dialog :deep(.el-dialog) {
+  background: rgba(30, 30, 40, 0.78);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.25),
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+html.dark .glass-dialog.device-dialog :deep(.el-dialog__header) {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+html.dark .glass-dialog.device-dialog :deep(.el-dialog__footer) {
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+html.dark .glass-dialog.device-dialog :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px var(--el-color-primary) inset, 0 0 12px rgba(var(--el-color-primary-rgb), 0.2);
+}
+
+html.dark .form-card {
+  background: rgba(30, 30, 40, 0.55);
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+html.dark .form-card:hover {
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.25),
+    0 8px 24px rgba(0, 0, 0, 0.2),
+    0 16px 48px rgba(0, 0, 0, 0.15);
+}
+
+html.dark :deep(.el-card__header) {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
 }
 
 :deep(.el-tab-pane) {
@@ -3188,7 +3338,7 @@ watch(easyPlayerOpen, (newVal) => {
 }
 
 .btn-play:not(:disabled):hover {
-  box-shadow: 0 4px 14px rgba(64, 158, 255, 0.4);
+  box-shadow: 0 4px 14px rgba(var(--el-color-primary-rgb), 0.4);
   transform: translateY(-1px);
 }
 
@@ -3207,6 +3357,171 @@ watch(easyPlayerOpen, (newVal) => {
 
 .toolbar-actions .el-button:hover {
   transform: scale(1.08);
+}
+
+/* ===== 播放对话框玻璃拟态 ===== */
+.glass-dialog.play-dialog :deep(.el-dialog),
+.glass-dialog.access-dialog :deep(.el-dialog) {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(20px) saturate(1.3);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+  animation: dialogEnter 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes dialogEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.glass-dialog.play-dialog :deep(.el-dialog__header),
+.glass-dialog.access-dialog :deep(.el-dialog__header) {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  padding: 18px 24px;
+  margin-right: 0;
+}
+
+.glass-dialog.play-dialog :deep(.el-dialog__header .el-dialog__title),
+.glass-dialog.access-dialog :deep(.el-dialog__header .el-dialog__title) {
+  color: var(--el-text-color-primary);
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.3px;
+}
+
+.glass-dialog.play-dialog :deep(.el-dialog__headerbtn),
+.glass-dialog.access-dialog :deep(.el-dialog__headerbtn) {
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.glass-dialog.play-dialog :deep(.el-dialog__headerbtn:hover),
+.glass-dialog.access-dialog :deep(.el-dialog__headerbtn:hover) {
+  background: rgba(var(--el-color-primary-rgb), 0.1);
+  transform: rotate(90deg) scale(1.1);
+}
+
+.glass-dialog.play-dialog :deep(.el-dialog__body),
+.glass-dialog.access-dialog :deep(.el-dialog__body) {
+  padding: 16px 24px;
+}
+
+.glass-dialog.play-dialog :deep(.el-dialog__footer),
+.glass-dialog.access-dialog :deep(.el-dialog__footer) {
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  padding: 16px 24px;
+}
+
+/* ===== 播放对话框内输入框 focus 光晕 ===== */
+.glass-dialog.play-dialog :deep(.el-input__wrapper),
+.glass-dialog.access-dialog :deep(.el-input__wrapper) {
+  transition: all 0.25s ease;
+}
+
+.glass-dialog.play-dialog :deep(.el-input__wrapper.is-focus),
+.glass-dialog.access-dialog :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px var(--el-color-primary) inset, 0 0 10px rgba(var(--el-color-primary-rgb), 0.12);
+}
+
+/* ===== 云台控制玻璃效果 ===== */
+.control-round {
+  background: var(--el-bg-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.control-round-inner {
+  background: var(--el-bg-color);
+  box-shadow: 0 2px 8px rgba(var(--el-color-primary-rgb), 0.1);
+}
+
+.control-inner-btn {
+  background: var(--el-fill-color-lighter);
+}
+
+.control-btn:hover {
+  background: rgba(var(--el-color-primary-rgb), 0.06);
+  box-shadow: 0 0 12px rgba(var(--el-color-primary-rgb), 0.15);
+}
+
+.control-zoom-btn {
+  color: var(--el-color-primary-light-3);
+  transition: all 0.25s ease;
+}
+
+.control-zoom-btn:hover {
+  color: var(--el-color-primary);
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 6px rgba(var(--el-color-primary-rgb), 0.3));
+}
+
+/* ===== 预置点面板动画 ===== */
+.preset-panel {
+  animation: panelFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes panelFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== 暗黑模式 ===== */
+html.dark .glass-dialog.play-dialog :deep(.el-dialog),
+html.dark .glass-dialog.access-dialog :deep(.el-dialog) {
+  background: rgba(30, 30, 40, 0.78);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.25),
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+html.dark .glass-dialog.play-dialog :deep(.el-dialog__header),
+html.dark .glass-dialog.access-dialog :deep(.el-dialog__header) {
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+html.dark .glass-dialog.play-dialog :deep(.el-dialog__footer),
+html.dark .glass-dialog.access-dialog :deep(.el-dialog__footer) {
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+
+html.dark .glass-dialog.play-dialog :deep(.el-input__wrapper.is-focus),
+html.dark .glass-dialog.access-dialog :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px var(--el-color-primary) inset, 0 0 12px rgba(var(--el-color-primary-rgb), 0.2);
+}
+
+html.dark .control-round {
+  background: var(--el-bg-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+html.dark .control-round-inner {
+  background: var(--el-bg-color);
+  box-shadow: 0 2px 8px rgba(var(--el-color-primary-rgb), 0.15);
+}
+
+html.dark .control-inner-btn {
+  background: var(--el-fill-color-darker);
+}
+
+html.dark .control-btn:hover {
+  background: rgba(var(--el-color-primary-rgb), 0.1);
 }
 </style>
 

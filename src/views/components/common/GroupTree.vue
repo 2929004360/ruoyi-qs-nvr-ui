@@ -31,7 +31,7 @@
              style="display: flex;">
 
           <div v-if="!data.leaf">
-            <el-icon :color="chooseId === data.name ? '#0094ff' : ''" :size="18" style="margin-right: 4px">
+            <el-icon :color="chooseId === data.name ? 'var(--el-color-primary)' : ''" :size="18" style="margin-right: 4px">
               <FolderOpened/>
             </el-icon>
           </div>
@@ -50,7 +50,7 @@
           <div v-if="data.leaf">
             <div v-if="isContextmenu" @contextmenu="onContextMenu($event,data)"
                  style="display: flex;align-items: center">
-              <el-icon color="#409efc" :size="18" style="margin-top: 2px;margin-right: 4px" v-if="data.status === 'ON'">
+              <el-icon color="var(--el-color-primary)" :size="18" style="margin-top: 2px;margin-right: 4px" v-if="data.status === 'ON'">
                 <VideoCamera/>
               </el-icon>
               <el-icon :size="18" style="margin-top: 2px;margin-right: 4px" v-if="data.status === 'OFFLINE'">
@@ -67,7 +67,7 @@
             </div>
 
             <div v-else style="display: flex;align-items: center">
-              <el-icon color="#409efc" :size="18" style="margin-top: 2px;margin-right: 4px" v-if="data.status === 'ON'">
+              <el-icon color="var(--el-color-primary)" :size="18" style="margin-top: 2px;margin-right: 4px" v-if="data.status === 'ON'">
                 <VideoCamera/>
               </el-icon>
               <el-icon :size="18" style="margin-top: 2px;margin-right: 4px" v-if="data.status === 'OFFLINE'">
@@ -85,7 +85,7 @@
           </div>
 
           <div v-else style="display: flex;align-items: center">
-            <el-icon :color="chooseId === data.name ? '#0094ff' : ''" :size="18"
+            <el-icon :color="chooseId === data.name ? 'var(--el-color-primary)' : ''" :size="18"
                      style="margin-right: 4px">
               <FolderOpened/>
             </el-icon>
@@ -102,23 +102,23 @@
       </template>
     </el-tree>
 
-    <div v-else style="color: #606266; height: calc(100% - 32px); overflow: auto !important;">
+    <div v-else style="color: var(--el-text-color-secondary); height: calc(100% - 32px); overflow: auto !important;">
       <ul v-if="groupList.length > 0" style="list-style: none; margin: 0; padding: 10px">
         <li v-for="item in groupList" :key="item.id" class="channel-list-li"
             style="height: 26px; align-items: center;cursor: pointer;" @click="handleNodeClick(item)">
           <span
               v-if="chooseId !== item.name"
-              style="color: #409EFF; font-size: 20px"
+              style="color: var(--el-color-primary); font-size: 20px"
               class="iconfont icon-bianzubeifen3"
           />
           <span
               v-if="chooseId === item.name"
-              style="color: #c60135; font-size: 20px"
+              style="color: var(--el-color-danger); font-size: 20px"
               class="iconfont icon-bianzubeifen3"
           />
           <div>
             <div style="margin-left: 4px; margin-bottom: 3px; font-size: 15px">{{ item.name }}</div>
-            <div style="margin-left: 4px; font-size: 13px; color: #808181">{{ item.deviceId }}</div>
+            <div style="margin-left: 4px; font-size: 13px; color: var(--el-text-color-placeholder)">{{ item.deviceId }}</div>
           </div>
         </li>
 
@@ -516,5 +516,10 @@ defineExpose({
   display: grid;
   grid-template-columns: 26px 1fr;
   margin-bottom: 20px;
+}
+
+/* 暗黑模式适配 */
+html.dark {
+  color: var(--el-text-color-regular);
 }
 </style>
