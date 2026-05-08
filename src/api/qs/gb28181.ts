@@ -22,3 +22,27 @@ export function getChannelsByDeviceId(gbDeviceId: string): Promise<AjaxResult<Gb
     method: 'get'
   })
 }
+
+/**
+ * 查询设备录像列表
+ * @param deviceId 设备ID
+ * @param channelId 通道ID
+ * @param startTime 开始时间
+ * @param endTime 结束时间
+ */
+export function queryDeviceRecord(
+  deviceId: string,
+  channelId: string,
+  startTime: string,
+  endTime: string
+): Promise<AjaxResult<any>> {
+  return request({
+    url: `/gb28181/device/queryRecord/${deviceId}/${channelId}`,
+    method: 'get',
+    params: {
+      startTime,
+      endTime
+    },
+    timeout: 30000
+  })
+}
