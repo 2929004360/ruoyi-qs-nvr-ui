@@ -99,7 +99,7 @@
               <span>录像播放</span>
               <span v-if="selectedRecord" class="record-meta">
                 <el-icon size="12"><VideoCamera /></el-icon>
-                {{ currentDevice?.deviceName || '' }} - {{ formatShortTime(selectedRecord.startTime) }}
+                {{ currentDevice?.deviceName || '' }} · {{ selectedDateText }} · {{ formatShortTime(selectedRecord.startTime) }}
               </span>
             </div>
             <div class="player-area">
@@ -315,7 +315,7 @@ const rtcUrl = ref('')
 const flvUrl = ref('')
 const wsUrl = ref('')
 const tabActiveName = ref('media')
-const streamInfo = ref({})
+const streamInfo = ref<any>({})
 const quality = ref(['普清', '高清', '超清'])
 const defaultQuality = ref('高清')
 const isPtz = ref(true)
@@ -323,16 +323,16 @@ const isQuality = ref(true)
 const isLive = ref(true)
 const currentWidth = ref(0)
 const playerTime = ref(0)
-const showTimeLeft = ref(0)
+const showTimeLeft = ref<number | null>(0)
 const step = ref(0)
-const timeLen = ref(null)
-const startTime = ref(null)
+const timeLen = ref<number | null>(null)
+const startTime = ref<number | null>(null)
 const playing = ref(false)
-const timer = ref(null)
-const playSpeed = ref(1)
+const timer = ref<any>(null)
+const playSpeed = ref<number>(1)
 const isFullScreen = ref(false)
 const playSpeedRange = ref([1, 2, 4])
-const jessibucaHeight = ref<string>(document.documentElement.clientHeight - 260 + 'px;')
+const jessibucaHeight = ref<string>(document.documentElement.clientHeight - 300 + 'px;')
 const isPaused = ref(false)
 
 /**
@@ -483,7 +483,7 @@ const handlePlay = async (row: ZlmCloudRecord) => {
       playSpeed.value = 1
       isFullScreen.value = false
 
-      jessibucaHeight.value = document.documentElement.clientHeight - 260 + 'px;'
+      jessibucaHeight.value = document.documentElement.clientHeight - 300 + 'px;'
       step.value = 100 / (cloudRecordRow.value.timeLen / 1000)
       timer.value = setInterval(() => {
         if (isPaused.value) return
@@ -580,7 +580,7 @@ const fullScreen = () => {
   if (isFullScreen.value) {
     screenfull.exit()
     isFullScreen.value = false
-    jessibucaHeight.value = document.documentElement.clientHeight - 260 + 'px;'
+    jessibucaHeight.value = document.documentElement.clientHeight - 300 + 'px;'
     return
   }
   screenfull.request(document.getElementById('recordPlayer'))
@@ -594,7 +594,7 @@ const fullScreen = () => {
 /**
  * 倍速播放
  */
-const changePlaySpeed = (speed) => {
+const changePlaySpeed = (speed: number) => {
   if (!streamInfo.value) {
     return
   }
@@ -698,17 +698,17 @@ const refresh = () => {
 /**
  * 播放进度条点击
  */
-function timeProcessClick(event) {
+function timeProcessClick(event: MouseEvent) {
   if (!timeLen.value) return
   let x = event.offsetX
-  let clientWidth = proxy.$refs['timeProcess'].clientWidth
+  let clientWidth = (proxy.$refs['timeProcess'] as HTMLElement).clientWidth
   seekRecord((x / clientWidth) * timeLen.value)
 }
 
 /**
  * 定位录像
  */
-function seekRecord(playSeekValue) {
+function seekRecord(playSeekValue: number) {
   if (!streamInfo.value) return
   seekCloudRecord({
     mediaServerId: streamInfo.value.mediaServerId,
@@ -744,7 +744,7 @@ const showPlayTimeTotal = computed(() => {
  */
 const showPlayTimeTitle = computed(() => {
   if (showTimeLeft.value && timeLen.value && selectedRecord.value) {
-    let time = (showTimeLeft.value / proxy.$refs['timeProcess'].clientWidth) * timeLen.value
+    let time = (showTimeLeft.value / (proxy.$refs['timeProcess'] as HTMLElement).clientWidth) * timeLen.value
     let realTime = (timeLen.value / selectedRecord.value.timeLen) * time + selectedRecord.value.startTime
     return `${moment(time + 1000).format('mm:ss')}(${moment(realTime).format('HH:mm:ss')})`
   } else {
@@ -756,21 +756,21 @@ const showPlayTimeTitle = computed(() => {
  * 获取播放进度条样式
  */
 const playTimeTitleStyle = computed(() => {
-  return { left: showTimeLeft.value - 32 + 'px' }
+  return { left: (showTimeLeft.value || 0) - 32 + 'px' }
 })
 
 /**
  * 鼠标事件
  */
-function timeProcessMouseEnter(event) {
+function timeProcessMouseEnter(event: MouseEvent) {
   showTimeLeft.value = event.offsetX
 }
 
-function timeProcessMouseMove(event) {
+function timeProcessMouseMove(event: MouseEvent) {
   showTimeLeft.value = event.offsetX
 }
 
-function timeProcessMouseLeave(event) {
+function timeProcessMouseLeave(event: MouseEvent) {
   showTimeLeft.value = null
 }
 
@@ -784,7 +784,7 @@ const playTimeValue = computed(() => {
 /**
  * 格式化时间戳
  */
-function formatTimeStamp(time) {
+function formatTimeStamp(time: number) {
   if (!time) return ''
   return moment.unix(time / 1000).format('YYYY-MM-DD HH:mm:ss')
 }
@@ -792,7 +792,7 @@ function formatTimeStamp(time) {
 /**
  * 格式化短时时间
  */
-function formatShortTime(time) {
+function formatShortTime(time: number) {
   if (!time) return ''
   return moment.unix(time / 1000).format('HH:mm')
 }
@@ -800,10 +800,10 @@ function formatShortTime(time) {
 /**
  * 格式化时长
  */
-function formatTime(time) {
+function formatTime(time: number) {
   if (!time) return '0秒'
-  const h = parseInt(time / 3600 / 1000)
-  const minute = parseInt((time - h * 3600 * 1000) / 60 / 1000)
+  const h = parseInt(String(time / 3600 / 1000))
+  const minute = parseInt(String((time - h * 3600 * 1000) / 60 / 1000))
   let second = Math.ceil((time - h * 3600 * 1000 - minute * 60 * 1000) / 1000)
   if (second < 0) second = 0
   return (h > 0 ? h + 'h' : '') + (minute > 0 ? minute + 'm' : '') + (second > 0 ? second + 's' : '')
@@ -817,7 +817,7 @@ const updateFullscreenState = () => {
   if (!isFullScreen.value) {
     screenfull.exit()
     isFullScreen.value = false
-    jessibucaHeight.value = document.documentElement.clientHeight - 260 + 'px;'
+    jessibucaHeight.value = document.documentElement.clientHeight - 300 + 'px;'
   }
 }
 

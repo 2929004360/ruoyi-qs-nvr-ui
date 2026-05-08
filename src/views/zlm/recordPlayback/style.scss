@@ -36,6 +36,16 @@ html.dark .record-splitpanes {
   color: var(--el-text-color-primary);
   font-size: 13px;
   gap: 8px;
+  min-height: 44px;
+  box-sizing: border-box;
+
+  .header-accent {
+    width: 3px;
+    height: 16px;
+    border-radius: 2px;
+    background: linear-gradient(to bottom, var(--el-color-primary), var(--el-color-primary-light-3));
+    flex-shrink: 0;
+  }
 
   .header-icon-wrap {
     display: flex;
@@ -97,7 +107,6 @@ html.dark .record-splitpanes {
   justify-content: center;
   padding: 14px 12px;
   gap: 10px;
-  background: linear-gradient(135deg, var(--el-bg-color-page) 0%, var(--el-fill-color-lighter) 100%);
   border-bottom: 1px solid var(--el-border-color-lighter);
   flex-shrink: 0;
 
@@ -571,6 +580,21 @@ html.dark .record-splitpanes {
   border-radius: 2px;
   position: relative;
   z-index: 1;
+}
+
+.player-progress-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--el-color-primary) 0%, var(--el-color-primary-light-3) 100%);
+  border-radius: 2px;
+  opacity: 0.4;
+  filter: blur(4px);
+  z-index: 0;
+  transform: scaleY(2.5);
+  transform-origin: center;
+  transition: width 0.3s ease;
 }
 
 .player-progress-tooltip {
