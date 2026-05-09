@@ -193,15 +193,16 @@ function getList() {
     ).then((res: any) => {
       recordList.value = []
       recordList.value = res.data.recordList || []
-      console.log(res.data.recordList)
       if (recordList.value.length > 0) {
         let time = new Date(recordList.value[0].startTime).getTime()
         playTime.value = time
+        // 根据录像开始时间更新 initTime
+        updateInitTimeByRecord(time)
         for (let i = 0; i < recordList.value.length; i++) {
           timeSegments.value.push({
             beginTime: new Date(recordList.value[i].startTime).getTime(),
             endTime: new Date(recordList.value[i].endTime).getTime(),
-            color: '#017690',
+            color: '#409EFF',
             startRatio: 0.7,
             endRatio: 0.85,
             index: i
@@ -221,21 +222,22 @@ function getList() {
   } else if(currentDevice.value && currentDevice.value.type == '9'){
     queryDaHuaRecord(
         currentDevice.value.id,
-        currentDevice.value.channel || 1,
+        currentDevice.value.channel,
         dayStart,
         dayEnd
     ).then((res: any) => {
       recordList.value = []
       recordList.value = res.data || []
-      console.log(res.data)
       if (recordList.value.length > 0) {
-        let time = new Date(recordList.value[0].startTime).getTime()
+        let time = new Date(recordList.value[0].start).getTime()
         playTime.value = time
+        // 根据录像开始时间更新 initTime
+        updateInitTimeByRecord(time)
         for (let i = 0; i < recordList.value.length; i++) {
           timeSegments.value.push({
-            beginTime: new Date(recordList.value[i].startTime).getTime(),
-            endTime: new Date(recordList.value[i].endTime).getTime(),
-            color: '#017690',
+            beginTime: new Date(recordList.value[i].start).getTime(),
+            endTime: new Date(recordList.value[i].end).getTime(),
+            color: '#409EFF',
             startRatio: 0.7,
             endRatio: 0.85,
             index: i
@@ -262,15 +264,16 @@ function getList() {
     ).then((res: any) => {
       recordList.value = []
       recordList.value = res.data || []
-      console.log(res.data)
       if (recordList.value.length > 0) {
-        let time = new Date(recordList.value[0].startTime).getTime()
+        let time = new Date(recordList.value[0].start).getTime()
         playTime.value = time
+        // 根据录像开始时间更新 initTime
+        updateInitTimeByRecord(time)
         for (let i = 0; i < recordList.value.length; i++) {
           timeSegments.value.push({
-            beginTime: new Date(recordList.value[i].startTime).getTime(),
-            endTime: new Date(recordList.value[i].endTime).getTime(),
-            color: '#017690',
+            beginTime: new Date(recordList.value[i].start).getTime(),
+            endTime: new Date(recordList.value[i].end).getTime(),
+            color: '#409EFF',
             startRatio: 0.7,
             endRatio: 0.85,
             index: i
@@ -297,15 +300,16 @@ function getList() {
     ).then((res: any) => {
       recordList.value = []
       recordList.value = res.data || []
-      console.log(res.data)
       if (recordList.value.length > 0) {
-        let time = new Date(recordList.value[0].startTime).getTime()
+        let time = new Date(recordList.value[0].start).getTime()
         playTime.value = time
+        // 根据录像开始时间更新 initTime
+        updateInitTimeByRecord(time)
         for (let i = 0; i < recordList.value.length; i++) {
           timeSegments.value.push({
-            beginTime: new Date(recordList.value[i].startTime).getTime(),
-            endTime: new Date(recordList.value[i].endTime).getTime(),
-            color: '#017690',
+            beginTime: new Date(recordList.value[i].start).getTime(),
+            endTime: new Date(recordList.value[i].end).getTime(),
+            color: '#409EFF',
             startRatio: 0.7,
             endRatio: 0.85,
             index: i
@@ -333,15 +337,16 @@ function getList() {
     ).then((res: any) => {
       recordList.value = []
       recordList.value = res.data || []
-      console.log(res.data)
       if (recordList.value.length > 0) {
-        let time = new Date(recordList.value[0].startTime).getTime()
+        let time = new Date(recordList.value[0].start).getTime()
         playTime.value = time
+        // 根据录像开始时间更新 initTime
+        updateInitTimeByRecord(time)
         for (let i = 0; i < recordList.value.length; i++) {
           timeSegments.value.push({
-            beginTime: new Date(recordList.value[i].startTime).getTime(),
-            endTime: new Date(recordList.value[i].endTime).getTime(),
-            color: '#017690',
+            beginTime: new Date(recordList.value[i].start).getTime(),
+            endTime: new Date(recordList.value[i].end).getTime(),
+            color: '#409EFF',
             startRatio: 0.7,
             endRatio: 0.85,
             index: i
@@ -368,15 +373,16 @@ function getList() {
     ).then((res: any) => {
       recordList.value = []
       recordList.value = res.data || []
-      console.log(res.data)
       if (recordList.value.length > 0) {
         let time = new Date(recordList.value[0].startTime).getTime()
         playTime.value = time
+        // 根据录像开始时间更新 initTime
+        updateInitTimeByRecord(time)
         for (let i = 0; i < recordList.value.length; i++) {
           timeSegments.value.push({
             beginTime: new Date(recordList.value[i].startTime).getTime(),
             endTime: new Date(recordList.value[i].endTime).getTime(),
-            color: '#017690',
+            color: '#409EFF',
             startRatio: 0.7,
             endRatio: 0.85,
             index: i
@@ -425,6 +431,23 @@ function mouseupTimeline() {
  */
 const easyPlayeError = () => {
 
+}
+
+/**
+ * 根据录像开始时间更新 initTime
+ * @param recordStartTime 录像开始时间（Date或时间戳）
+ */
+const updateInitTimeByRecord = (recordStartTime: any) => {
+  const dayStart = moment(selectedDate.value).startOf('day').valueOf()
+  const recordTime = moment(recordStartTime).valueOf()
+
+  if (recordTime >= dayStart) {
+    // 录像时间 >= 今天 00:00:00，用录像开始时间
+    initTime.value = recordTime
+  } else {
+    // 录像时间 < 今天 00:00:00，用当天 00:00:00
+    initTime.value = dayStart
+  }
 }
 
 /**

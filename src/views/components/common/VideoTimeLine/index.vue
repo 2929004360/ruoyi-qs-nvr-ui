@@ -1084,7 +1084,8 @@ export default {
         this.resolvedColors.lineColor = 'rgba(255,255,255,0.2)'
       } else {
         // 明亮模式 - 也使用白色文字，确保足够明显
-        this.resolvedColors.bgPanel = 'rgba(255, 255, 255, 0.95)'
+        // bgPanel 保持深色，这样白色文字才能看清
+        this.resolvedColors.bgPanel = 'rgba(0, 0, 0, 0.8)'
         this.resolvedColors.textStrong = '#ffffff'
         this.resolvedColors.textColor = '#ffffff'
         this.resolvedColors.hoverTextColor = '#ffffff'
