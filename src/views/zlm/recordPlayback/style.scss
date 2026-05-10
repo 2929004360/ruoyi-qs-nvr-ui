@@ -451,9 +451,7 @@ html.dark .record-splitpanes {
 
 /* 播放器区域 */
 .player-wrapper {
-  border-radius: 8px;
   overflow: hidden;
-  margin: 12px;
   display: flex;
   flex-direction: column;
   background: #0a0a0a;
@@ -636,10 +634,6 @@ html.dark .record-splitpanes {
   width: 100%;
   padding: 0 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.04);
-
-  &.disabled {
-    opacity: 0.35;
-  }
 }
 
 .player-toolbar-left,

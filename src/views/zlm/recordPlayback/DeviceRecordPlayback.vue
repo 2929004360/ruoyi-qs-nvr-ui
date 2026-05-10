@@ -2,7 +2,6 @@
   <div class="app-container">
     <el-row :gutter="0">
       <splitpanes class="default-theme record-splitpanes">
-        <!-- 左侧设备树 -->
         <pane size="20">
           <el-col class="tree-col">
             <div class="panel-header">
@@ -13,7 +12,6 @@
               <span>设备列表</span>
             </div>
             <div class="tree-container">
-              <!-- 日期选择 -->
               <div class="date-panel">
                 <el-button :icon="ArrowLeft" @click="prevDay" circle class="date-nav-btn" />
                 <el-date-picker
@@ -34,7 +32,6 @@
           </el-col>
         </pane>
 
-        <!-- 右侧播放器和时间轴 -->
         <pane size="80">
           <el-col class="player-col">
             <div class="panel-header">
@@ -46,24 +43,23 @@
               <span v-if="currentDevice" class="device-name">{{ currentDevice.deviceName }}</span>
             </div>
             <div class="player-area">
-              <div class="player-container" :style="'height:' + jessibucaHeight">
-                <!-- 空状态提示 -->
-                <div v-if="!currentDevice" class="player-empty-overlay">
-                  <div class="empty-content">
-                    <div class="empty-icon-wrap">
-                      <el-icon size="64"><VideoPlay /></el-icon>
-                    </div>
-                    <div class="empty-text">
-                      {{ !currentDevice ? '请选择设备' : '暂无录像数据' }}
-                    </div>
-                    <div v-if="currentDevice" class="empty-hint">
-                      当前设备在所选日期无录像
+              <div id="recordPlayer" class="device-record-wrapper">
+                <div class="player-container" :style="'height:' + jessibucaHeight">
+                  <div v-if="!currentDevice" class="player-empty-overlay">
+                    <div class="empty-content">
+                      <div class="empty-icon-wrap">
+                        <el-icon size="64"><VideoPlay /></el-icon>
+                      </div>
+                      <div class="empty-text">
+                        {{ !currentDevice ? '请选择设备' : '暂无录像数据' }}
+                      </div>
+                      <div v-if="currentDevice" class="empty-hint">
+                        当前设备在所选日期无录像
+                      </div>
                     </div>
                   </div>
-                </div>
-                <!-- 播放器 -->
-                <EasyPlayer
-                    v-else-if="currentDevice && timeSegments.length > 0"
+                  <EasyPlayer
+                    v-if="wsUrl && currentDevice"
                     :style="'height:' + jessibucaHeight"
                     :ref="'EasyPlayerRef_' + currentDevice.id"
                     :id="`EasyPlayerRef_${currentDevice.id}`"
@@ -71,6 +67,7 @@
                     width="100"
                     height="100"
                     @error="easyPlayeError"
+                    @play="handlePlaySuccess"
                     :isPercentage="true"
                     :quality="quality"
                     :defaultQuality="defaultQuality"
@@ -80,25 +77,77 @@
                     :isMute="true"
                     :isLive="isLive"
                     :videoUrl="wsUrl"
-                />
-              </div>
+                  />
+                </div>
 
-              <!-- 时间轴 -->
-              <div class="player-option-box" :class="{ 'timeline-disabled': !currentDevice || timeSegments.length === 0 }">
-                <VideoTimeline
-                    ref="Timeline"
-                    :init-time="initTime"
-                    :time-segments="timeSegments"
-                    :init-zoom-index="4"
-                    :enable-zoom="!!currentDevice && timeSegments.length > 0"
-                    :enable-drag="!!currentDevice && timeSegments.length > 0"
-                    :show-hover-time="!!currentDevice && timeSegments.length > 0"
-                    @timeChange="playTimeChange"
-                    @mousedown="timelineMouseDown"
-                    @mouseup="mouseupTimeline"
-                />
-                <div v-if="showTime && playTime && currentDevice && timeSegments.length > 0" class="time-line-show">
-                  <span>{{ showTimeValue }}</span>
+                <div class="player-option-box" :class="{ 'timeline-disabled': !currentDevice || timeSegments.length === 0 }">
+                  <VideoTimeline
+                      ref="Timeline"
+                      :init-time="initTime"
+                      :time-segments="timeSegments"
+                      :init-zoom-index="4"
+                      :enable-zoom="!!currentDevice && timeSegments.length > 0"
+                      :enable-drag="!!currentDevice && timeSegments.length > 0"
+                      :show-hover-time="!!currentDevice && timeSegments.length > 0"
+                      @timeChange="playTimeChange"
+                      @dragTimeChange="playTimeChange"
+                      @mousedown="timelineMouseDown"
+                      @mouseup="mouseupTimeline"
+                  />
+                  <div v-if="showTime && playTime && currentDevice && timeSegments.length > 0" class="time-line-show">
+                    <span>{{ showTimeValue }}</span>
+                  </div>
+                </div>
+
+                <div class="player-toolbar" :class="{ 'disabled': !currentDevice || timeSegments.length === 0 }">
+                  <div class="player-toolbar-left">
+                    <el-tooltip content="截图" placement="top">
+                      <el-button circle size="small" class="toolbar-btn" :disabled="!currentDevice || timeSegments.length === 0" @click="snap">
+                        <el-icon><Camera /></el-icon>
+                      </el-button>
+                    </el-tooltip>
+                    <el-tooltip content="下载" placement="top">
+                      <el-button circle size="small" class="toolbar-btn" :disabled="!currentDevice || timeSegments.length === 0">
+                        <el-icon><Download /></el-icon>
+                      </el-button>
+                    </el-tooltip>
+                  </div>
+
+                  <div class="player-toolbar-center">
+                    <el-tooltip :content="playing ? '停止' : '播放'" placement="top">
+                      <el-button
+                          circle
+                          :class="playing ? 'toolbar-btn stop-btn' : 'toolbar-btn play-btn'"
+                          :disabled="!currentDevice || timeSegments.length === 0"
+                          @click="playing ? stopPlay() : playRecord()"
+                      >
+                        <el-icon v-if="playing"><VideoPause /></el-icon>
+                        <el-icon v-else><VideoPlay /></el-icon>
+                      </el-button>
+                    </el-tooltip>
+                    <el-dropdown :popper-append-to-body="false" :disabled="!currentDevice || timeSegments.length === 0">
+                      <el-button class="toolbar-btn speed-btn" size="small" :disabled="!currentDevice || timeSegments.length === 0">
+                        1X
+                        <el-icon><ArrowDown /></el-icon>
+                      </el-button>
+                      <template #dropdown>
+                        <el-dropdown-menu class="speed-dropdown-menu">
+                          <el-dropdown-item>1X</el-dropdown-item>
+                          <el-dropdown-item>2X</el-dropdown-item>
+                          <el-dropdown-item>4X</el-dropdown-item>
+                        </el-dropdown-menu>
+                      </template>
+                    </el-dropdown>
+                  </div>
+
+                  <div class="player-toolbar-right">
+                    <el-tooltip :content="isFullScreen ? '退出全屏' : '全屏'" placement="top">
+                      <el-button circle size="small" class="toolbar-btn" :disabled="!currentDevice || timeSegments.length === 0" @click="fullScreen">
+                        <el-icon v-if="!isFullScreen"><FullScreen /></el-icon>
+                        <el-icon v-else><Aim /></el-icon>
+                      </el-button>
+                    </el-tooltip>
+                  </div>
                 </div>
               </div>
             </div>
@@ -110,10 +159,28 @@
 </template>
 
 <script setup lang="ts" name="DeviceRecordPlayback">
+import {getCurrentInstance, nextTick, onMounted, onUnmounted} from 'vue'
+import screenfull from 'screenfull'
+import { ElLoading } from 'element-plus'
 import DeviceTree from '@/components/DeviceTree'
 import {Pane, Splitpanes} from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
-import {VideoCamera, Monitor, VideoPlay, ArrowLeft, ArrowRight} from '@element-plus/icons-vue'
+import {
+  Aim,
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  Camera,
+  DArrowLeft,
+  DArrowRight,
+  Download,
+  FullScreen,
+  Monitor,
+  Refresh,
+  VideoCamera,
+  VideoPause,
+  VideoPlay
+} from '@element-plus/icons-vue'
 import {getDevice} from "@/api/qs/device"
 import {queryDeviceRecord} from "@/api/qs/gb28181"
 import {queryDaHuaRecord} from "@/api/qs/dahua"
@@ -121,21 +188,23 @@ import {queryHaiKangRecord} from "@/api/qs/haikang"
 import {queryHaiKangIsupRecord} from "@/api/qs/haikang-isup"
 import {queryOnvifRecord} from "@/api/qs/onvif"
 import {queryJt1078Record} from "@/api/qs/jt1078"
+import {rtpPlayback, stopRtpPlayback} from "@/api/qs/zlm"
 import moment from 'moment'
 import VideoTimeline from '@/views/components/common/VideoTimeLine/index.vue'
 import EasyPlayer from '@/components/EasyPlayer'
 
-// 数据相关
+const {proxy} = getCurrentInstance()
+
 const loading = ref<boolean>(false)
 const currentDevice = ref<any>(null)
 const recordList = ref([]);
+const selectedRecord = ref<any>(null);
 
-const playTime = ref(null);
 const initTime = ref(moment().startOf('day').valueOf());
 const timeSegments = ref([]);
 const showTime = ref(true);
 const showTimeValue = ref('');
-const jessibucaHeight = ref<string>(document.documentElement.clientHeight - 260 + 'px;')
+const jessibucaHeight = ref<string>(document.documentElement.clientHeight - 310 + 'px;')
 const quality = ref(['普清', '高清', '超清'])
 const defaultQuality = ref('高清')
 const isPtz = ref(true)
@@ -143,29 +212,32 @@ const isQuality = ref(true)
 const isLive = ref(true)
 const wsUrl = ref('')
 
-// 时间轴组件引用
-const Timeline = ref()
+const playing = ref(false)
+const isPaused = ref(false)
+const playSpeed = ref<number>(1)
+const playTime = ref<number | null>(null)
+const currentStartTime = ref<any>(null)
+const currentEndTime = ref<any>(null)
+const isFullScreen = ref(false)
 
-// 日期相关
+const Timeline = ref()
+let lastUpdateTime = 0
+let lastTimelineUpdate = 0
+let animationFrameId: number | null = null
+let isDraggingTimeline = false
+let playDebounceTimer: number | null = null
+let currentStreamId: string = ''
+let loadingInstance: any = null
+
 const selectedDate = ref<string>(moment().format('YYYY-MM-DD'))
 
-onMounted(()=>{
-  setTimeout(()=>{
-    nextTick(()=>{
-      selectedDate.value = moment().format('YYYY-MM-DD')
-      timeSegments.value = []
-    })
-  },300)
-})
-
-/**
- * 点击设备树节点
- */
 const handleDeviceClick = async (deviceId: number) => {
   try {
     const res: any = await getDevice(deviceId)
     const device = res.data
     currentDevice.value = device
+
+    await stopPlay()
 
     getList()
   } catch (e) {
@@ -173,15 +245,10 @@ const handleDeviceClick = async (deviceId: number) => {
   }
 }
 
-/**
- * 查询录像列表
- */
 function getList() {
-  // 设置当天的开始和结束时间
   const dayStart = moment(selectedDate.value).startOf('day').format('YYYY-MM-DD HH:mm:ss')
   const dayEnd = moment(selectedDate.value).endOf('day').format('YYYY-MM-DD HH:mm:ss')
   loading.value = true
-  // 清空之前的录像片段
   timeSegments.value = []
   
   if(currentDevice.value && currentDevice.value.type == '12'){
@@ -194,9 +261,9 @@ function getList() {
       recordList.value = []
       recordList.value = res.data.recordList || []
       if (recordList.value.length > 0) {
+        selectedRecord.value = recordList.value[0]
         let time = new Date(recordList.value[0].startTime).getTime()
         playTime.value = time
-        // 根据录像开始时间更新 initTime
         updateInitTimeByRecord(time)
         for (let i = 0; i < recordList.value.length; i++) {
           timeSegments.value.push({
@@ -208,7 +275,6 @@ function getList() {
             index: i
           })
         }
-        // 重新初始化时间轴
         nextTick(() => {
           if (Timeline.value && Timeline.value.setTime) {
             Timeline.value.setTime(time)
@@ -229,9 +295,9 @@ function getList() {
       recordList.value = []
       recordList.value = res.data || []
       if (recordList.value.length > 0) {
+        selectedRecord.value = recordList.value[0]
         let time = new Date(recordList.value[0].start).getTime()
         playTime.value = time
-        // 根据录像开始时间更新 initTime
         updateInitTimeByRecord(time)
         for (let i = 0; i < recordList.value.length; i++) {
           timeSegments.value.push({
@@ -243,7 +309,6 @@ function getList() {
             index: i
           })
         }
-        // 重新初始化时间轴
         nextTick(() => {
           if (Timeline.value && Timeline.value.setTime) {
             Timeline.value.setTime(time)
@@ -255,7 +320,6 @@ function getList() {
       loading.value = false
     })
   } else if(currentDevice.value && currentDevice.value.type == '7'){
-    // 海康SDK设备
     queryHaiKangRecord(
         currentDevice.value.id,
         currentDevice.value.channel || 1,
@@ -265,9 +329,9 @@ function getList() {
       recordList.value = []
       recordList.value = res.data || []
       if (recordList.value.length > 0) {
+        selectedRecord.value = recordList.value[0]
         let time = new Date(recordList.value[0].start).getTime()
         playTime.value = time
-        // 根据录像开始时间更新 initTime
         updateInitTimeByRecord(time)
         for (let i = 0; i < recordList.value.length; i++) {
           timeSegments.value.push({
@@ -279,7 +343,6 @@ function getList() {
             index: i
           })
         }
-        // 重新初始化时间轴
         nextTick(() => {
           if (Timeline.value && Timeline.value.setTime) {
             Timeline.value.setTime(time)
@@ -291,7 +354,6 @@ function getList() {
       loading.value = false
     })
   } else if(currentDevice.value && currentDevice.value.type == '8'){
-    // 海康ISUP设备
     queryHaiKangIsupRecord(
         currentDevice.value.id,
         currentDevice.value.channel || 1,
@@ -301,9 +363,9 @@ function getList() {
       recordList.value = []
       recordList.value = res.data || []
       if (recordList.value.length > 0) {
+        selectedRecord.value = recordList.value[0]
         let time = new Date(recordList.value[0].start).getTime()
         playTime.value = time
-        // 根据录像开始时间更新 initTime
         updateInitTimeByRecord(time)
         for (let i = 0; i < recordList.value.length; i++) {
           timeSegments.value.push({
@@ -315,7 +377,6 @@ function getList() {
             index: i
           })
         }
-        // 重新初始化时间轴
         nextTick(() => {
           if (Timeline.value && Timeline.value.setTime) {
             Timeline.value.setTime(time)
@@ -327,7 +388,6 @@ function getList() {
       loading.value = false
     })
   } else if(currentDevice.value && currentDevice.value.type == '5'){
-    // ONVIF设备
     queryOnvifRecord(
         currentDevice.value.ipAddress || '',
         currentDevice.value.userName || '',
@@ -338,9 +398,9 @@ function getList() {
       recordList.value = []
       recordList.value = res.data || []
       if (recordList.value.length > 0) {
+        selectedRecord.value = recordList.value[0]
         let time = new Date(recordList.value[0].start).getTime()
         playTime.value = time
-        // 根据录像开始时间更新 initTime
         updateInitTimeByRecord(time)
         for (let i = 0; i < recordList.value.length; i++) {
           timeSegments.value.push({
@@ -352,7 +412,6 @@ function getList() {
             index: i
           })
         }
-        // 重新初始化时间轴
         nextTick(() => {
           if (Timeline.value && Timeline.value.setTime) {
             Timeline.value.setTime(time)
@@ -364,7 +423,6 @@ function getList() {
       loading.value = false
     })
   } else if(currentDevice.value && currentDevice.value.type == '10'){
-    // JT1078设备
     queryJt1078Record(
         currentDevice.value.mobileNo || currentDevice.value.gbDeviceId || '',
         currentDevice.value.channel || 1,
@@ -374,9 +432,9 @@ function getList() {
       recordList.value = []
       recordList.value = res.data || []
       if (recordList.value.length > 0) {
+        selectedRecord.value = recordList.value[0]
         let time = new Date(recordList.value[0].startTime).getTime()
         playTime.value = time
-        // 根据录像开始时间更新 initTime
         updateInitTimeByRecord(time)
         for (let i = 0; i < recordList.value.length; i++) {
           timeSegments.value.push({
@@ -388,7 +446,6 @@ function getList() {
             index: i
           })
         }
-        // 重新初始化时间轴
         nextTick(() => {
           if (Timeline.value && Timeline.value.setTime) {
             Timeline.value.setTime(time)
@@ -404,86 +461,459 @@ function getList() {
   }
 }
 
-/**
- * 时间轴时间变化
- */
+const findRecordByTime = (time: number) => {
+  for (const record of recordList.value) {
+    const recStartTime = new Date(record.startTime || record.start).getTime()
+    const recEndTime = new Date(record.endTime || record.end).getTime()
+    if (time >= recStartTime && time <= recEndTime) {
+      return record
+    }
+  }
+  return null
+}
+
+const handlePlaySuccess = () => {
+  // 播放成功后启动时间轴动画
+  lastUpdateTime = performance.now()
+  if (currentStartTime.value && currentEndTime.value) {
+    startSmoothAnimation(currentStartTime.value, currentEndTime.value)
+  }
+  // 关闭加载动画
+  if (loadingInstance) {
+    loadingInstance.close()
+    loadingInstance = null
+  }
+}
+
+const playRecord = async () => {
+  // 如果是暂停后恢复播放
+  if (isPaused.value && wsUrl.value) {
+    playing.value = true
+    isPaused.value = false
+    if (proxy && proxy.$refs && proxy.$refs['EasyPlayerRef_' + currentDevice.value.id]) {
+      proxy.$refs['EasyPlayerRef_' + currentDevice.value.id].play()
+    }
+    handlePlaySuccess()
+    return
+  }
+  
+  // 否则是全新播放
+  if (loadingInstance) {
+    return
+  }
+  if (!currentDevice.value || timeSegments.value.length === 0) {
+    return
+  }
+  
+  if (playing.value) {
+    await stopPlay()
+  }
+  
+  // 显示加载动画
+  loadingInstance = ElLoading.service({
+    lock: true,
+    text: '加载中...',
+    background: 'rgba(0, 0, 0, 0.7)',
+  })
+
+  let targetRecord = findRecordByTime(playTime.value || 0)
+  
+  if (!targetRecord) {
+    // 如果当前时间没有匹配的录像，使用第一段录像
+    if (recordList.value.length > 0) {
+      targetRecord = recordList.value[0]
+      playTime.value = new Date(targetRecord.startTime || targetRecord.start).getTime()
+    } else {
+      loadingInstance.close()
+      loadingInstance = null
+      return
+    }
+  }
+
+  // 找到整个录像的最早开始时间和最晚结束时间
+  let overallStartTime = Infinity
+  let overallEndTime = 0
+  for (let i = 0; i < recordList.value.length; i++) {
+    const recStartTime = new Date(recordList.value[i].startTime || recordList.value[i].start).getTime()
+    const recEndTime = new Date(recordList.value[i].endTime || recordList.value[i].end).getTime()
+    if (recStartTime < overallStartTime) overallStartTime = recStartTime
+    if (recEndTime > overallEndTime) overallEndTime = recEndTime
+  }
+  
+  selectedRecord.value = targetRecord
+  
+  const actualStartTimeVal = playTime.value || overallStartTime
+  currentStartTime.value = actualStartTimeVal
+  currentEndTime.value = overallEndTime
+
+  playTime.value = actualStartTimeVal
+  lastUpdateTime = performance.now()
+
+  currentStreamId = `${currentDevice.value.deviceCode}_${Date.now()}`
+  const param: any = {
+    id: currentDevice.value.id,
+    app: currentDevice.value.type == '7' ? 'haikang' : currentDevice.value.type == '8' ? 'haikang_isup' : 'dahua',
+    streamId: currentStreamId,
+    type: currentDevice.value.type,
+    tcpMode: 0,
+    playback: true,
+    channel: currentDevice.value.channel
+  }
+
+  // 使用整个录像的时间范围
+  if (actualStartTimeVal && overallEndTime) {
+    param.startTime = moment(actualStartTimeVal).format('YYYY-MM-DD HH:mm:ss')
+    param.endTime = moment(overallEndTime).format('YYYY-MM-DD HH:mm:ss')
+  }
+
+  try {
+    const res: any = await rtpPlayback(param)
+    if (res && res.data) {
+      if (location.protocol === 'https:') {
+        wsUrl.value = res.data.wssFlv || res.data.wss_flv || res.data.wss_flv
+      } else {
+        wsUrl.value = res.data.wsFlv || res.data.ws_flv
+      }
+      playing.value = true
+      isPaused.value = false
+
+      await nextTick()
+      setTimeout(async () => {
+        await nextTick()
+        if (proxy && proxy.$refs && proxy.$refs['EasyPlayerRef_' + currentDevice.value.id]) {
+          proxy.$refs['EasyPlayerRef_' + currentDevice.value.id].play()
+        }
+      }, 1000)
+    } else {
+      loadingInstance.close()
+      loadingInstance = null
+    }
+  } catch (error) {
+    console.error('播放失败', error)
+    loadingInstance.close()
+    loadingInstance = null
+  }
+}
+
+const pausePlay = () => {
+  if (proxy && proxy.$refs && proxy.$refs['EasyPlayerRef_' + currentDevice.value.id]) {
+    proxy.$refs['EasyPlayerRef_' + currentDevice.value.id].pause()
+  }
+  playing.value = false
+  isPaused.value = true
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId)
+    animationFrameId = null
+  }
+}
+
+let isDraggingStop = false
+
+const stopPlay = async () => {
+  // 关闭加载动画
+  if (loadingInstance) {
+    loadingInstance.close()
+    loadingInstance = null
+  }
+
+  if (playDebounceTimer) {
+    clearTimeout(playDebounceTimer)
+    playDebounceTimer = null
+  }
+
+  if (currentDevice.value && proxy && proxy.$refs && proxy.$refs['EasyPlayerRef_' + currentDevice.value.id]) {
+    proxy.$refs['EasyPlayerRef_' + currentDevice.value.id].destroy()
+  }
+
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId)
+    animationFrameId = null
+  }
+
+  if (currentDevice.value && currentStreamId) {
+    try {
+      const param: any = {
+        id: currentDevice.value.id,
+        app: currentDevice.value.type == '7' ? 'haikang' : currentDevice.value.type == '8' ? 'haikang_isup' : 'dahua',
+        streamId: currentStreamId,
+        type: currentDevice.value.type,
+        tcpMode: 0,
+        playback: true
+      }
+      await stopRtpPlayback(param)
+    } catch (error) {
+      console.error('停止播放失败', error)
+    }
+  }
+
+  playing.value = false
+  isPaused.value = false
+  wsUrl.value = ''
+  
+  // 只有不是拖动时才重置播放时间到开始
+  if (!isDraggingStop && selectedRecord.value) {
+    const startTimeVal = selectedRecord.value.startTime || selectedRecord.value.start
+    playTime.value = new Date(startTimeVal).getTime()
+    if (Timeline.value && Timeline.value.setTime) {
+      Timeline.value.setTime(playTime.value)
+    }
+  }
+  
+  isDraggingStop = false
+}
+
+
+
+const startSmoothAnimation = (startTimeVal: number | string, endTimeVal: number | string) => {
+  lastTimelineUpdate = performance.now()
+  
+  // 找到整个录像的最早开始时间和最晚结束时间
+  let overallStartTime = Infinity
+  let overallEndTime = 0
+  for (let i = 0; i < recordList.value.length; i++) {
+    const recStartTime = new Date(recordList.value[i].startTime || recordList.value[i].start).getTime()
+    const recEndTime = new Date(recordList.value[i].endTime || recordList.value[i].end).getTime()
+    if (recStartTime < overallStartTime) overallStartTime = recStartTime
+    if (recEndTime > overallEndTime) overallEndTime = recEndTime
+  }
+  
+  const animate = () => {
+    if (!playing.value || isPaused.value) {
+      animationFrameId = null
+      return
+    }
+    
+    const now = performance.now()
+    const deltaTime = now - lastUpdateTime
+    lastUpdateTime = now
+    
+    const timeToAdd = deltaTime * playSpeed.value
+    playTime.value += timeToAdd
+    
+    if (now - lastTimelineUpdate >= 100 && Timeline.value && Timeline.value.setTime) {
+      Timeline.value.setTime(playTime.value)
+      lastTimelineUpdate = now
+    }
+    
+    // 使用整个录像的结束时间
+    if (playTime.value >= overallEndTime) {
+      playing.value = false
+      animationFrameId = null
+      return
+    }
+    
+    animationFrameId = requestAnimationFrame(animate)
+  }
+  
+  if (Timeline.value && Timeline.value.setTime) {
+    Timeline.value.setTime(playTime.value)
+  }
+  
+  animationFrameId = requestAnimationFrame(animate)
+}
+
 function playTimeChange(time: number) {
   playTime.value = time
   showTimeValue.value = moment(time).format('YYYY-MM-DD HH:mm:ss')
 }
 
-/**
- * 时间轴鼠标按下
- */
 function timelineMouseDown() {
-  // 可以在这里添加鼠标按下时的逻辑
+  isDraggingTimeline = true
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId)
+    animationFrameId = null
+  }
 }
 
-/**
- * 时间轴鼠标抬起
- */
-function mouseupTimeline() {
-  // 可以在这里添加鼠标抬起时的逻辑
+async function mouseupTimeline() {
+  // 只有真正拖动过时间轴才执行
+  if (!isDraggingTimeline) {
+    return
+  }
+  
+  isDraggingTimeline = false
+  
+  // 找到整个录像的最早开始时间和最晚结束时间
+  let overallStartTime = Infinity
+  let overallEndTime = 0
+  if (recordList.value.length > 0) {
+    for (let i = 0; i < recordList.value.length; i++) {
+      const recStartTime = new Date(recordList.value[i].startTime || recordList.value[i].start).getTime()
+      const recEndTime = new Date(recordList.value[i].endTime || recordList.value[i].end).getTime()
+      if (recStartTime < overallStartTime) overallStartTime = recStartTime
+      if (recEndTime > overallEndTime) overallEndTime = recEndTime
+    }
+  }
+  
+  // 检查是否小于整个录像的开始时间
+  if (playTime.value < overallStartTime && recordList.value.length > 0) {
+    playTime.value = overallStartTime
+    if (Timeline.value && Timeline.value.setTime) {
+      Timeline.value.setTime(playTime.value)
+    }
+  }
+  
+  // 检查是否大于整个录像的结束时间
+  if (playTime.value > overallEndTime && recordList.value.length > 0) {
+    playTime.value = overallEndTime
+    if (Timeline.value && Timeline.value.setTime) {
+      Timeline.value.setTime(playTime.value)
+    }
+  }
+  
+  if (playDebounceTimer) {
+    clearTimeout(playDebounceTimer)
+  }
+  
+  playDebounceTimer = window.setTimeout(async () => {
+    if (playing.value || isPaused.value) {
+      isDraggingStop = true
+      await stopPlay()
+      setTimeout(() => {
+        playRecord()
+      }, 300)
+    } else {
+      if (selectedRecord.value || recordList.value.length > 0) {
+        playRecord()
+      }
+    }
+  }, 200)
 }
 
-/**
- * 播放器错误回调
- */
 const easyPlayeError = () => {
-
+  // 关闭加载动画
+  if (loadingInstance) {
+    loadingInstance.close()
+    loadingInstance = null
+  }
+  // 停止时间轴动画
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId)
+    animationFrameId = null
+  }
+  // 重置播放状态
+  playing.value = false
+  isPaused.value = false
 }
 
-/**
- * 根据录像开始时间更新 initTime
- * @param recordStartTime 录像开始时间（Date或时间戳）
- */
 const updateInitTimeByRecord = (recordStartTime: any) => {
   const dayStart = moment(selectedDate.value).startOf('day').valueOf()
   const recordTime = moment(recordStartTime).valueOf()
 
   if (recordTime >= dayStart) {
-    // 录像时间 >= 今天 00:00:00，用录像开始时间
     initTime.value = recordTime
   } else {
-    // 录像时间 < 今天 00:00:00，用当天 00:00:00
     initTime.value = dayStart
   }
 }
 
-/**
- * 日期变化
- */
 const handleDateChange = () => {
+  stopPlay()
   getList()
 }
 
-/**
- * 前一天
- */
 const prevDay = () => {
   selectedDate.value = moment(selectedDate.value).subtract(1, 'day').format('YYYY-MM-DD')
+  stopPlay()
   getList()
 }
 
-/**
- * 后一天
- */
 const nextDay = () => {
   selectedDate.value = moment(selectedDate.value).add(1, 'day').format('YYYY-MM-DD')
+  stopPlay()
+  getList()
+}
+
+const handleToday = () => {
+  selectedDate.value = moment().format('YYYY-MM-DD')
+  stopPlay()
   getList()
 }
 
 /**
- * 今天
+ * 截图
  */
-const handleToday = () => {
-  selectedDate.value = moment().format('YYYY-MM-DD')
-  getList()
+const snap = () => {
+  if (proxy.$refs['EasyPlayerRef_' + currentDevice.value.id]) {
+    proxy.$refs['EasyPlayerRef_' + currentDevice.value.id].screenshot()
+  }
 }
+
+/**
+ * 刷新
+ */
+const refresh = () => {
+  if (proxy.$refs['EasyPlayerRef_' + currentDevice.value.id]) {
+    proxy.$refs['EasyPlayerRef_' + currentDevice.value.id].play()
+  }
+}
+
+/**
+ * 全屏
+ */
+const fullScreen = () => {
+  if (isFullScreen.value) {
+    screenfull.exit()
+    isFullScreen.value = false
+    jessibucaHeight.value = document.documentElement.clientHeight - 310 + 'px;'
+    return
+  }
+  screenfull.request(document.getElementById('recordPlayer'))
+  screenfull.on('change', (event) => {
+    isFullScreen.value = screenfull.isFullscreen
+  })
+  isFullScreen.value = true
+  jessibucaHeight.value = '100%'
+}
+
+/**
+ * 更新全屏状态
+ */
+const updateFullscreenState = () => {
+  isFullScreen.value = !!document.fullscreenElement
+  if (!isFullScreen.value) {
+    screenfull.exit()
+    isFullScreen.value = false
+    jessibucaHeight.value = document.documentElement.clientHeight - 310 + 'px;'
+  }
+}
+
+/**
+ * 组件挂载
+ */
+onMounted(() => {
+  document.addEventListener('fullscreenchange', updateFullscreenState)
+  setTimeout(()=>{
+    nextTick(()=>{
+      selectedDate.value = moment().format('YYYY-MM-DD')
+      timeSegments.value = []
+    })
+  },300)
+})
+
+/**
+ * 组件卸载
+ */
+onUnmounted(() => {
+  document.removeEventListener('fullscreenchange', updateFullscreenState)
+  // 关闭加载动画
+  if (loadingInstance) {
+    loadingInstance.close()
+    loadingInstance = null
+  }
+})
 </script>
 
 <style lang="scss" scoped>
 @import './style.scss';
+
+.device-record-wrapper {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #0a0a0a;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
 
 .player-option-box {
   height: 60px
@@ -499,30 +929,9 @@ const handleToday = () => {
 }
 
 .player-container {
-  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
   padding-top: 10px;
-}
-
-.play-grid {
-  width: 100%;
-  height: 100%;
-  display: grid;
-}
-
-.play-box {
-  background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  position: relative;
-  border: 2px solid transparent;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  box-shadow: 0 8px 24px rgba(var(--el-color-primary-rgb), 0.12);
 }
 </style>

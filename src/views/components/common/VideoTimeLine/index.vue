@@ -1142,7 +1142,7 @@ export default {
       this.startTimestamp = ts - this.totalMS / 2
       this.fixStartTimestamp()
       this.clearCanvas(this.width, this.height)
-      this.draw(true)
+      this.draw(false)  // 这里保持false，确保所有逻辑都执行
       if (this.mousemoveX !== -1 && !this.isMobile) {
         this.hoverShow(this.mousemoveX, true)
       }

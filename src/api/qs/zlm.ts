@@ -52,6 +52,26 @@ export function stopRtpPlay(data: RTPServerParam) {
     })
 }
 
+// 大华回放
+export function rtpPlayback(data: RTPServerParam): Promise<AjaxResult<StreamContent>> {
+    return request({
+        url: '/zlm/rtpPlayback',
+        method: 'post',
+        data,
+        timeout: 20000
+    })
+}
+
+// 停止大华回放
+export function stopRtpPlayback(data: RTPServerParam) {
+    return request({
+        url: '/zlm/stopRtpPlayback',
+        method: 'post',
+        data,
+        timeout: 20000
+    })
+}
+
 
 // 获取流媒体服务器列表
 export function getMediaServerList(): Promise<AjaxResult<MediaServer[]>> {
