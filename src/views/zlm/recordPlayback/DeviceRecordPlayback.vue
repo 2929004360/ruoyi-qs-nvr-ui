@@ -73,7 +73,7 @@
                     :defaultQuality="defaultQuality"
                     :isPtz="isPtz"
                     :isQuality="isQuality"
-                    :hasAudio="true"
+                    :hasAudio="false"
                     :isMute="true"
                     :isLive="isLive"
                     :videoUrl="wsUrl"
@@ -161,7 +161,7 @@
 <script setup lang="ts" name="DeviceRecordPlayback">
 import {getCurrentInstance, nextTick, onMounted, onUnmounted} from 'vue'
 import screenfull from 'screenfull'
-import { ElLoading } from 'element-plus'
+import { ElLoading, ElMessage } from 'element-plus'
 import DeviceTree from '@/components/DeviceTree'
 import {Pane, Splitpanes} from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
@@ -188,7 +188,7 @@ import {queryHaiKangRecord} from "@/api/qs/haikang"
 import {queryHaiKangIsupRecord} from "@/api/qs/haikang-isup"
 import {queryOnvifRecord} from "@/api/qs/onvif"
 import {queryJt1078Record} from "@/api/qs/jt1078"
-import {rtpPlayback, stopRtpPlayback} from "@/api/qs/zlm"
+import {rtpPlayback, stopRtpPlayback, onvifPlayback, stopOnvifPlayback, startGb28181Playback, stopGb28181Playback} from "@/api/qs/zlm"
 import moment from 'moment'
 import VideoTimeline from '@/views/components/common/VideoTimeLine/index.vue'
 import EasyPlayer from '@/components/EasyPlayer'
@@ -236,6 +236,17 @@ const handleDeviceClick = async (deviceId: number) => {
     const res: any = await getDevice(deviceId)
     const device = res.data
     currentDevice.value = device
+
+    // 检查设备类型是否支持录像功能
+    const unsupportedTypes = ['1', '2', '3', '4', '6', '13']
+    if (unsupportedTypes.includes(device.type)) {
+      ElMessage.warning('该设备类型不支持录像回放功能')
+      // 清空之前的状态
+      timeSegments.value = []
+      recordList.value = []
+      selectedRecord.value = null
+      return
+    }
 
     await stopPlay()
 
@@ -550,48 +561,129 @@ const playRecord = async () => {
   lastUpdateTime = performance.now()
 
   currentStreamId = `${currentDevice.value.deviceCode}_${Date.now()}`
-  const param: any = {
-    id: currentDevice.value.id,
-    app: currentDevice.value.type == '7' ? 'haikang' : currentDevice.value.type == '8' ? 'haikang_isup' : 'dahua',
-    streamId: currentStreamId,
-    type: currentDevice.value.type,
-    tcpMode: 0,
-    playback: true,
-    channel: currentDevice.value.channel
-  }
-
-  // 使用整个录像的时间范围
-  if (actualStartTimeVal && overallEndTime) {
-    param.startTime = moment(actualStartTimeVal).format('YYYY-MM-DD HH:mm:ss')
-    param.endTime = moment(overallEndTime).format('YYYY-MM-DD HH:mm:ss')
-  }
-
-  try {
-    const res: any = await rtpPlayback(param)
-    if (res && res.data) {
-      if (location.protocol === 'https:') {
-        wsUrl.value = res.data.wssFlv || res.data.wss_flv || res.data.wss_flv
-      } else {
-        wsUrl.value = res.data.wsFlv || res.data.ws_flv
-      }
-      playing.value = true
-      isPaused.value = false
-
-      await nextTick()
-      setTimeout(async () => {
-        await nextTick()
-        if (proxy && proxy.$refs && proxy.$refs['EasyPlayerRef_' + currentDevice.value.id]) {
-          proxy.$refs['EasyPlayerRef_' + currentDevice.value.id].play()
+  
+  // GB28181 设备类型处理
+  if (currentDevice.value.type == '12') {
+    // GB28181 设备回放
+    try {
+      const res: any = await startGb28181Playback(
+        currentDevice.value.id,
+        moment(actualStartTimeVal).format('YYYY-MM-DD HH:mm:ss'),
+        moment(overallEndTime).format('YYYY-MM-DD HH:mm:ss')
+      )
+      if (res && res.data) {
+        if (location.protocol === 'https:') {
+          wsUrl.value = res.data.wssFlv || res.data.wss_flv
+        } else {
+          wsUrl.value = res.data.wsFlv || res.data.ws_flv
         }
-      }, 1000)
-    } else {
+        playing.value = true
+        isPaused.value = false
+
+        await nextTick()
+        setTimeout(async () => {
+          await nextTick()
+          if (proxy && proxy.$refs && proxy.$refs['EasyPlayerRef_' + currentDevice.value.id]) {
+            proxy.$refs['EasyPlayerRef_' + currentDevice.value.id].play()
+          }
+        }, 1000)
+      } else {
+        loadingInstance.close()
+        loadingInstance = null
+      }
+    } catch (error) {
+      console.error('播放失败', error)
       loadingInstance.close()
       loadingInstance = null
     }
-  } catch (error) {
-    console.error('播放失败', error)
-    loadingInstance.close()
-    loadingInstance = null
+  } else if (currentDevice.value.type == '5') {
+    // ONVIF 设备播放
+    const onvifParam: any = {
+      deviceId: currentDevice.value.id,
+      deviceIp: currentDevice.value.ipAddress || '',
+      username: currentDevice.value.userName || '',
+      password: currentDevice.value.password || '',
+      recordingToken: targetRecord.recordingToken || '',
+      trackToken: targetRecord.trackToken || '',
+      app: 'onvif',
+      stream: currentStreamId,
+      enableAudio: true,
+      rtpType: '0',
+      timeOut: 30000
+    }
+    
+    try {
+      const res: any = await onvifPlayback(onvifParam)
+      if (res && res.data) {
+        if (location.protocol === 'https:') {
+          wsUrl.value = res.data.wssFlv || res.data.wss_flv
+        } else {
+          wsUrl.value = res.data.wsFlv || res.data.ws_flv
+        }
+        playing.value = true
+        isPaused.value = false
+
+        await nextTick()
+        setTimeout(async () => {
+          await nextTick()
+          if (proxy && proxy.$refs && proxy.$refs['EasyPlayerRef_' + currentDevice.value.id]) {
+            proxy.$refs['EasyPlayerRef_' + currentDevice.value.id].play()
+          }
+        }, 1000)
+      } else {
+        loadingInstance.close()
+        loadingInstance = null
+      }
+    } catch (error) {
+      console.error('播放失败', error)
+      loadingInstance.close()
+      loadingInstance = null
+    }
+  } else {
+    // 其他设备类型处理
+    const param: any = {
+      id: currentDevice.value.id,
+      app: currentDevice.value.type == '7' ? 'haikang' : currentDevice.value.type == '8' ? 'haikang_isup' : 'dahua',
+      streamId: currentStreamId,
+      type: currentDevice.value.type,
+      tcpMode: 0,
+      playback: true,
+      channel: currentDevice.value.channel
+    }
+
+    // 使用整个录像的时间范围
+    if (actualStartTimeVal && overallEndTime) {
+      param.startTime = moment(actualStartTimeVal).format('YYYY-MM-DD HH:mm:ss')
+      param.endTime = moment(overallEndTime).format('YYYY-MM-DD HH:mm:ss')
+    }
+
+    try {
+      const res: any = await rtpPlayback(param)
+      if (res && res.data) {
+        if (location.protocol === 'https:') {
+          wsUrl.value = res.data.wssFlv || res.data.wss_flv
+        } else {
+          wsUrl.value = res.data.wsFlv || res.data.ws_flv
+        }
+        playing.value = true
+        isPaused.value = false
+
+        await nextTick()
+        setTimeout(async () => {
+          await nextTick()
+          if (proxy && proxy.$refs && proxy.$refs['EasyPlayerRef_' + currentDevice.value.id]) {
+            proxy.$refs['EasyPlayerRef_' + currentDevice.value.id].play()
+          }
+        }, 1000)
+      } else {
+        loadingInstance.close()
+        loadingInstance = null
+      }
+    } catch (error) {
+      console.error('播放失败', error)
+      loadingInstance.close()
+      loadingInstance = null
+    }
   }
 }
 
@@ -632,15 +724,30 @@ const stopPlay = async () => {
 
   if (currentDevice.value && currentStreamId) {
     try {
-      const param: any = {
-        id: currentDevice.value.id,
-        app: currentDevice.value.type == '7' ? 'haikang' : currentDevice.value.type == '8' ? 'haikang_isup' : 'dahua',
-        streamId: currentStreamId,
-        type: currentDevice.value.type,
-        tcpMode: 0,
-        playback: true
+      // GB28181 设备类型处理
+      if (currentDevice.value.type == '12') {
+        await stopGb28181Playback(currentDevice.value.id)
+      } else if (currentDevice.value.type == '5') {
+        // ONVIF 设备类型处理
+        const onvifParam: any = {
+          deviceId: currentDevice.value.id,
+          streamKey: currentStreamId,
+          mediaServerId: currentDevice.value.playbackMediaServerId || '',
+          playback: true
+        }
+        await stopOnvifPlayback(onvifParam)
+      } else {
+        // 其他设备类型处理
+        const param: any = {
+          id: currentDevice.value.id,
+          app: currentDevice.value.type == '7' ? 'haikang' : currentDevice.value.type == '8' ? 'haikang_isup' : 'dahua',
+          streamId: currentStreamId,
+          type: currentDevice.value.type,
+          tcpMode: 0,
+          playback: true
+        }
+        await stopRtpPlayback(param)
       }
-      await stopRtpPlayback(param)
     } catch (error) {
       console.error('停止播放失败', error)
     }

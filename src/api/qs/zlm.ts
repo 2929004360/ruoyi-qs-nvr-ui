@@ -72,6 +72,26 @@ export function stopRtpPlayback(data: RTPServerParam) {
     })
 }
 
+// ONVIF回放拉流播放
+export function onvifPlayback(data: any): Promise<AjaxResult<StreamContent>> {
+    return request({
+        url: '/zlm/onvifPlayback',
+        method: 'post',
+        data,
+        timeout: 20000
+    })
+}
+
+// 停止ONVIF拉流播放
+export function stopOnvifPlayback(data: any) {
+    return request({
+        url: '/zlm/stopStreamPullPlay',
+        method: 'post',
+        data,
+        timeout: 20000
+    })
+}
+
 
 // 获取流媒体服务器列表
 export function getMediaServerList(): Promise<AjaxResult<MediaServer[]>> {
@@ -221,6 +241,28 @@ export function startGb28181Play(id: number): Promise<AjaxResult<StreamContent>>
 export function stopGb28181Play(id: number): Promise<AjaxResult> {
     return request({
         url: '/zlm/stopGb28181Play/' + id,
+        method: 'get',
+    })
+}
+
+/**
+ * gb28181 回放
+ */
+export function startGb28181Playback(id: number, startTime: string, endTime: string): Promise<AjaxResult<StreamContent>> {
+    return request({
+        url: '/zlm/startGb28181Playback/' + id,
+        method: 'get',
+        params: { startTime, endTime },
+        timeout: 20000
+    })
+}
+
+/**
+ * gb28181 停止回放
+ */
+export function stopGb28181Playback(id: number): Promise<AjaxResult> {
+    return request({
+        url: '/zlm/stopGb28181Playback/' + id,
         method: 'get',
     })
 }
