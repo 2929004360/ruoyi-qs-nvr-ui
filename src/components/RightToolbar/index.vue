@@ -2,11 +2,16 @@
   <div class="top-right-btn" :style="style">
     <el-row>
       <el-tooltip class="item" effect="dark" :content="showSearch ? '隐藏搜索' : '显示搜索'" placement="top" v-if="search">
-        <el-button circle icon="Search" @click="toggleSearch()" />
+        <el-button circle icon="Search" @click="toggleSearch()" style="margin-right: 6px" />
       </el-tooltip>
       <el-tooltip class="item" effect="dark" content="刷新" placement="top">
-        <el-button circle icon="Refresh" @click="refresh()" />
+        <el-button circle icon="Refresh" @click="refresh()" style="margin-right: 6px" />
       </el-tooltip>
+      <template v-if="showViewSwitch">
+        <el-tooltip class="item" effect="dark" :content="viewMode === 'list' ? '卡片视图' : '列表视图'" placement="top">
+          <el-button circle :icon="viewMode === 'list' ? List : Grid" @click="handleViewModeChange(viewMode === 'list' ? 'card' : 'list')" :type="viewMode === 'list' ? 'primary' : ''" style="margin-right: 6px" />
+        </el-tooltip>
+      </template>
       <el-tooltip class="item" effect="dark" content="显隐列" placement="top" v-if="Object.keys(columns).length > 0">
         <el-button circle icon="Menu" @click="showColumn()" v-if="showColumnsType == 'transfer'"/>
         <el-dropdown trigger="click" :hide-on-click="false" style="padding-left: 12px" v-if="showColumnsType == 'checkbox'">
@@ -40,7 +45,9 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, nextTick, getCurrentInstance } from 'vue'
 import type { TableShowColumns } from '@/types/api/common'
+import { List, Grid } from '@element-plus/icons-vue'
 
 const props = defineProps({
   /* 是否显示检索条件 */
@@ -68,9 +75,19 @@ const props = defineProps({
     type: Number,
     default: 10
   },
+  /* 是否显示视图切换 */
+  showViewSwitch: {
+    type: Boolean,
+    default: false
+  },
+  /* 当前视图模式 */
+  viewMode: {
+    type: String,
+    default: "list"
+  }
 })
 
-const emits = defineEmits(['update:showSearch', 'queryTable'])
+const emits = defineEmits(['update:showSearch', 'queryTable', 'update:viewMode'])
 
 // 显隐数据
 const value = ref<number[]>([])
@@ -86,6 +103,10 @@ const style = computed(() => {
   }
   return ret
 })
+
+function handleViewModeChange(mode: string) {
+  emits('update:viewMode', mode)
+}
 
 // 是否全选/半选 状态
 const isChecked = computed({

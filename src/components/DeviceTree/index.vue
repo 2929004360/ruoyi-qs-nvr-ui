@@ -1,10 +1,11 @@
 <template>
   <div id="DeviceTree" class="device-tree-container" style="height: 100%">
-    <div class="device-tree-header">
-      <div class="header-title">
-        <span class="title-icon">📹</span>
-        <span>设备列表</span>
+    <div v-if="showHeader" class="panel-header">
+      <div class="header-accent"></div>
+      <div class="header-icon-wrap">
+        <el-icon><VideoCamera /></el-icon>
       </div>
+      <span>设备列表</span>
       <div class="header-switch">
         <el-switch
             v-model="showRegion"
@@ -16,6 +17,14 @@
     </div>
 
     <div class="tree-content">
+      <div v-if="!showHeader" class="switch-container">
+        <el-switch
+            v-model="showRegion"
+            active-text="行政区划"
+            inactive-text="业务分组"
+            @change="change"
+        />
+      </div>
       <div class="tree-wrapper">
         <RegionTree
             v-if="showRegion"
@@ -49,6 +58,7 @@
 <script setup name="DeviceTree" lang="ts">
 import GroupTree from "@/views/components/common/GroupTree.vue";
 import RegionTree from "@/views/components/common/RegionTree.vue";
+import { VideoCamera } from '@element-plus/icons-vue';
 
 const {proxy} = getCurrentInstance()
 const emit = defineEmits(['clickEvent', ',playChannel', 'updatePosition']);
@@ -61,6 +71,10 @@ const props = defineProps({
   isContextmenu: {
     type: Boolean,
     default: false
+  },
+  showHeader: {
+    type: Boolean,
+    default: true
   },
 })
 
@@ -107,31 +121,55 @@ defineExpose({
   flex-direction: column;
   box-sizing: border-box;
   overflow: hidden !important;
+  background: var(--el-bg-color);
 }
 
-.device-tree-header {
+/* Panel Header - 参考 DeviceRecordPlayback 的设计 */
+.panel-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
-  padding: 10px 4px;
-  flex-wrap: wrap;
-  gap: 12px;
-  min-height: 30px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--el-border-color-lighter);
-}
-
-.header-title {
-  font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--el-text-color-primary);
-  display: flex;
-  align-items: center;
+  font-size: 13px;
   gap: 8px;
+  min-height: 44px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+
+  .header-accent {
+    width: 3px;
+    height: 16px;
+    border-radius: 2px;
+    background: linear-gradient(to bottom, var(--el-color-primary), var(--el-color-primary-light-3));
+    flex-shrink: 0;
+  }
+
+  .header-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--el-color-primary-light-9);
+    color: var(--el-color-primary);
+    font-size: 13px;
+  }
+
+  .header-switch {
+    margin-left: auto;
+  }
 }
 
-.title-icon {
-  font-size: 18px;
+.switch-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  flex-shrink: 0;
 }
 
 .tree-content {
@@ -139,8 +177,11 @@ defineExpose({
   overflow: hidden !important;
   width: 100%;
   margin: 0;
-  padding: 0;
+  padding: 8px;
   position: relative;
+  background: var(--el-bg-color);
+  display: flex;
+  flex-direction: column;
 }
 
 .tree-wrapper {
@@ -168,14 +209,15 @@ defineExpose({
   width: 100% !important;
   min-width: 0 !important;
   padding: 8px 12px;
-  border-radius: 6px;
-  transition: all 0.2s ease;
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
   margin: 2px 0;
 }
 
 :deep(.el-tree-node__content:hover) {
   background: rgba(var(--el-color-primary-rgb), 0.08);
   transform: translateX(2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 :deep(.el-tree-node__label) {
@@ -186,9 +228,10 @@ defineExpose({
 }
 
 :deep(.el-tree-node.is-current > .el-tree-node__content) {
-  background: rgba(var(--el-color-primary-rgb), 0.12);
+  background: linear-gradient(135deg, var(--el-color-primary-light-9) 0%, var(--el-color-primary-light-8) 100%);
   color: var(--el-color-primary);
   font-weight: 600;
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.15);
 }
 
 :deep(.el-tree-node__expand-icon) {
@@ -219,32 +262,23 @@ defineExpose({
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .device-tree-header {
+  .panel-header {
     flex-direction: column;
     align-items: flex-start;
-    padding: 8px 0;
+    gap: 10px;
+    padding: 12px 14px;
   }
 
   .header-switch {
     width: 100%;
-    margin-top: 4px;
+    margin-left: 0;
   }
 }
 
-@media (max-width: 480px) {
-  .header-title {
-    font-size: 15px;
-  }
-
-  .title-icon {
-    font-size: 16px;
-  }
-}
-
-/* ===== 暗黑模式 ===== */
-html.dark .device-tree-header {
-  border-bottom-color: var(--el-border-color);
-  background: var(--el-bg-color-page);
+/* ========== 暗黑模式 ========== */
+html.dark .panel-header {
+  background: rgba(255, 255, 255, 0.02);
+  border-bottom-color: var(--el-border-color-darker);
 }
 
 html.dark :deep(.el-tree-node__content:hover) {
@@ -252,7 +286,8 @@ html.dark :deep(.el-tree-node__content:hover) {
 }
 
 html.dark :deep(.el-tree-node.is-current > .el-tree-node__content) {
-  background: rgba(var(--el-color-primary-rgb), 0.2);
+  background: linear-gradient(135deg, rgba(64, 158, 255, 0.18) 0%, rgba(64, 158, 255, 0.12) 100%);
+  box-shadow: 0 4px 16px rgba(64, 158, 255, 0.2);
 }
 
 html.dark :deep(.el-tree-node__label) {
@@ -261,5 +296,9 @@ html.dark :deep(.el-tree-node__label) {
 
 html.dark .device-tree-container {
   background: var(--el-bg-color-page);
+}
+
+html.dark .panel-header .header-icon-wrap {
+  background: rgba(64, 158, 255, 0.15);
 }
 </style>

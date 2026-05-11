@@ -1,139 +1,155 @@
 <template>
   <div class="app-container">
     <div class="search-box">
-      <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
+      <!-- 查询表单 -->
+      <el-form
+        :model="queryParams"
+        ref="queryRef"
+        :inline="true"
+        v-show="showSearch"
+        label-width="68px"
+        class="query-form"
+      >
         <el-form-item label="应用名" prop="app">
           <el-input
-              v-model="queryParams.app"
-              placeholder="请输入应用名"
-              clearable
-              @keyup.enter="handleQuery"
+            v-model="queryParams.app"
+            placeholder="请输入应用名"
+            clearable
+            @keyup.enter="handleQuery"
           />
         </el-form-item>
         <el-form-item label="流id" prop="stream">
           <el-input
-              v-model="queryParams.stream"
-              placeholder="请输入流id"
-              clearable
-              @keyup.enter="handleQuery"
+            v-model="queryParams.stream"
+            placeholder="请输入流id"
+            clearable
+            @keyup.enter="handleQuery"
           />
         </el-form-item>
         <el-form-item label="开始时间" prop="queryStartTime">
           <el-date-picker
-              v-model="queryParams.queryStartTime"
-              type="datetime"
-              style="width: 240px"
-              value-format="YYYY-MM-DD HH:mm:ss"
-              placeholder="选择日期时间">
+            v-model="queryParams.queryStartTime"
+            type="datetime"
+            style="width: 240px"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            placeholder="选择日期时间">
           </el-date-picker>
         </el-form-item>
         <el-form-item label="结束时间" prop="queryEndTime">
           <el-date-picker
-              v-model="queryParams.queryEndTime"
-              type="datetime"
-              style="width: 240px"
-              value-format="YYYY-MM-DD HH:mm:ss"
-              placeholder="选择日期时间">
+            v-model="queryParams.queryEndTime"
+            type="datetime"
+            style="width: 240px"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            placeholder="选择日期时间">
           </el-date-picker>
         </el-form-item>
         <el-form-item label="媒体节点" prop="mediaServerId">
           <el-select
-              v-model="queryParams.mediaServerId"
-              style="width: 240px"
-              placeholder="请选择节点选择"
-              clearable
+            v-model="queryParams.mediaServerId"
+            style="width: 240px"
+            placeholder="请选择节点选择"
+            clearable
           >
             <el-option
-                v-for="item in mediaServerList"
-                :key="item.id"
-                :label="item.id"
-                :value="item.id"
+              v-for="item in mediaServerList"
+              :key="item.id"
+              :label="item.id"
+              :value="item.id"
             />
           </el-select>
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-          <el-button icon="Refresh" @click="resetQuery">重置</el-button>
+        <el-form-item class="form-actions">
+          <div class="button-group">
+            <el-button type="primary" icon="Search" @click="handleQuery" class="search-btn">搜索</el-button>
+            <el-button icon="Refresh" @click="resetQuery" class="reset-btn">重置</el-button>
+          </div>
         </el-form-item>
       </el-form>
 
-      <div class="action-buttons">
-        <el-button
+      <!-- 操作按钮区 -->
+      <el-row :gutter="10" class="mb8 toolbar-row action-buttons">
+        <el-col :span="1.5">
+          <el-button
             type="danger"
             plain
             icon="Delete"
             :disabled="multiple"
             @click="handleDelete"
-        >删除
-        </el-button>
-        <el-button
+            class="action-btn delete-btn"
+          >删除
+          </el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button
             type="warning"
             plain
             icon="Download"
             :disabled="multiple"
             @click="downloadZip"
-        >下载
-        </el-button>
-        <el-col :span="2" class="view-switch">
-          <el-radio-group v-model="viewMode" size="small">
-            <el-tooltip content="列表视图" placement="bottom" :show-after="500">
-              <el-radio-button value="list">
-                <el-icon><List /></el-icon>
-              </el-radio-button>
-            </el-tooltip>
-            <el-tooltip content="卡片视图" placement="bottom" :show-after="500">
-              <el-radio-button value="card">
-                <el-icon><Grid /></el-icon>
-              </el-radio-button>
-            </el-tooltip>
-          </el-radio-group>
+            class="action-btn download-btn"
+          >下载
+          </el-button>
         </el-col>
-        <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
-      </div>
+        <right-toolbar v-model:showSearch="showSearch" v-model:viewMode="viewMode" :showViewSwitch="true" @queryTable="getList"></right-toolbar>
+      </el-row>
     </div>
 
-    <el-table v-if="viewMode === 'list'" v-loading="loading" :data="cloudRecordList" @selection-change="handleSelectionChange" class="record-table" border>
-      <el-table-column type="selection" width="55" align="center" fixed/>
-      <el-table-column label="编号" align="center" prop="id" width="80"/>
-      <el-table-column label="应用名" align="center" prop="app" width="120"/>
-      <el-table-column label="流id" align="center" prop="stream" min-width="150"/>
-      <el-table-column label="开始时间" align="center" width="180">
-        <template v-slot:default="scope">
-          {{ formatTimeStamp(scope.row.startTime) }}
-        </template>
-      </el-table-column>
-      <el-table-column label="结束时间" align="center" width="180">
-        <template v-slot:default="scope">
-          {{ formatTimeStamp(scope.row.endTime) }}
-        </template>
-      </el-table-column>
-      <el-table-column label="媒体节点" align="center" prop="mediaServerId" width="120"/>
-      <el-table-column label="文件名称" align="center" prop="fileName" min-width="150"/>
-      <el-table-column label="大小" align="center" prop="fileSize" width="120">
-        <template v-slot:default="scope">
-          <el-tag type="info">{{ formatBytes(scope.row.fileSize) }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="时长" align="center" width="140">
-        <template v-slot:default="scope">
-          <el-tag type="success">{{ formatTime(scope.row.timeLen) }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="200" fixed="right">
-        <template #default="scope">
-          <el-button link
-                     type="primary"
-                     icon="VideoPlay"
-                     @click="handlePlay(scope.row)"
-                     :loading="scope.row.loading"
-          >
-            播放
-          </el-button>
-          <el-button link type="success" icon="Download" @click="downloadZip(scope.row)">下载</el-button>
-          <el-button link type="danger" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
+    <!-- 数据表格 -->
+    <div v-if="viewMode === 'list'" class="table-wrapper">
+      <el-table
+        v-loading="loading"
+        :data="cloudRecordList"
+        @selection-change="handleSelectionChange"
+        class="custom-table"
+        highlight-current-row
+      >
+        <el-table-column type="selection" width="55" align="center" fixed/>
+        <el-table-column label="编号" align="center" prop="id" width="70">
+          <template #default="scope">
+            <span class="id-badge">{{ scope.row.id }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="应用名" align="center" prop="app" width="120"/>
+        <el-table-column label="流id" align="center" prop="stream" min-width="150"/>
+        <el-table-column label="开始时间" align="center" width="180">
+          <template v-slot:default="scope">
+            {{ formatTimeStamp(scope.row.startTime) }}
+          </template>
+        </el-table-column>
+        <el-table-column label="结束时间" align="center" width="180">
+          <template v-slot:default="scope">
+            {{ formatTimeStamp(scope.row.endTime) }}
+          </template>
+        </el-table-column>
+        <el-table-column label="媒体节点" align="center" prop="mediaServerId" width="120"/>
+        <el-table-column label="文件名称" align="center" prop="fileName" min-width="150"/>
+        <el-table-column label="大小" align="center" prop="fileSize" width="120">
+          <template v-slot:default="scope">
+            <el-tag type="info">{{ formatBytes(scope.row.fileSize) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="时长" align="center" width="140">
+          <template v-slot:default="scope">
+            <el-tag type="success">{{ formatTime(scope.row.timeLen) }}</el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="200" fixed="right">
+          <template #default="scope">
+            <el-button link
+                       type="primary"
+                       icon="VideoPlay"
+                       @click="handlePlay(scope.row)"
+                       :loading="scope.row.loading"
+                >
+              播放
+            </el-button>
+            <el-button link type="success" icon="Download" @click="downloadZip(scope.row)">下载</el-button>
+            <el-button link type="danger" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
 
     <div v-else class="card-view" v-loading="loading">
       <el-row :gutter="16">
@@ -905,11 +921,101 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .app-container {
-  padding: 20px;
+  padding: 16px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .search-box {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
+}
+
+/* ========== 查询表单 ========== */
+.query-form {
+  padding: 10px 15px;
+  background: var(--el-bg-color-overlay);
+  border-radius: 10px;
+  border: 1px solid var(--el-border-color-lighter);
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+  margin-bottom: 0 !important;
+  animation: fadeInUp 0.4s ease-out 0.15s both;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+
+  :deep(.el-form-item) {
+    margin-bottom: 0;
+    margin-right: 0;
+  }
+
+  :deep(.el-input__wrapper),
+  :deep(.el-select .el-input__wrapper) {
+    box-shadow: 0 0 0 1px var(--el-border-color-light) inset;
+    transition: all 0.3s;
+
+    &:hover,
+    &:focus-within {
+      box-shadow: 0 0 0 1px var(--el-color-primary-light-5) inset;
+    }
+
+    &:focus-within {
+      box-shadow: 0 0 0 1px var(--el-color-primary) inset, 0 0 0 3px var(--el-color-primary-light-8);
+    }
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-btn {
+  transition: all 0.3s;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--el-color-primary-light-7);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.reset-btn {
+  transition: all 0.3s;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+/* ========== 工具栏 ========== */
+.toolbar-row {
+  padding: 4px 0;
+  animation: fadeInUp 0.4s ease-out 0.2s both;
 }
 
 .action-buttons {
@@ -917,6 +1023,46 @@ onUnmounted(() => {
   gap: 12px;
   margin-top: 12px;
   align-items: center;
+}
+
+.action-btn {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  }
+
+  &:not(:disabled):active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.delete-btn:not(:disabled):hover {
+  box-shadow: 0 6px 16px var(--el-color-danger-light-7);
+}
+
+.download-btn:not(:disabled):hover {
+  box-shadow: 0 6px 16px var(--el-color-warning-light-7);
+}
+
+/* 按钮区域 */
+.form-actions {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+  padding-left: 16px;
+  border-left: 1px solid var(--el-border-color-lighter);
+  margin-left: 12px !important;
+
+  .button-group {
+    display: flex;
+    gap: 12px;
+  }
 }
 
 .view-switch {
@@ -1227,8 +1373,119 @@ onUnmounted(() => {
   transform: scale(1.08);
 }
 
-.record-table {
-  margin-bottom: 20px;
+/* 表格容器优化 */
+.table-wrapper {
+  background: var(--el-bg-color-overlay);
+  border-radius: 10px;
+  border: 1px solid var(--el-border-color-lighter);
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  animation: fadeInUp 0.4s ease-out 0.25s both;
+  transition: box-shadow 0.3s;
+}
+
+.table-wrapper:hover {
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.06);
+}
+
+.custom-table {
+  --el-table-header-bg-color: var(--el-fill-color-light);
+
+  :deep(.el-table__header-wrapper) {
+    th {
+      background-color: var(--el-fill-color-light) !important;
+      color: var(--el-text-color-primary);
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.3px;
+      transition: background-color 0.3s;
+    }
+  }
+
+  :deep(.el-table__body-wrapper) {
+    .el-table__row {
+      transition: all 0.25s ease;
+      animation: rowFadeIn 0.4s ease-out both;
+
+      @for $i from 1 through 20 {
+        &:nth-child(#{$i}) {
+          animation-delay: #{$i * 0.03 + 0.25}s;
+        }
+      }
+
+      &:hover {
+        background-color: var(--el-color-primary-light-9) !important;
+        transform: scale(1.002);
+      }
+
+      &.current-row {
+        background-color: var(--el-color-primary-light-9) !important;
+      }
+    }
+  }
+
+  :deep(.el-table__empty-block) {
+    padding: 40px 0;
+  }
+}
+
+@keyframes rowFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 编号徽章 */
+.id-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 22px;
+  padding: 0 8px;
+  background: var(--el-color-primary-light-9);
+  color: var(--el-color-primary);
+  border-radius: 11px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.3s;
+
+  .el-table__row:hover & {
+    background: var(--el-color-primary-light-8);
+    transform: scale(1.05);
+  }
+}
+
+/* 分页优化 */
+:deep(.el-pagination) {
+  padding: 12px 0;
+  animation: fadeInUp 0.4s ease-out 0.3s both;
+}
+
+:deep(.el-pagination__total) {
+  color: var(--el-text-color-secondary);
+}
+
+:deep(.el-pagination__sizes) .el-input__wrapper {
+  box-shadow: 0 0 0 1px var(--el-border-color-light) inset;
+}
+
+:deep(.el-pager li) {
+  transition: all 0.3s;
+}
+
+:deep(.el-pager li:hover:not(.is-active)) {
+  color: var(--el-color-primary);
+  transform: translateY(-1px);
+}
+
+:deep(.el-pager li.is-active) {
+  box-shadow: 0 2px 8px var(--el-color-primary-light-5);
 }
 
 .player-dialog {
@@ -1390,6 +1647,37 @@ onUnmounted(() => {
 
 /* 暗黑模式适配 */
 html.dark {
+  .query-form {
+    border-color: var(--el-border-color);
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  .table-wrapper {
+    border-color: var(--el-border-color);
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.2);
+  }
+
+  .table-wrapper:hover {
+    box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.3);
+  }
+
+  .custom-table :deep(.el-table__header-wrapper th) {
+    background-color: var(--el-bg-color-overlay) !important;
+  }
+
+  .custom-table :deep(.el-table__row:hover) {
+    background-color: #0c2a5e !important;
+  }
+
+  .custom-table :deep(.el-table__cell),
+  .custom-table :deep(.el-table__cell *),
+  .custom-table :deep(.el-link),
+  .custom-table :deep(.el-link *),
+  .custom-table :deep(.el-text),
+  .custom-table :deep(.el-text *) {
+    color: #ffffff !important;
+  }
+
   .player-toolbar {
     background: linear-gradient(to bottom, #0d0d0d, #1a1a1a);
   }
@@ -1453,5 +1741,25 @@ html.dark {
   .card-toolbar .el-button.btn-play:not(:disabled):hover {
     box-shadow: 0 4px 14px rgba(var(--el-color-primary-rgb), 0.5) !important;
   }
+}
+
+/* 滚动条美化 */
+:deep(.el-table__body-wrapper::-webkit-scrollbar) {
+  width: 6px;
+  height: 6px;
+}
+
+:deep(.el-table__body-wrapper::-webkit-scrollbar-thumb) {
+  background: var(--el-border-color);
+  border-radius: 3px;
+  transition: background 0.3s;
+}
+
+:deep(.el-table__body-wrapper::-webkit-scrollbar-thumb:hover) {
+  background: var(--el-color-primary-light-5);
+}
+
+:deep(.el-table__body-wrapper::-webkit-scrollbar-track) {
+  background: transparent;
 }
 </style>
