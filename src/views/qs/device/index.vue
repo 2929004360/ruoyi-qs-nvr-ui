@@ -155,7 +155,7 @@
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" width="180"/>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="200" fixed="right">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="360" fixed="right">
         <template #default="scope">
           <el-button link
                      type="primary"
@@ -179,6 +179,12 @@
                      @click="handleAccessAddress(scope.row)"
                      v-if="scope.row.type === '13'">
             接入地址
+          </el-button>
+          <el-button link type="primary" icon="VideoCamera" @click="handleCloudRecord(scope.row)">
+            云端录像
+          </el-button>
+          <el-button link type="primary" icon="Monitor" @click="handleDeviceRecord(scope.row)" v-if="!['1', '2', '3', '4', '6', '13'].includes(scope.row.type)">
+            设备录像
           </el-button>
           <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">
             修改
@@ -281,6 +287,26 @@
                     size="small"
                     icon="Position"
                     @click="handleAccessAddress(item)"
+                  />
+                </el-tooltip>
+                <el-tooltip content="云端录像">
+                  <el-button
+                    type="primary"
+                    text
+                    bg
+                    size="small"
+                    icon="VideoCamera"
+                    @click="handleCloudRecord(item)"
+                  />
+                </el-tooltip>
+                <el-tooltip content="设备录像" v-if="!['1', '2', '3', '4', '6', '13'].includes(item.type)">
+                  <el-button
+                    type="primary"
+                    text
+                    bg
+                    size="small"
+                    icon="Monitor"
+                    @click="handleDeviceRecord(item)"
                   />
                 </el-tooltip>
                 <el-tooltip content="编辑">
@@ -1082,7 +1108,7 @@ import {
   startGb28181Play, stopGb28181Play,
   startJt1078Play, stopJt1078Play
 } from "@/api/qs/zlm";
-import {DocumentCopy, InfoFilled, Refresh, Sunny, Moon, SwitchButton, CircleClose, Position, Plus, Delete, WindPower, List, Grid, CircleCheck, Picture, VideoCamera, MapLocation} from '@element-plus/icons-vue'
+import {DocumentCopy, InfoFilled, Refresh, Sunny, Moon, SwitchButton, CircleClose, Position, Plus, Delete, WindPower, List, Grid, CircleCheck, Picture, VideoCamera, MapLocation, Monitor} from '@element-plus/icons-vue'
 import StreamDropdown from "@/components/Channel/streamDropdown.vue";
 import MediaInfo from "@/components/Channel/mediaInfo.vue";
 import SelectMapPosition from '@/components/SelectMapPosition';
@@ -2009,6 +2035,26 @@ const handlePlay = (row: QsDevice) => {
     })
   }
 
+}
+
+/**
+ * 跳转到云端录像
+ */
+const handleCloudRecord = (row: QsDevice) => {
+  proxy.$tab.openPage("[" + row.deviceName + "]云端录像", '/zlm/deviceRecordPlayback/index', {
+      deviceId: row.id,
+      type: 'cloud'
+  })
+}
+
+/**
+ * 跳转到设备录像
+ */
+const handleDeviceRecord = (row: QsDevice) => {
+  proxy.$tab.openPage("[" + row.deviceName + "]设备录像", '/zlm/deviceRecordPlayback/index', {
+      deviceId: row.id,
+      type: 'device'
+  })
 }
 
 const convertWsToHttp = (wsUrl: string) => {

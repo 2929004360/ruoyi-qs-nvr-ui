@@ -200,6 +200,21 @@ export const dynamicRoutes = [
       }
     ]
   },
+  {
+    path: '/zlm/deviceRecordPlayback',
+    component: Layout,
+    hidden: true,
+    permissions: ['zlm:record:playback'],
+    children: [
+      {
+        noCache: false,
+        path: 'index',
+        component: () => import('@/views/zlm/deviceRecordPlayback/index'),
+        name: 'DeviceRecordPlayback',
+        meta: { title: '录像回放', activeMenu: '/zlm/deviceRecordPlayback' }
+      }
+    ]
+  },
 ]
 
 const router = createRouter({
