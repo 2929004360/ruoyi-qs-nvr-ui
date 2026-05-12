@@ -112,7 +112,6 @@
 
     <div class="table-wrapper">
       <el-table
-        border
         ref="operlogRef"
         v-loading="loading"
         :data="operlogList"

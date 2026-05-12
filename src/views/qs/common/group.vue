@@ -970,6 +970,9 @@ getList();
   overflow: hidden;
   animation: fadeInUp 0.4s ease-out 0.25s both;
   transition: box-shadow 0.3s;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 
   &:hover {
     box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.06);
@@ -978,6 +981,8 @@ getList();
 
 .custom-table {
   --el-table-header-bg-color: var(--el-fill-color-light);
+  flex: 1;
+  height: 0;
 
   :deep(.el-table__header-wrapper) {
     th {
@@ -1003,7 +1008,6 @@ getList();
 
       &:hover {
         background-color: var(--el-color-primary-light-9) !important;
-        transform: scale(1.002);
       }
 
       &.current-row {
