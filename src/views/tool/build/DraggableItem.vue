@@ -66,3 +66,75 @@ watch(() => props.activeId, (val: string) => {
   }
 }, { immediate: true })
 </script>
+
+<style lang="scss" scoped>
+.drawing-item,
+.drawing-row-item {
+  position: relative;
+  cursor: move;
+  transition: all 0.3s ease;
+
+  &.unfocus-bordered:not(.active-from-item) > div:first-child {
+    border: 1px dashed var(--el-border-color);
+    border-radius: 6px;
+    transition: border-color 0.3s ease;
+  }
+
+  .el-form-item {
+    padding: 12px 10px;
+    border-radius: 6px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  &.active-from-item {
+    .el-form-item {
+      background: var(--el-fill-color-light);
+      box-shadow: 0 0 0 2px var(--el-color-primary-light-5);
+      animation: pulseGlow 2s infinite;
+    }
+
+    .component-name {
+      color: var(--el-color-primary);
+    }
+  }
+
+  &:hover {
+    .el-form-item {
+      background: var(--el-fill-color-light);
+    }
+  }
+}
+
+.drawing-row-item {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  padding: 0 2px;
+  margin-bottom: 15px;
+
+  &.active-from-item {
+    border: 1px dashed var(--el-color-primary);
+    box-shadow: 0 0 0 2px var(--el-color-primary-light-5);
+    animation: pulseGlow 2s infinite;
+  }
+
+  .component-name {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 12px;
+    color: var(--el-text-color-secondary);
+    display: inline-block;
+    padding: 0 6px;
+    transition: color 0.3s ease;
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 2px var(--el-color-primary-light-7);
+  }
+  50% {
+    box-shadow: 0 0 0 4px var(--el-color-primary-light-9);
+  }
+}
+</style>

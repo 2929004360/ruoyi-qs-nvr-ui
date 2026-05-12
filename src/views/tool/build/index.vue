@@ -81,7 +81,8 @@
               </template>
             </draggable>
             <div v-show="!drawingList.length" class="empty-info">
-              从左侧拖入或点选组件进行表单设计
+              <svg-icon icon-class="drag" style="font-size: 48px; margin-bottom: 12px; opacity: 0.4;" />
+              <div>从左侧拖入或点选组件进行表单设计</div>
             </div>
           </el-form>
         </el-row>
@@ -317,8 +318,6 @@ onUnmounted(() => {
 </script>
 
 <style lang='scss'>
-$lighterBlue: #409EFF;
-
 .container {
   position: relative;
   width: 100%;
@@ -332,37 +331,33 @@ $lighterBlue: #409EFF;
     left: 0;
     top: 0;
     height: calc(100vh - 50px - 40px);
+    background-color: var(--el-bg-color);
+    border-right: 1px solid var(--el-border-color-extra-light);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 
     .logo-wrapper {
       position: relative;
       height: 42px;
       border-bottom: 1px solid var(--el-border-color-extra-light);
       box-sizing: border-box;
+      transition: border-color 0.3s ease;
 
       .logo {
         position: absolute;
         left: 12px;
         top: 6px;
         line-height: 30px;
-        color: #00afff;
+        color: var(--el-color-primary);
         font-weight: 600;
         font-size: 17px;
         white-space: nowrap;
+        transition: color 0.3s ease;
 
         >img {
           width: 30px;
           height: 30px;
           vertical-align: top;
-        }
-
-        .github {
-          display: inline-block;
-          vertical-align: sub;
-          margin-left: 15px;
-
-          >img {
-            height: 22px;
-          }
+          margin-right: 6px;
         }
       }
     }
@@ -379,14 +374,42 @@ $lighterBlue: #409EFF;
           height: 100%;
 
           .components-title {
-            font-size: 14px;
-            // color: #222;
-            margin: 6px 2px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--el-text-color-primary);
+            margin: 14px 2px 8px;
+            padding-left: 8px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            transition: color 0.3s ease;
+
+            &::before {
+              content: '';
+              position: absolute;
+              left: 0;
+              top: 50%;
+              transform: translateY(-50%);
+              width: 3px;
+              height: 14px;
+              background: var(--el-color-primary);
+              border-radius: 2px;
+              transition: height 0.3s ease;
+            }
+
+            &:hover::before {
+              height: 18px;
+            }
 
             .svg-icon {
-              // color: #666;
-              font-size: 18px;
-              margin-right: 5px;
+              font-size: 16px;
+              margin-right: 6px;
+              color: var(--el-color-primary);
+              transition: transform 0.3s ease;
+            }
+
+            &:hover .svg-icon {
+              transform: rotate(-10deg) scale(1.1);
             }
           }
 
@@ -398,34 +421,51 @@ $lighterBlue: #409EFF;
               width: 48%;
               margin: 1%;
               transition: transform 0ms !important;
+              animation: fadeInUp 0.4s ease both;
+
+              @for $i from 1 through 20 {
+                &:nth-child(#{$i}) {
+                  animation-delay: $i * 0.02s;
+                }
+              }
 
               .components-body {
                 padding: 8px 10px;
-                background: var(--el-border-color-extra-light);
+                background: var(--el-fill-color-light);
                 font-size: 12px;
                 cursor: move;
-                border: 1px dashed var(--el-border-color-extra-light);
-                border-radius: 3px;
+                border: 1px dashed transparent;
+                border-radius: 6px;
+                color: var(--el-text-color-regular);
+                display: flex;
+                align-items: center;
+                transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 
                 .svg-icon {
-                  // color: #777;
                   font-size: 15px;
                   margin-right: 5px;
+                  color: var(--el-text-color-secondary);
+                  transition: color 0.25s ease;
                 }
 
                 &:hover {
-                  border: 1px dashed #787be8;
-                  color: #787be8;
+                  border-color: var(--el-color-primary-light-5);
+                  color: var(--el-color-primary);
+                  background: var(--el-color-primary-light-9);
+                  transform: scale(1.03);
+                  box-shadow: 0 4px 12px rgba(var(--el-color-primary-rgb), 0.12);
 
                   .svg-icon {
-                    color: #787be8;
+                    color: var(--el-color-primary);
                   }
+                }
+
+                &:active {
+                  transform: scale(0.98);
                 }
               }
             }
           }
-
-
         }
       }
     }
@@ -442,16 +482,29 @@ $lighterBlue: #409EFF;
       height: 42px;
       padding: 0 15px;
       box-sizing: border-box;
-      ;
       border: 1px solid var(--el-border-color-extra-light);
       border-top: none;
       border-left: none;
       display: flex;
       align-items: center;
       justify-content: flex-end;
+      background-color: var(--el-bg-color-overlay);
+      transition: background-color 0.3s ease, border-color 0.3s ease;
 
-      u .delete-btn {
-        color: #F56C6C;
+      .el-button {
+        transition: transform 0.2s ease;
+
+        &:hover {
+          transform: translateY(-1px);
+        }
+      }
+
+      .delete-btn {
+        color: var(--el-color-danger);
+
+        &:hover {
+          color: var(--el-color-danger);
+        }
       }
     }
 
@@ -461,6 +514,8 @@ $lighterBlue: #409EFF;
       border-left: 1px solid var(--el-border-color-extra-light);
       border-right: 1px solid var(--el-border-color-extra-light);
       box-sizing: border-box;
+      background-color: var(--el-bg-color-page);
+      transition: background-color 0.3s ease;
 
       .el-scrollbar__view {
         overflow-x: hidden;
@@ -471,13 +526,13 @@ $lighterBlue: #409EFF;
         box-sizing: border-box;
 
         &>.el-form {
-          // 69 = 12+15+42
           height: calc(100vh - 50px - 40px - 69px);
           flex: 1;
 
           .drawing-board {
             height: 100%;
             position: relative;
+            min-height: 120px;
 
             .components-body {
               padding: 0;
@@ -489,6 +544,7 @@ $lighterBlue: #409EFF;
               position: relative;
               display: block;
               overflow: hidden;
+              border-radius: 6px;
 
               &::before {
                 content: " ";
@@ -497,30 +553,35 @@ $lighterBlue: #409EFF;
                 right: 0;
                 top: 0;
                 height: 3px;
-                background: rgb(89, 89, 223);
+                background: var(--el-color-primary);
                 z-index: 2;
+                animation: shimmer 1.5s infinite;
               }
             }
 
             .components-item.sortable-ghost {
               width: 100%;
               height: 60px;
-              background: var(--el-border-color-extra-light);
+              background: var(--el-fill-color-light);
+              border-radius: 6px;
             }
 
             .active-from-item {
               &>.el-form-item {
-                background: var(--el-border-color-extra-light);
+                background: var(--el-fill-color-light);
                 border-radius: 6px;
+                transition: background-color 0.3s ease;
               }
 
               &>.drawing-item-copy,
               &>.drawing-item-delete {
                 display: initial;
+                opacity: 1;
+                transform: scale(1);
               }
 
               &>.component-name {
-                color: $lighterBlue;
+                color: var(--el-color-primary);
               }
 
               .el-input__wrapper {
@@ -536,13 +597,26 @@ $lighterBlue: #409EFF;
           .drawing-item {
             position: relative;
             cursor: move;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.35s ease both;
 
             &.unfocus-bordered:not(.activeFromItem)>div:first-child {
-              border: 1px dashed #ccc;
+              border: 1px dashed var(--el-border-color);
+              border-radius: 6px;
+              transition: border-color 0.3s ease;
             }
 
             .el-form-item {
               padding: 12px 10px;
+              border-radius: 6px;
+              transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            &.active-from-item {
+              .el-form-item {
+                box-shadow: 0 0 0 2px var(--el-color-primary-light-5);
+                animation: pulseGlow 2s infinite;
+              }
             }
           }
 
@@ -550,10 +624,12 @@ $lighterBlue: #409EFF;
             position: relative;
             cursor: move;
             box-sizing: border-box;
-            border: 1px dashed #ccc;
-            border-radius: 3px;
+            border: 1px dashed var(--el-border-color);
+            border-radius: 6px;
             padding: 0 2px;
             margin-bottom: 15px;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.35s ease both;
 
             .drawing-row-item {
               margin-bottom: 2px;
@@ -575,7 +651,9 @@ $lighterBlue: #409EFF;
             }
 
             &.active-from-item {
-              border: 1px dashed $lighterBlue;
+              border: 1px dashed var(--el-color-primary);
+              box-shadow: 0 0 0 2px var(--el-color-primary-light-5);
+              animation: pulseGlow 2s infinite;
             }
 
             .component-name {
@@ -583,9 +661,10 @@ $lighterBlue: #409EFF;
               top: 0;
               left: 0;
               font-size: 12px;
-              color: #bbb;
+              color: var(--el-text-color-secondary);
               display: inline-block;
               padding: 0 6px;
+              transition: color 0.3s ease;
             }
           }
 
@@ -593,13 +672,15 @@ $lighterBlue: #409EFF;
           .drawing-row-item {
             &:hover {
               &>.el-form-item {
-                background: var(--el-border-color-extra-light);
+                background: var(--el-fill-color-light);
                 border-radius: 6px;
               }
 
               &>.drawing-item-copy,
               &>.drawing-item-delete {
                 display: initial;
+                opacity: 1;
+                transform: scale(1);
               }
             }
 
@@ -616,30 +697,36 @@ $lighterBlue: #409EFF;
               font-size: 12px;
               border: 1px solid;
               cursor: pointer;
-              z-index: 1;
+              z-index: 10;
+              opacity: 0;
+              transform: scale(0.5);
+              transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+              box-shadow: 0 2px 6px rgba(0,0,0,0.1);
             }
 
             &>.drawing-item-copy {
               right: 56px;
-              border-color: $lighterBlue;
-              color: $lighterBlue;
-              background: #fff;
+              border-color: var(--el-color-primary);
+              color: var(--el-color-primary);
+              background: var(--el-bg-color-overlay);
 
               &:hover {
-                background: $lighterBlue;
-                color: #fff;
+                background: var(--el-color-primary);
+                color: var(--el-color-white);
+                transform: scale(1.15) rotate(-10deg);
               }
             }
 
             &>.drawing-item-delete {
               right: 24px;
-              border-color: #F56C6C;
-              color: #F56C6C;
-              background: #fff;
+              border-color: var(--el-color-danger);
+              color: var(--el-color-danger);
+              background: var(--el-bg-color-overlay);
 
               &:hover {
-                background: #F56C6C;
-                color: #fff;
+                background: var(--el-color-danger);
+                color: var(--el-color-white);
+                transform: scale(1.15) rotate(10deg);
               }
             }
           }
@@ -650,14 +737,70 @@ $lighterBlue: #409EFF;
             left: 0;
             right: 0;
             text-align: center;
-            font-size: 18px;
-            color: #ccb1ea;
-            letter-spacing: 4px;
+            font-size: 16px;
+            color: var(--el-text-color-secondary);
+            letter-spacing: 2px;
+            animation: float 3s ease-in-out infinite, fadeIn 0.6s ease both;
+            pointer-events: none;
           }
 
         }
       }
     }
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 2px var(--el-color-primary-light-7);
+  }
+  50% {
+    box-shadow: 0 0 0 4px var(--el-color-primary-light-9);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 </style>

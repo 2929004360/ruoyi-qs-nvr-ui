@@ -5,60 +5,104 @@
         <!--部门数据-->
         <pane size="16">
           <el-col>
-            <div class="head-container">
-              <el-input v-model="deptName" placeholder="请输入部门名称" clearable prefix-icon="Search" style="margin-bottom: 20px" />
-            </div>
-            <div class="head-container">
-              <el-tree :data="deptOptions" :props="{ label: 'label', children: 'children' }" :expand-on-click-node="false" :filter-node-method="filterNode" ref="deptTreeRef" node-key="id" highlight-current default-expand-all @node-click="handleNodeClick" />
+            <div class="dept-tree-container">
+              <!-- 搜索区域 -->
+              <div class="search-area">
+                <el-input
+                  v-model="deptName"
+                  placeholder="请输入部门名称"
+                  clearable
+                  class="search-input"
+                  :prefix-icon="Search"
+                >
+                  <template #prepend>
+                    <el-button @click="getDeptTree" class="refresh-btn" :icon="Refresh" title="刷新" />
+                  </template>
+                </el-input>
+              </div>
+
+              <!-- 树形组件 -->
+              <el-tree
+                :data="deptOptions"
+                :props="{ label: 'label', children: 'children' }"
+                :expand-on-click-node="false"
+                :filter-node-method="filterNode"
+                ref="deptTreeRef"
+                node-key="id"
+                highlight-current
+                default-expand-all
+                @node-click="handleNodeClick"
+                class="custom-tree"
+              >
+                <template #default="{ node, data }">
+                  <div class="custom-tree-node" :class="{ 'is-active': currentDeptId === data.id }">
+                    <div class="node-icon-wrap">
+                      <el-icon class="node-icon folder-icon">
+                        <FolderOpened />
+                      </el-icon>
+                    </div>
+                    <div class="node-label">{{ node.label }}</div>
+                  </div>
+                </template>
+              </el-tree>
             </div>
           </el-col>
         </pane>
         <!--用户数据-->
         <pane size="84">
           <el-col>
-            <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px">
-              <el-form-item label="用户名称" prop="userName">
-                <el-input v-model="queryParams.userName" placeholder="请输入用户名称" clearable style="width: 240px" @keyup.enter="handleQuery" />
-              </el-form-item>
-              <el-form-item label="手机号码" prop="phonenumber">
-                <el-input v-model="queryParams.phonenumber" placeholder="请输入手机号码" clearable style="width: 240px" @keyup.enter="handleQuery" />
-              </el-form-item>
-              <el-form-item label="状态" prop="status">
-                <el-select v-model="queryParams.status" placeholder="用户状态" clearable style="width: 240px">
-                  <el-option v-for="dict in sys_normal_disable" :key="dict.value" :label="dict.label" :value="dict.value" />
-                </el-select>
-              </el-form-item>
-              <el-form-item label="创建时间" style="width: 308px">
-                <el-date-picker v-model="dateRange" value-format="YYYY-MM-DD" type="daterange" range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
-              </el-form-item>
-              <el-form-item>
-                <el-button type="primary" icon="Search" @click="handleQuery">搜索</el-button>
-                <el-button icon="Refresh" @click="resetQuery">重置</el-button>
-              </el-form-item>
-            </el-form>
+            <div class="search-box">
+              <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px" class="query-form">
+                <el-form-item label="用户名称" prop="userName">
+                  <el-input v-model="queryParams.userName" placeholder="请输入用户名称" clearable @keyup.enter="handleQuery" />
+                </el-form-item>
+                <el-form-item label="手机号码" prop="phonenumber">
+                  <el-input v-model="queryParams.phonenumber" placeholder="请输入手机号码" clearable @keyup.enter="handleQuery" />
+                </el-form-item>
+                <el-form-item label="状态" prop="status">
+                  <el-select v-model="queryParams.status" placeholder="用户状态" clearable style="width: 240px">
+                    <el-option v-for="dict in sys_normal_disable" :key="dict.value" :label="dict.label" :value="dict.value" />
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="创建时间">
+                  <el-date-picker v-model="dateRange" value-format="YYYY-MM-DD" type="daterange" range-separator="-" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
+                </el-form-item>
+                <el-form-item class="form-actions">
+                  <div class="button-group">
+                    <el-button type="primary" icon="Search" @click="handleQuery" class="search-btn">搜索</el-button>
+                    <el-button icon="Refresh" @click="resetQuery" class="reset-btn">重置</el-button>
+                  </div>
+                </el-form-item>
+              </el-form>
 
-            <el-row :gutter="10" class="mb8">
-              <el-col :span="1.5">
-                <el-button type="primary" plain icon="Plus" @click="handleAdd" v-hasPermi="['system:user:add']">新增</el-button>
-              </el-col>
-              <el-col :span="1.5">
-                <el-button type="success" plain icon="Edit" :disabled="single" @click="handleUpdate" v-hasPermi="['system:user:edit']">修改</el-button>
-              </el-col>
-              <el-col :span="1.5">
-                <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete" v-hasPermi="['system:user:remove']">删除</el-button>
-              </el-col>
-              <el-col :span="1.5">
-                <el-button type="info" plain icon="Upload" @click="handleImport" v-hasPermi="['system:user:import']">导入</el-button>
-              </el-col>
-              <el-col :span="1.5">
-                <el-button type="warning" plain icon="Download" @click="handleExport" v-hasPermi="['system:user:export']">导出</el-button>
-              </el-col>
-              <right-toolbar v-model:showSearch="showSearch" @queryTable="getList" :columns="columns"></right-toolbar>
-            </el-row>
+              <el-row :gutter="10" class="mb8 toolbar-row action-buttons">
+                <el-col :span="1.5">
+                  <el-button type="primary" plain icon="Plus" @click="handleAdd" v-hasPermi="['system:user:add']">新增</el-button>
+                </el-col>
+                <el-col :span="1.5">
+                  <el-button type="success" plain icon="Edit" :disabled="single" @click="handleUpdate" v-hasPermi="['system:user:edit']">修改</el-button>
+                </el-col>
+                <el-col :span="1.5">
+                  <el-button type="danger" plain icon="Delete" :disabled="multiple" @click="handleDelete" v-hasPermi="['system:user:remove']" class="action-btn delete-btn">删除</el-button>
+                </el-col>
+                <el-col :span="1.5">
+                  <el-button type="info" plain icon="Upload" @click="handleImport" v-hasPermi="['system:user:import']">导入</el-button>
+                </el-col>
+                <el-col :span="1.5">
+                  <el-button type="warning" plain icon="Download" @click="handleExport" v-hasPermi="['system:user:export']">导出</el-button>
+                </el-col>
+                <right-toolbar v-model:showSearch="showSearch" @queryTable="getList" :columns="columns"></right-toolbar>
+              </el-row>
+            </div>
 
-            <el-table border v-loading="loading" :data="userList" @selection-change="handleSelectionChange">
-              <el-table-column type="selection" width="50" align="center" />
-              <el-table-column label="用户编号" align="center" key="userId" prop="userId" v-if="columns.userId.visible" />
+            <div class="table-wrapper">
+              <el-table v-loading="loading" :data="userList" @selection-change="handleSelectionChange" class="custom-table" highlight-current-row>
+              <el-table-column type="selection" width="55" align="center" fixed />
+              <el-table-column label="编号" align="center" prop="userId" width="70" v-if="columns.userId.visible">
+                <template #default="scope">
+                  <span class="id-badge">{{ scope.row.userId }}</span>
+                </template>
+              </el-table-column>
               <el-table-column label="用户名称" align="center" key="userName" prop="userName" v-if="columns.userName.visible" :show-overflow-tooltip="true" />
               <el-table-column label="用户昵称" align="center" key="nickName" prop="nickName" v-if="columns.nickName.visible" :show-overflow-tooltip="true" />
               <el-table-column label="部门" align="center" key="deptName" prop="dept.deptName" v-if="columns.deptName.visible" :show-overflow-tooltip="true" />
@@ -96,6 +140,8 @@
               </el-table-column>
             </el-table>
             <pagination v-show="total > 0" :total="total" v-model:page="queryParams.pageNum" v-model:limit="queryParams.pageSize" @pagination="getList" />
+          
+           </div>
           </el-col>
         </pane>
       </splitpanes>
@@ -219,6 +265,7 @@ import useAppStore from '@/store/modules/app'
 import { changeUserStatus, listUser, resetUserPwd, delUser, getUser, updateUser, addUser, deptTreeSelect } from "@/api/system/user"
 import { Splitpanes, Pane } from "splitpanes"
 import "splitpanes/dist/splitpanes.css"
+import { Search, Refresh, FolderOpened } from "@element-plus/icons-vue"
 import type { SysUser, UserQueryParams, UserFormDataResult } from '@/types/api/system/user'
 import type { SysRole } from '@/types/api/system/role'
 import type { SysPost } from '@/types/api/system/post'
@@ -240,6 +287,7 @@ const total = ref<number>(0)
 const title = ref<string>("")
 const dateRange = ref<string[]>([])
 const deptName = ref<string>("")
+const currentDeptId = ref<number | null>(null)
 const deptOptions = ref<TreeSelect[] | undefined>(undefined)
 const enabledDeptOptions = ref<TreeSelect[] | undefined>(undefined)
 const initPassword = ref<string | undefined>(undefined)
@@ -336,6 +384,7 @@ function filterDisabledDept(deptList: TreeSelect[]) {
 
 /** 节点单击事件 */
 function handleNodeClick(data: any) {
+  currentDeptId.value = data.id
   queryParams.value.deptId = data.id
   handleQuery()
 }
@@ -351,6 +400,7 @@ function resetQuery() {
   dateRange.value = []
   proxy.resetForm("queryRef")
   queryParams.value.deptId = undefined
+  currentDeptId.value = null
   proxy.$refs.deptTreeRef.setCurrentKey(null)
   handleQuery()
 }
@@ -562,3 +612,429 @@ onMounted(() => {
   })
 })
 </script>
+
+<style lang="scss" scoped>
+.app-container {
+  padding: 16px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-box {
+  margin-bottom: 16px;
+}
+
+/* ========== 查询表单 ========== */
+.query-form {
+  padding: 10px 15px;
+  background: var(--el-bg-color-overlay);
+  border-radius: 10px;
+  border: 1px solid var(--el-border-color-lighter);
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+  margin-bottom: 0 !important;
+  animation: fadeInUp 0.4s ease-out 0.15s both;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px;
+
+  :deep(.el-form-item) {
+    margin-bottom: 0;
+    margin-right: 0;
+  }
+
+  :deep(.el-input__wrapper),
+  :deep(.el-select .el-input__wrapper) {
+    box-shadow: 0 0 0 1px var(--el-border-color-light) inset;
+    transition: all 0.3s;
+
+    &:hover,
+    &:focus-within {
+      box-shadow: 0 0 0 1px var(--el-color-primary-light-5) inset;
+    }
+
+    &:focus-within {
+      box-shadow: 0 0 0 1px var(--el-color-primary) inset, 0 0 0 3px var(--el-color-primary-light-8);
+    }
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-btn {
+  transition: all 0.3s;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--el-color-primary-light-7);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.reset-btn {
+  transition: all 0.3s;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+/* ========== 工具栏 ========== */
+.toolbar-row {
+  padding: 4px 0;
+  animation: fadeInUp 0.4s ease-out 0.2s both;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+  align-items: center;
+}
+
+.action-btn {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  }
+
+  &:not(:disabled):active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.delete-btn:not(:disabled):hover {
+  box-shadow: 0 6px 16px var(--el-color-danger-light-7);
+}
+
+/* 按钮区域 */
+.form-actions {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+  padding-left: 16px;
+  border-left: 1px solid var(--el-border-color-lighter);
+  margin-left: 12px !important;
+
+  .button-group {
+    display: flex;
+    gap: 12px;
+  }
+}
+
+/* 表格容器优化 */
+.table-wrapper {
+  background: var(--el-bg-color-overlay);
+  border-radius: 10px;
+  border: 1px solid var(--el-border-color-lighter);
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  animation: fadeInUp 0.4s ease-out 0.25s both;
+  transition: box-shadow 0.3s;
+}
+
+.table-wrapper:hover {
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.06);
+}
+
+.custom-table {
+  --el-table-header-bg-color: var(--el-fill-color-light);
+
+  :deep(.el-table__header-wrapper) {
+    th {
+      background-color: var(--el-fill-color-light) !important;
+      color: var(--el-text-color-primary);
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.3px;
+      transition: background-color 0.3s;
+    }
+  }
+
+  :deep(.el-table__body-wrapper) {
+    .el-table__row {
+      transition: all 0.25s ease;
+      animation: rowFadeIn 0.4s ease-out both;
+
+      &:hover {
+        background-color: var(--el-color-primary-light-9) !important;
+        transform: scale(1.002);
+      }
+
+      &.current-row {
+        background-color: var(--el-color-primary-light-9) !important;
+      }
+    }
+  }
+
+  :deep(.el-table__empty-block) {
+    padding: 40px 0;
+  }
+}
+
+@keyframes rowFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 编号徽章 */
+.id-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 22px;
+  padding: 0 8px;
+  background: var(--el-color-primary-light-9);
+  color: var(--el-color-primary);
+  border-radius: 11px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.3s;
+
+  .el-table__row:hover & {
+    background: var(--el-color-primary-light-8);
+    transform: scale(1.05);
+  }
+}
+
+/* 分页优化 */
+:deep(.el-pagination) {
+  padding: 12px 0;
+  animation: fadeInUp 0.4s ease-out 0.3s both;
+}
+
+:deep(.el-pagination__total) {
+  color: var(--el-text-color-secondary);
+}
+
+:deep(.el-pagination__sizes) .el-input__wrapper {
+  box-shadow: 0 0 0 1px var(--el-border-color-light) inset;
+}
+
+:deep(.el-pager li) {
+  transition: all 0.3s;
+}
+
+:deep(.el-pager li:hover:not(.is-active)) {
+  color: var(--el-color-primary);
+  transform: translateY(-1px);
+}
+
+:deep(.el-pager li.is-active) {
+  box-shadow: 0 2px 8px var(--el-color-primary-light-5);
+}
+
+/* ========== 部门树样式 ========== */
+.dept-tree-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  animation: fadeIn 0.35s ease-out;
+  padding: 4px;
+}
+
+/* 搜索区域 */
+.search-area {
+  padding: 0 0 12px 0;
+  flex-shrink: 0;
+
+  .search-input {
+    :deep(.el-input__wrapper) {
+      border-radius: 8px 0 0 8px;
+      box-shadow: 0 0 0 1px var(--el-border-color-light) inset;
+      transition: all 0.3s;
+
+      &:focus-within {
+        box-shadow: 0 0 0 1px var(--el-color-primary) inset, 0 0 0 3px var(--el-color-primary-light-8);
+      }
+    }
+
+    :deep(.el-input-group__prepend) {
+      padding: 0;
+      background: transparent;
+      border-radius: 8px 0 0 8px;
+      overflow: hidden;
+
+      .refresh-btn {
+        border: none;
+        border-radius: 0;
+        margin: 0;
+        height: 100%;
+        padding: 0 12px;
+        background: var(--el-fill-color-light);
+        color: var(--el-text-color-regular);
+        transition: all 0.3s;
+
+        &:hover {
+          background: var(--el-color-primary-light-9);
+          color: var(--el-color-primary);
+        }
+      }
+    }
+  }
+}
+
+/* 树形组件 */
+.custom-tree {
+  flex: 1;
+  overflow: auto;
+  padding: 4px;
+
+  :deep(.el-tree-node__content) {
+    height: 36px;
+    border-radius: 8px;
+    margin: 2px 0;
+    padding-right: 8px !important;
+    transition: all 0.25s ease;
+
+    &:hover {
+      background-color: var(--el-color-primary-light-9) !important;
+    }
+  }
+
+  :deep(.el-tree-node.is-current > .el-tree-node__content) {
+    background: linear-gradient(90deg, var(--el-color-primary-light-9) 0%, var(--el-color-primary-light-8) 100%) !important;
+    box-shadow: 0 0 0 1px var(--el-color-primary-light-7) inset;
+  }
+
+  :deep(.el-tree-node__expand-icon) {
+    color: var(--el-text-color-secondary);
+    transition: all 0.3s;
+
+    &:hover {
+      color: var(--el-color-primary);
+    }
+  }
+
+  :deep(.el-tree-node__loading-icon) {
+    color: var(--el-color-primary);
+  }
+}
+
+/* 自定义树节点 */
+.custom-tree-node {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  font-size: 14px;
+  color: var(--el-text-color-primary);
+  transition: all 0.25s;
+
+  &.is-active {
+    .node-label {
+      color: var(--el-color-primary);
+      font-weight: 600;
+    }
+
+    .folder-icon {
+      color: var(--el-color-primary);
+    }
+  }
+}
+
+.node-icon-wrap {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.node-icon {
+  font-size: 18px;
+  transition: all 0.3s;
+  flex-shrink: 0;
+
+  &.folder-icon {
+    color: var(--el-color-warning);
+  }
+}
+
+.node-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 0.25s;
+}
+
+/* 滚动条美化 */
+.custom-tree::-webkit-scrollbar {
+  width: 5px;
+}
+
+.custom-tree::-webkit-scrollbar-thumb {
+  background: var(--el-border-color);
+  border-radius: 3px;
+}
+
+.custom-tree::-webkit-scrollbar-thumb:hover {
+  background: var(--el-color-primary-light-5);
+}
+
+.custom-tree::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 暗黑模式适配 */
+html.dark {
+  .dept-tree-container {
+    .search-input {
+      :deep(.el-input-group__prepend .refresh-btn) {
+        background: var(--el-bg-color-overlay);
+      }
+    }
+
+    .custom-tree {
+      :deep(.el-tree-node.is-current > .el-tree-node__content) {
+        background: rgba(64, 158, 255, 0.1) !important;
+        box-shadow: 0 0 0 1px rgba(64, 158, 255, 0.2) inset;
+      }
+
+      :deep(.el-tree-node__content:hover) {
+        background-color: rgba(64, 158, 255, 0.08) !important;
+      }
+    }
+  }
+}
+</style>

@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-dialog title="添加选项" v-model="open" width="800px" :close-on-click-modal="false" :modal-append-to-body="false"
-      @open="onOpen" @close="onClose">
+      @open="onOpen" @close="onClose" class="tree-node-dialog">
       <el-form ref="treeNodeForm" :model="formData" :rules="rules" label-width="100px">
         <el-col :span="24">
           <el-form-item label="选项名" prop="label">
@@ -33,7 +33,7 @@
 </template>
 <script setup lang="ts">
 const open = defineModel()
-const emit = defineEmits(['confirm'])
+const emit = defineEmits(['commit'])
 const formData = ref({
   label: undefined,
   value: undefined
@@ -93,3 +93,24 @@ function handelConfirm(): void {
   })
 }
 </script>
+
+<style lang="scss" scoped>
+.tree-node-dialog {
+  :deep(.el-dialog) {
+    border-radius: 12px;
+    background: var(--el-bg-color-overlay);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+
+    .el-dialog__header {
+      margin-right: 0;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--el-border-color-extra-light);
+    }
+
+    .el-dialog__footer {
+      padding-top: 16px;
+      border-top: 1px solid var(--el-border-color-extra-light);
+    }
+  }
+}
+</style>

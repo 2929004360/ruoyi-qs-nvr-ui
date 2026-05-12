@@ -1,6 +1,7 @@
 <template>
-   <div class="app-container">
-      <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch">
+   <div class="app-container page-fade-in">
+      <transition name="search-slide">
+      <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" class="search-card">
          <el-form-item label="菜单名称" prop="menuName">
             <el-input
                v-model="queryParams.menuName"
@@ -25,6 +26,7 @@
             <el-button icon="Refresh" @click="resetQuery">重置</el-button>
          </el-form-item>
       </el-form>
+      </transition>
 
       <el-row :gutter="10" class="mb8">
          <el-col :span="1.5">
@@ -64,6 +66,7 @@
          row-key="menuId"
          :default-expand-all="isExpandAll"
          :tree-props="{ children: 'children', hasChildren: 'hasChildren' }"
+         class="menu-table"
       >
          <el-table-column prop="menuName" label="菜单名称" :show-overflow-tooltip="true" width="220">
             <template #default="scope">
@@ -94,15 +97,15 @@
          </el-table-column>
          <el-table-column label="操作" align="center" width="210" class-name="small-padding fixed-width">
             <template #default="scope">
-               <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['system:menu:edit']">修改</el-button>
-               <el-button link type="primary" icon="Plus" @click="handleAdd(scope.row)" v-hasPermi="['system:menu:add']">新增</el-button>
-               <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['system:menu:remove']">删除</el-button>
+               <el-button class="op-btn" link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['system:menu:edit']">修改</el-button>
+               <el-button class="op-btn" link type="primary" icon="Plus" @click="handleAdd(scope.row)" v-hasPermi="['system:menu:add']">新增</el-button>
+               <el-button class="op-btn op-btn-del" link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['system:menu:remove']">删除</el-button>
             </template>
          </el-table-column>
       </el-table>
 
       <!-- 添加或修改菜单对话框 -->
-      <el-dialog :title="title" v-model="open" width="680px" append-to-body>
+      <el-dialog :title="title" v-model="open" width="680px" append-to-body class="menu-dialog">
          <el-form ref="menuRef" :model="form" :rules="rules" label-width="100px">
             <el-row>
                <el-col :span="24">
@@ -507,3 +510,320 @@ function handleDelete(row: SysMenu) {
 
 getList()
 </script>
+
+
+<style lang="scss" scoped>
+.page-fade-in {
+  animation: pageFadeIn 0.5s ease both;
+}
+
+.search-card {
+  background: var(--el-bg-color-overlay);
+  border: 1px solid var(--el-border-color-extra-light);
+  border-radius: 10px;
+  padding: 16px 20px 0;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    border-color: var(--el-border-color-light);
+  }
+
+  :deep(.el-input__wrapper),
+  :deep(.el-select .el-input__wrapper) {
+    transition: box-shadow 0.25s ease;
+
+    &.is-focus {
+      box-shadow: 0 0 0 1px var(--el-color-primary) inset, 0 0 0 3px var(--el-color-primary-light-8);
+    }
+  }
+
+  .el-button {
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    &:hover {
+      transform: translateY(-2px);
+
+      .el-icon {
+        transform: rotate(-10deg) scale(1.1);
+      }
+    }
+
+    &:active {
+      transform: translateY(0) scale(0.98);
+    }
+  }
+}
+
+.search-slide-enter-active,
+.search-slide-leave-active {
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: top center;
+}
+
+.search-slide-enter-from,
+.search-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-12px) scale(0.98);
+}
+
+.mb8 {
+  align-items: center;
+
+  .el-button {
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    &:active {
+      transform: translateY(0) scale(0.97);
+    }
+  }
+}
+
+.menu-table {
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  }
+
+  :deep(.el-table__row) {
+    animation: fadeInUp 0.4s ease both;
+
+    @for $i from 1 through 30 {
+      &:nth-child(#{$i}) {
+        animation-delay: $i * 0.04s;
+      }
+    }
+
+    td {
+      transition: background-color 0.2s ease;
+    }
+
+    &:hover td {
+      background-color: var(--el-fill-color-light) !important;
+    }
+  }
+
+  :deep(.el-table__expand-icon) {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    &:hover {
+      transform: scale(1.2);
+      color: var(--el-color-primary);
+    }
+  }
+
+  :deep(.el-table__expand-icon--expanded) {
+    transform: rotate(90deg);
+
+    &:hover {
+      transform: rotate(90deg) scale(1.2);
+    }
+  }
+
+  :deep(.el-input-number) {
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+
+  :deep(.dict-tag) {
+    display: inline-block;
+    transition: transform 0.25s ease;
+
+    &:hover {
+      transform: scale(1.08);
+    }
+  }
+
+  :deep(.el-tag) {
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+
+  :deep(.svg-icon) {
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: inline-block;
+  }
+
+  :deep(td:hover .svg-icon) {
+    transform: rotate(-10deg) scale(1.15);
+    color: var(--el-color-primary);
+  }
+
+  .op-btn {
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+
+      .el-icon {
+        transform: rotate(-8deg) scale(1.15);
+      }
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+
+  .op-btn-del {
+    &:hover {
+      color: var(--el-color-danger);
+
+      .el-icon {
+        animation: shake 0.4s ease both;
+      }
+    }
+  }
+}
+
+.menu-dialog {
+  :deep(.el-dialog) {
+    border-radius: 12px;
+    background: var(--el-bg-color-overlay);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    animation: dialogScaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+    .el-dialog__header {
+      margin-right: 0;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--el-border-color-extra-light);
+      font-weight: 600;
+    }
+
+    .el-dialog__body {
+      padding: 20px 24px 8px;
+    }
+
+    .el-dialog__footer {
+      padding-top: 16px;
+      border-top: 1px solid var(--el-border-color-extra-light);
+
+      .el-button {
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+        &:hover {
+          transform: translateY(-2px);
+        }
+
+        &:active {
+          transform: translateY(0) scale(0.97);
+        }
+      }
+    }
+  }
+
+  :deep(.el-form-item) {
+    transition: all 0.2s ease;
+
+    &:hover {
+      .el-form-item__label {
+        color: var(--el-color-primary);
+      }
+    }
+
+    .el-input__wrapper,
+    .el-textarea__inner {
+      transition: box-shadow 0.25s ease;
+
+      &.is-focus,
+      &:focus {
+        box-shadow: 0 0 0 1px var(--el-color-primary) inset, 0 0 0 3px var(--el-color-primary-light-8);
+      }
+    }
+
+    .el-icon {
+      transition: transform 0.25s ease;
+      cursor: help;
+
+      &:hover {
+        transform: rotate(15deg) scale(1.2);
+        color: var(--el-color-primary);
+      }
+    }
+  }
+
+  :deep(.el-input[readonly]) {
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.02);
+    }
+  }
+}
+
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes dialogScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: rotate(0);
+  }
+  20% {
+    transform: rotate(-12deg);
+  }
+  40% {
+    transform: rotate(10deg);
+  }
+  60% {
+    transform: rotate(-8deg);
+  }
+  80% {
+    transform: rotate(6deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>

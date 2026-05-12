@@ -1,5 +1,6 @@
 <template>
-  <el-dialog v-model="open" width="500px" title="选择生成类型" @open="onOpen" @close="onClose">
+  <el-dialog v-model="open" width="500px" title="选择生成类型" @open="onOpen" @close="onClose"
+    class="code-type-dialog" :close-on-click-modal="false">
     <el-form ref="codeTypeForm" :model="formData" :rules="rules" label-width="100px">
       <el-form-item label="生成类型" prop="type">
         <el-radio-group v-model="formData.type">
@@ -69,3 +70,24 @@ function handelConfirm(): void {
   })
 }
 </script>
+
+<style lang="scss" scoped>
+.code-type-dialog {
+  :deep(.el-dialog) {
+    border-radius: 12px;
+    background: var(--el-bg-color-overlay);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+
+    .el-dialog__header {
+      margin-right: 0;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--el-border-color-extra-light);
+    }
+
+    .el-dialog__footer {
+      padding-top: 16px;
+      border-top: 1px solid var(--el-border-color-extra-light);
+    }
+  }
+}
+</style>
