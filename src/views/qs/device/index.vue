@@ -345,16 +345,11 @@
     />
 
     <!-- 添加或修改视频监控设备对话框 -->
-    <el-dialog :title="title" v-model="open" width="960px" append-to-body draggable destroy-on-close class="glass-dialog device-dialog">
-      <el-form ref="deviceRef" :model="form" :rules="rules" label-width="110px">
-        <!-- 基础信息分组 -->
-        <el-card class="form-card" body-style="padding: 16px 20px;">
-          <template #header>
-            <div class="card-header">
-              <span style="font-weight: 500; color: #303133; font-size: 14px;">基础信息</span>
-            </div>
-          </template>
-          <el-row :gutter="20">
+    <el-dialog :title="title" v-model="open" width="800px" append-to-body draggable destroy-on-close class="glass-dialog device-dialog">
+      <el-form ref="deviceRef" :model="form" :rules="rules" label-width="90px">
+        <!-- 核心信息（始终显示） -->
+        <div class="core-info">
+          <el-row :gutter="16">
             <el-col :span="12">
               <el-form-item label="接入类型" prop="type">
                 <el-select v-model="form.type" placeholder="请选择接入类型" @change="liveStreamChange" filterable style="width: 100%;">
@@ -373,16 +368,8 @@
               </el-form-item>
             </el-col>
           </el-row>
-        </el-card>
 
-        <!-- 连接配置分组 -->
-        <el-card class="form-card" body-style="padding: 16px 20px;">
-          <template #header>
-            <div class="card-header">
-              <span style="font-weight: 500; color: #303133; font-size: 14px;">连接配置</span>
-            </div>
-          </template>
-          
+          <!-- 动态连接配置 -->
           <!-- 通用流地址 -->
           <el-form-item label="流地址"
                       prop="liveAddress"
@@ -403,170 +390,103 @@
             />
           </el-form-item>
 
-          <!-- 上线类型 -->
-          <el-form-item label="上线类型" prop="onlineType" v-if="form.type === '9'">
-            <el-radio-group v-model="form.onlineType" @change="onlineTypeChange">
-              <el-radio
-                  v-for="dict in qs_online_type"
-                  :key="dict.value"
-                  :label="dict.value"
-              >{{ dict.label }}
-              </el-radio>
-            </el-radio-group>
-          </el-form-item>
-
-          <!-- IP/端口/用户名/密码 -->
-          <el-row :gutter="20" v-if="form.type === '7' || form.type === '5' || form.type === '9'">
-            <el-col :span="12">
-              <el-form-item label="IP地址" prop="ipAddress"
-                            v-if="form.type === '7' || (form.type === '9' && form.onlineType === '1')">
-                <el-input v-model="form.ipAddress" placeholder="请输入IP地址" :maxlength="50" show-word-limit/>
-              </el-form-item>
-              <el-form-item label="设备IP" prop="ipAddress"
-                            v-if="form.type === '5'">
-                <el-select v-model="form.ipAddress" @change="onvifDeviceCodeChange" placeholder="请选择设备IP"
-                          filterable style="width: 100%;">
-                  <el-option
-                    v-for="item in onvifDeviceList"
-                    :key="item.ip"
-                    :label="item.ip"
-                    :value="item.ip"
-                  />
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="端口" prop="port"
-                            v-if="form.type === '7' || (form.type === '9' && form.onlineType === '1')">
-                <el-input v-model="form.port" placeholder="请输入端口" disabled :maxlength="10" show-word-limit/>
-              </el-form-item>
-            </el-col>
-          </el-row>
-
-          <el-row :gutter="20" v-if="form.type === '7' || form.type === '5' || form.type === '9'">
-            <el-col :span="12">
-              <el-form-item label="用户名" prop="userName">
-                <el-input v-model="form.userName" placeholder="请输入用户名" :maxlength="64" show-word-limit/>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="密码" prop="password">
-                <el-input v-model="form.password" placeholder="请输入密码" :maxlength="128" show-word-limit type="password" show-password/>
-              </el-form-item>
-            </el-col>
-          </el-row>
-
-          <!-- 海康ISUP设备ID -->
-          <el-form-item label="设备ID" prop="deviceCode" v-if="form.type === '8'">
-            <el-select v-model="form.deviceCode" @change="haikangIsupDeviceCodeChange" placeholder="请选择设备"
-                       filterable style="width: 100%;">
-              <el-option
-                v-for="item in haiKangIsupDeviceList"
-                :key="item.deviceId"
-                :label="item.deviceId"
-                :value="item.deviceId"
-              >
-                <div style="display: flex; justify-content: space-between;">
-                  <span>{{ item.deviceId }}</span>
-                  <span style="color: var(--el-text-color-secondary); font-size: 12px;">{{ item.ip }}</span>
-                </div>
-              </el-option>
-            </el-select>
-          </el-form-item>
-
-          <!-- 大华设备ID -->
-          <el-form-item label="设备ID" prop="deviceCode" v-if="form.type === '9' && form.onlineType === '2'">
-            <el-select v-model="form.deviceCode" @change="dahuaDeviceCodeChange" placeholder="请选择设备"
-                       filterable style="width: 100%;">
-              <el-option
-                v-for="item in dahuaDeviceList"
-                :key="item.deviceId"
-                :label="item.deviceId"
-                :value="item.deviceId"
-              >
-                <div style="display: flex; justify-content: space-between;">
-                  <span>{{ item.deviceId }}</span>
-                  <span style="color: var(--el-text-color-secondary); font-size: 12px;">{{ item.ip }}</span>
-                </div>
-              </el-option>
-            </el-select>
-          </el-form-item>
-
-          <!-- 通道号/码流类型 -->
-          <el-row :gutter="20" v-if="form.type === '7' || form.type === '8' || form.type === '9'">
-            <el-col :span="12">
-              <el-form-item label="通道号" prop="channel">
-                <el-input v-model="form.channel" placeholder="请输入通道号" @input="handleNumberInput" :maxlength="5"
-                          show-word-limit/>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="码流类型" prop="streamType">
-                <el-radio-group v-model="form.streamType">
-                  <el-radio
-                    v-for="dict in qs_stream_type"
-                    :key="dict.value"
-                    :label="dict.value"
-                  >{{ dict.label }}
-                  </el-radio>
+          <!-- IP设备配置（海康/大华/ONVIF） -->
+          <template v-if="form.type === '5' || form.type === '7' || form.type === '8' || form.type === '9'">
+            <el-row :gutter="16">
+              <el-col :span="12">
+                <!-- 海康ISUP -->
+                <el-form-item label="设备ID" prop="deviceCode" v-if="form.type === '8'">
+                  <el-select v-model="form.deviceCode" @change="haikangIsupDeviceCodeChange" placeholder="请选择设备" filterable style="width: 100%;">
+                    <el-option v-for="item in haiKangIsupDeviceList" :key="item.deviceId" :label="item.deviceId" :value="item.deviceId">
+                      <div style="display: flex; justify-content: space-between;">
+                        <span>{{ item.deviceId }}</span>
+                        <span style="color: var(--el-text-color-secondary); font-size: 12px;">{{ item.ip }}</span>
+                      </div>
+                    </el-option>
+                  </el-select>
+                </el-form-item>
+                <!-- 大华 -->
+                <el-form-item label="设备ID" prop="deviceCode" v-if="form.type === '9' && form.onlineType === '2'">
+                  <el-select v-model="form.deviceCode" @change="dahuaDeviceCodeChange" placeholder="请选择设备" filterable style="width: 100%;">
+                    <el-option v-for="item in dahuaDeviceList" :key="item.deviceId" :label="item.deviceId" :value="item.deviceId">
+                      <div style="display: flex; justify-content: space-between;">
+                        <span>{{ item.deviceId }}</span>
+                        <span style="color: var(--el-text-color-secondary); font-size: 12px;">{{ item.ip }}</span>
+                      </div>
+                    </el-option>
+                  </el-select>
+                </el-form-item>
+                <!-- 其他 -->
+                <el-form-item label="IP地址" prop="ipAddress" v-if="form.type === '5' || form.type === '7' || (form.type === '9' && form.onlineType === '1')">
+                  <el-select v-if="form.type === '5'" v-model="form.ipAddress" @change="onvifDeviceCodeChange" placeholder="请选择设备IP" filterable style="width: 100%;">
+                    <el-option v-for="item in onvifDeviceList" :key="item.ip" :label="item.ip" :value="item.ip" />
+                  </el-select>
+                  <el-input v-else v-model="form.ipAddress" placeholder="请输入IP地址" :maxlength="50" show-word-limit/>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="端口" prop="port" v-if="form.type === '7' || (form.type === '9' && form.onlineType === '1')">
+                  <el-input v-model="form.port" placeholder="请输入端口" disabled :maxlength="10" show-word-limit/>
+                </el-form-item>
+                <el-form-item label="上线类型" prop="onlineType" v-if="form.type === '9'">
+                  <el-radio-group v-model="form.onlineType" @change="onlineTypeChange">
+                    <el-radio v-for="dict in qs_online_type" :key="dict.value" :label="dict.value">{{ dict.label }}</el-radio>
+                  </el-radio-group>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="16" v-if="form.type === '7' || form.type === '5' || form.type === '9'">
+              <el-col :span="12">
+                <el-form-item label="用户名" prop="userName">
+                  <el-input v-model="form.userName" placeholder="请输入用户名" :maxlength="64" show-word-limit/>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="密码" prop="password">
+                  <el-input v-model="form.password" placeholder="请输入密码" :maxlength="128" show-word-limit type="password" show-password/>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="16" v-if="form.type === '7' || form.type === '8' || form.type === '9'">
+              <el-col :span="12">
+                <el-form-item label="通道号" prop="channel">
+                  <el-input v-model="form.channel" placeholder="请输入通道号" @input="handleNumberInput" :maxlength="5" show-word-limit/>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="码流类型" prop="streamType">
+                  <el-radio-group v-model="form.streamType">
+                    <el-radio v-for="dict in qs_stream_type" :key="dict.value" :label="dict.value">{{ dict.label }}</el-radio>
+                  </el-radio-group>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <!-- ONVIF特有 -->
+            <template v-if="form.type === '5'">
+              <el-form-item label="验证类型" prop="onvifAuth">
+                <el-radio-group v-model="form.onvifAuth">
+                  <el-radio v-for="dict in qs_onvif_auth" :key="dict.value" :label="dict.value">{{ dict.label }}</el-radio>
                 </el-radio-group>
               </el-form-item>
-            </el-col>
-          </el-row>
-
-          <!-- ONVIF验证 -->
-          <el-form-item label="验证类型" prop="onvifAuth"
-                        v-if="form.type === '5'">
-            <el-radio-group v-model="form.onvifAuth">
-              <el-radio
-                v-for="dict in qs_onvif_auth"
-                :key="dict.value"
-                :label="dict.value"
-              >{{ dict.label }}
-              </el-radio>
-            </el-radio-group>
-          </el-form-item>
-
-          <el-form-item v-if="form.type === '5'" style="margin: -8px 0 0 110px;">
-            <el-button type="primary" @click="onvifAuthLogin" size="small">认证</el-button>
-          </el-form-item>
-
-          <!-- ONVIF直播流地址 -->
-          <el-form-item label="流地址"
-                        prop="liveAddress"
-                        v-if="form.type === '5'"
-          >
-            <el-select v-model="form.liveAddress" placeholder="请选择流地址" filterable style="width: 100%;">
-              <el-option
-                v-for="item in streamUris"
-                :key="item"
-                :label="item"
-                :value="item"
-              />
-            </el-select>
-          </el-form-item>
+              <el-form-item style="margin: -8px 0 0 90px;">
+                <el-button type="primary" @click="onvifAuthLogin" size="small">认证</el-button>
+              </el-form-item>
+              <el-form-item label="流地址" prop="liveAddress">
+                <el-select v-model="form.liveAddress" placeholder="请选择流地址" filterable style="width: 100%;">
+                  <el-option v-for="item in streamUris" :key="item" :label="item" :value="item" />
+                </el-select>
+              </el-form-item>
+            </template>
+          </template>
 
           <!-- 国标28181配置 -->
           <template v-if="form.type === '12'">
             <el-form-item label="国标设备" prop="gbDeviceId">
               <el-select v-model="form.gbDeviceId" placeholder="请选择国标设备" @change="gbDeviceChange" filterable style="width: 100%;">
-                <el-option
-                  v-for="item in gb28181DeviceList"
-                  :key="item.deviceId"
-                  :label="item.name"
-                  :value="item.deviceId"
-                >
-                  <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 2px 0;">
+                <el-option v-for="item in gb28181DeviceList" :key="item.deviceId" :label="item.name" :value="item.deviceId">
+                  <div style="display: flex; align-items: center; justify-content: space-between;">
                     <div style="display: flex; align-items: center; gap: 8px;">
-                      <span
-                        :style="{
-                          display: 'inline-block',
-                          width: '6px',
-                          height: '6px',
-                          borderRadius: '50%',
-                          backgroundColor: item.onLine ? 'var(--el-color-success)' : 'var(--el-text-color-secondary)'
-                        }"
-                      ></span>
+                      <span :style="{width: '6px', height: '6px', borderRadius: '50%', backgroundColor: item.onLine ? 'var(--el-color-success)' : 'var(--el-text-color-secondary)', display: 'inline-block'}"></span>
                       <span style="font-weight: 500;">{{ item.name }}</span>
                     </div>
                     <span style="color: var(--el-text-color-secondary); font-size: 12px; font-family: 'Courier New', monospace;">{{ item.deviceId }}</span>
@@ -574,26 +494,12 @@
                 </el-option>
               </el-select>
             </el-form-item>
-
             <el-form-item label="国标通道" prop="gbChannelId">
               <el-select v-model="form.gbChannelId" placeholder="请选择国标通道" @change="gbChannelChange" filterable :disabled="!form.gbDeviceId" style="width: 100%;">
-                <el-option
-                  v-for="item in gb28181ChannelList"
-                  :key="item.gbDeviceId || item.deviceId"
-                  :label="item.gbName || item.name"
-                  :value="item.gbDeviceId || item.deviceId"
-                >
-                  <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 2px 0;">
+                <el-option v-for="item in gb28181ChannelList" :key="item.gbDeviceId || item.deviceId" :label="item.gbName || item.name" :value="item.gbDeviceId || item.deviceId">
+                  <div style="display: flex; align-items: center; justify-content: space-between;">
                     <div style="display: flex; align-items: center; gap: 8px;">
-                      <span
-                        :style="{
-                          display: 'inline-block',
-                          width: '6px',
-                          height: '6px',
-                          borderRadius: '50%',
-                          backgroundColor: (item.gbStatus || item.status) === 'ON' ? 'var(--el-color-success)' : 'var(--el-text-color-secondary)'
-                        }"
-                      ></span>
+                      <span :style="{width: '6px', height: '6px', borderRadius: '50%', backgroundColor: (item.gbStatus || item.status) === 'ON' ? 'var(--el-color-success)' : 'var(--el-text-color-secondary)', display: 'inline-block'}"></span>
                       <span style="font-weight: 500;">{{ item.gbName || item.name }}</span>
                     </div>
                     <span style="color: var(--el-text-color-secondary); font-size: 12px; font-family: 'Courier New', monospace;">{{ item.gbDeviceId || item.deviceId }}</span>
@@ -601,36 +507,22 @@
                 </el-option>
               </el-select>
             </el-form-item>
-
             <el-form-item label="传输模式" prop="streamMode">
               <el-radio-group v-model="form.streamMode">
                 <el-radio label="UDP">UDP</el-radio>
-                <el-radio label="TCP-ACTIVE">TCP主动</el-radio>
                 <el-radio label="TCP-PASSIVE">TCP被动</el-radio>
               </el-radio-group>
             </el-form-item>
           </template>
 
-          <!-- JT1078 配置 -->
+          <!-- JT1078配置 -->
           <template v-if="form.type === '14'">
-            <el-form-item label="JT1078 设备" prop="deviceCode">
-              <el-select v-model="form.deviceCode" placeholder="请选择 JT1078 设备" @change="jt1078DeviceChange" filterable style="width: 100%;">
-                <el-option
-                  v-for="item in jt1078DeviceList"
-                  :key="item.deviceId"
-                  :value="item.deviceId"
-                >
-                  <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 2px 0;">
+            <el-form-item label="JT1078设备" prop="deviceCode">
+              <el-select v-model="form.deviceCode" placeholder="请选择JT1078设备" @change="jt1078DeviceChange" filterable style="width: 100%;">
+                <el-option v-for="item in jt1078DeviceList" :key="item.deviceId" :value="item.deviceId">
+                  <div style="display: flex; align-items: center; justify-content: space-between;">
                     <div style="display: flex; align-items: center; gap: 8px;">
-                      <span
-                        :style="{
-                          display: 'inline-block',
-                          width: '6px',
-                          height: '6px',
-                          borderRadius: '50%',
-                          backgroundColor: item.online ? 'var(--el-color-success)' : 'var(--el-text-color-secondary)'
-                        }"
-                      ></span>
+                      <span :style="{width: '6px', height: '6px', borderRadius: '50%', backgroundColor: item.online ? 'var(--el-color-success)' : 'var(--el-text-color-secondary)', display: 'inline-block'}"></span>
                       <span style="font-weight: 500;">{{ item.plateNo || item.deviceId }}</span>
                     </div>
                     <span style="color: var(--el-text-color-secondary); font-size: 12px; font-family: 'Courier New', monospace;">{{ item.mobileNo }}</span>
@@ -638,179 +530,192 @@
                 </el-option>
               </el-select>
             </el-form-item>
-
-            <el-form-item label="通道号" prop="channel">
-              <el-input v-model="form.channel" placeholder="请输入通道号" @input="handleNumberInput" :maxlength="5" show-word-limit/>
-            </el-form-item>
-
-            <el-form-item label="手机号" prop="jtMobileNo">
-              <el-input v-model="form.jtMobileNo" placeholder="请输入手机号" :maxlength="20" show-word-limit disabled/>
-            </el-form-item>
-
-            <el-form-item label="车牌号" prop="jtPlateNo">
-              <el-input v-model="form.jtPlateNo" placeholder="请输入车牌号" :maxlength="20" show-word-limit disabled/>
-            </el-form-item>
-
-            <el-form-item label="车牌颜色" prop="jtPlateColor">
-              <el-select v-model="form.jtPlateColor" placeholder="请选择车牌颜色" disabled style="width: 100%;">
-                <el-option label="蓝牌" :value="1" />
-                <el-option label="黄牌" :value="2" />
-                <el-option label="黑牌" :value="3" />
-                <el-option label="白牌" :value="4" />
-                <el-option label="绿牌" :value="5" />
-                <el-option label="黄绿牌" :value="6" />
-              </el-select>
-            </el-form-item>
-
-            <el-form-item label="传输模式" prop="streamMode">
-              <el-radio-group v-model="form.streamMode">
-                <el-radio label="UDP">UDP</el-radio>
-                <el-radio label="TCP-ACTIVE">TCP主动</el-radio>
-                <el-radio label="TCP-PASSIVE">TCP被动</el-radio>
-              </el-radio-group>
-            </el-form-item>
+            <el-row :gutter="16">
+              <el-col :span="12">
+                <el-form-item label="通道号" prop="channel">
+                  <el-input v-model="form.channel" placeholder="请输入通道号" @input="handleNumberInput" :maxlength="5" show-word-limit/>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="传输模式" prop="streamMode">
+                  <el-radio-group v-model="form.streamMode">
+                    <el-radio label="UDP">UDP</el-radio>
+                    <el-radio label="TCP-PASSIVE">TCP被动</el-radio>
+                  </el-radio-group>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="16">
+              <el-col :span="12">
+                <el-form-item label="车牌号" prop="jtPlateNo">
+                  <el-input v-model="form.jtPlateNo" placeholder="请输入车牌号" :maxlength="20" show-word-limit disabled/>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="车牌颜色" prop="jtPlateColor">
+                  <el-select v-model="form.jtPlateColor" placeholder="请选择车牌颜色" disabled style="width: 100%;">
+                    <el-option label="蓝牌" :value="1" />
+                    <el-option label="黄牌" :value="2" />
+                    <el-option label="绿牌" :value="5" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
           </template>
-        </el-card>
+        </div>
 
-        <!-- 功能配置分组 -->
-        <el-card class="form-card" body-style="padding: 16px 20px;">
-          <template #header>
-            <div class="card-header">
-              <span style="font-weight: 500; color: #303133; font-size: 14px;">功能配置</span>
-            </div>
-          </template>
-          
-          <el-row :gutter="20">
-            <el-col :span="12">
-              <el-form-item label="音频" prop="enableAudio">
-                <el-radio-group v-model="form.enableAudio">
-                  <el-radio label="0">关闭</el-radio>
-                  <el-radio label="1">开启</el-radio>
+        <!-- 展开/收起按钮 -->
+        <div class="expand-toggle">
+          <el-button text type="primary" @click="showAdvanced = !showAdvanced">
+            <el-icon v-if="!showAdvanced"><ArrowDown /></el-icon>
+            <el-icon v-else><ArrowUp /></el-icon>
+            {{ showAdvanced ? '收起高级选项' : '展开高级选项' }}
+          </el-button>
+        </div>
+
+        <!-- 高级配置（可展开） -->
+        <el-collapse-transition>
+          <div v-show="showAdvanced" class="advanced-config">
+
+            <!-- 功能配置 -->
+            <div class="config-section">
+              <div class="section-title">功能配置</div>
+              <el-row :gutter="16">
+                <el-col :span="8">
+                  <el-form-item label="音频" prop="enableAudio">
+                    <el-switch v-model="form.enableAudio" active-value="1" inactive-value="0" />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                  <el-form-item label="MP4录制" prop="enableMp4">
+                    <el-switch v-model="form.enableMp4" active-value="1" inactive-value="0" />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="8" v-if="form.type !== '12' && form.type !== '14'">
+                  <el-form-item label="无人观看" prop="enableDisableNoneReader">
+                    <el-switch v-model="form.enableDisableNoneReader" active-value="1" inactive-value="0" />
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-form-item label="传输协议" prop="protocol" v-if="form.type !== '12' && form.type !== '14'">
+                <el-radio-group v-model="form.protocol">
+                  <el-radio v-for="dict in qs_protocol" :key="dict.value" :label="dict.value">{{ dict.label }}</el-radio>
                 </el-radio-group>
               </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="MP4录制" prop="enableMp4">
-                <el-radio-group v-model="form.enableMp4">
-                  <el-radio label="0">关闭</el-radio>
-                  <el-radio label="1">开启</el-radio>
-                </el-radio-group>
-              </el-form-item>
-            </el-col>
-          </el-row>
-
-          <el-form-item label="传输协议" prop="protocol" v-if="form.type !== '12' && form.type !== '14'">
-            <el-radio-group v-model="form.protocol">
-              <el-radio
-                v-for="dict in qs_protocol"
-                :key="dict.value"
-                :label="dict.value"
-              >{{ dict.label }}
-              </el-radio>
-            </el-radio-group>
-          </el-form-item>
-
-          <el-form-item label="无人观看" prop="enableDisableNoneReader">
-            <el-radio-group v-model="form.enableDisableNoneReader">
-              <el-radio label="0">不处理</el-radio>
-              <el-radio label="1">停用</el-radio>
-            </el-radio-group>
-          </el-form-item>
-        </el-card>
-
-        <!-- 位置信息分组 -->
-        <el-card class="form-card" body-style="padding: 16px 20px;">
-          <template #header>
-            <div class="card-header">
-              <span style="font-weight: 500; color: #303133; font-size: 14px;">设备信息</span>
             </div>
-          </template>
-          
-          <el-row :gutter="20">
-            <el-col :span="12">
-              <el-form-item label="经度" prop="longitude">
-                <el-input v-model="form.longitude" placeholder="请输入经度" :maxlength="20"
-                          show-word-limit>
-                  <template #append>
-                    <el-button @click="selectMapPositionFun">
-                      选择
-                    </el-button>
-                  </template>
-                </el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="纬度" prop="latitude">
-                <el-input v-model="form.latitude" placeholder="请输入纬度" :maxlength="20"
-                          show-word-limit>
-                  <template #append>
-                    <el-button @click="selectMapPositionFun">
-                      选择
-                    </el-button>
-                  </template>
-                </el-input>
-              </el-form-item>
-            </el-col>
-          </el-row>
 
-          <el-row :gutter="20" v-if="form.type !== '12'">
-            <el-col :span="12">
-              <el-form-item label="国标编码" prop="gbCode">
-                <el-input v-model="form.gbCode" placeholder="请输入国标编码" @input="handleNumberInput" :maxlength="100"
-                          show-word-limit>
-                  <template #append>
-                    <el-button @click="handleChannelCode">选择</el-button>
-                  </template>
-                </el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="生产厂商" prop="manufacturer">
-                <el-input v-model="form.manufacturer" placeholder="请输入生产厂商" :maxlength="100" show-word-limit/>
-              </el-form-item>
-            </el-col>
-          </el-row>
-
-          <el-form-item label="生产厂商" prop="manufacturer" v-if="form.type === '12'">
-            <el-input v-model="form.manufacturer" placeholder="请输入生产厂商" :maxlength="100" show-word-limit/>
-          </el-form-item>
-
-          <el-row :gutter="20">
-            <el-col :span="12">
-              <el-form-item label="摄像机类型" prop="ptzType">
-                <el-select v-model="form.ptzType" placeholder="请选择摄像机类型" clearable style="width: 100%;">
-                  <el-option label="球机" :value="1"/>
-                  <el-option label="半球" :value="2"/>
-                  <el-option label="固定枪机" :value="3"/>
-                  <el-option label="遥控枪机" :value="4"/>
-                  <el-option label="遥控半球" :value="5"/>
-                  <el-option label="全景/拼接通道" :value="6"/>
-                  <el-option label="分割通道" :value="7"/>
-                </el-select>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
+            <!-- 设备信息 -->
+            <div class="config-section">
+              <div class="section-title">设备信息</div>
+              <el-row :gutter="16">
+                <el-col :span="12">
+                  <el-form-item label="国标编码" prop="gbCode" v-if="form.type !== '12'">
+                    <el-input v-model="form.gbCode" placeholder="请输入国标编码" :maxlength="100" show-word-limit>
+                      <template #append>
+                        <el-button @click="handleChannelCode">选择</el-button>
+                      </template>
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="生产厂商" prop="manufacturer">
+                    <el-input v-model="form.manufacturer" placeholder="请输入生产厂商" :maxlength="100" show-word-limit/>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="16">
+                <el-col :span="12">
+                  <el-form-item label="经度" prop="longitude">
+                    <el-input v-model="form.longitude" placeholder="请输入经度" :maxlength="20" show-word-limit>
+                      <template #append>
+                        <el-button @click="selectMapPositionFun">选择</el-button>
+                      </template>
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="纬度" prop="latitude">
+                    <el-input v-model="form.latitude" placeholder="请输入纬度" :maxlength="20" show-word-limit>
+                      <template #append>
+                        <el-button @click="selectMapPositionFun">选择</el-button>
+                      </template>
+                    </el-input>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="16">
+                <el-col :span="12">
+                  <el-form-item label="摄像机类型" prop="ptzType">
+                    <el-select v-model="form.ptzType" placeholder="请选择摄像机类型" clearable style="width: 100%;">
+                      <el-option label="球机" :value="1"/>
+                      <el-option label="半球" :value="2"/>
+                      <el-option label="固定枪机" :value="3"/>
+                      <el-option label="遥控枪机" :value="4"/>
+                      <el-option label="全景/拼接通道" :value="6"/>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="状态" prop="status">
+                    <el-radio-group v-model="form.status">
+                      <el-radio v-for="dict in qs_status" :key="dict.value" :label="dict.value">{{ dict.label }}</el-radio>
+                    </el-radio-group>
+                  </el-form-item>
+                </el-col>
+              </el-row>
               <el-form-item label="安装地址" prop="address">
-                <el-input v-model="form.address" placeholder="请输入安装地址" type="textarea" :maxlength="200" show-word-limit :rows="1"/>
+                <el-input v-model="form.address" placeholder="请输入安装地址" type="textarea" :maxlength="200" show-word-limit :rows="2"/>
               </el-form-item>
-            </el-col>
-          </el-row>
+              <el-form-item label="备注" prop="remark">
+                <el-input v-model="form.remark" type="textarea" placeholder="请输入备注信息" :maxlength="255" show-word-limit :rows="2"/>
+              </el-form-item>
+            </div>
 
-          <el-form-item label="状态" prop="status">
-            <el-radio-group v-model="form.status">
-              <el-radio
-                v-for="dict in qs_status"
-                :key="dict.value"
-                :label="dict.value"
-              >{{ dict.label }}
-              </el-radio>
-            </el-radio-group>
-          </el-form-item>
-
-          <el-form-item label="备注" prop="remark">
-            <el-input v-model="form.remark" type="textarea" placeholder="请输入备注信息" :maxlength="255" show-word-limit :rows="2"/>
-          </el-form-item>
-        </el-card>
+            <!-- GB28181扩展信息 -->
+            <div class="config-section">
+              <div class="section-title">GB28181扩展</div>
+              <el-row :gutter="16">
+                <el-col :span="12">
+                  <el-form-item label="设备型号" prop="gbModel">
+                    <el-input v-model="form.gbModel" placeholder="请输入设备型号" :maxlength="50" show-word-limit/>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="设备归属" prop="gbOwner">
+                    <el-input v-model="form.gbOwner" placeholder="请输入设备归属" :maxlength="50" show-word-limit/>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="16">
+                <el-col :span="12">
+                  <el-form-item label="行政区划" prop="gbBlock">
+                    <el-input v-model="form.gbBlock" placeholder="请输入行政区划" :maxlength="50" show-word-limit/>
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
+                  <el-form-item label="注册方式" prop="gbRegisterWay">
+                    <el-select v-model="form.gbRegisterWay" placeholder="请选择注册方式" clearable style="width: 100%;">
+                      <el-option label="IP方式" :value="1"/>
+                      <el-option label="动态域名" :value="2"/>
+                      <el-option label="主动上报" :value="3"/>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+              <el-row :gutter="16">
+                <el-col :span="12">
+                  <el-form-item label="使用类型" prop="gbUseType">
+                    <el-select v-model="form.gbUseType" placeholder="请选择使用类型" clearable style="width: 100%;">
+                      <el-option label="固定点" :value="1"/>
+                      <el-option label="移动点" :value="2"/>
+                      <el-option label="临时点" :value="3"/>
+                    </el-select>
+                  </el-form-item>
+                </el-col>
+              </el-row>
+            </div>
+          </div>
+        </el-collapse-transition>
       </el-form>
       <template #footer>
         <div class="dialog-footer">
@@ -1207,6 +1112,7 @@ const wiperOn = ref(false);
 const streamPushAddressForm = ref({});
 
 const data = reactive({
+  showAdvanced: false,
   form: {} as QsDevice,
   queryParams: {
     pageNum: 1,
@@ -1248,7 +1154,7 @@ const data = reactive({
   }
 })
 
-const {queryParams, form, rules} = toRefs(data)
+const {queryParams, form, rules, showAdvanced} = toRefs(data)
 
 /** 查询视频监控设备列表 */
 function getList() {
@@ -1307,8 +1213,20 @@ function reset() {
     remark: null,
     jtMobileNo: null,
     jtPlateNo: null,
-    jtPlateColor: null
+    jtPlateColor: null,
+    gbCode: null,
+    gbModel: null,
+    gbOwner: null,
+    gbBlock: null,
+    gbAddress: null,
+    gbRegisterWay: null,
+    gbUseType: null,
+    gbLongitude: null,
+    gbLatitude: null,
+    gbLongitudeDouble: null,
+    gbLatitudeDouble: null
   }
+  showAdvanced.value = false
   proxy.resetForm("deviceRef")
 }
 
@@ -4090,6 +4008,82 @@ html.dark {
   transform: scale(1.08);
 }
 
+/* ===== 卡片视图按钮样式 - 白色图标 ===== */
+/* 播放按钮 */
+.card-toolbar .btn-play {
+  color: #ffffff !important;
+}
+
+.card-toolbar .btn-play .el-icon {
+  color: #ffffff !important;
+}
+
+/* 操作按钮 - 强制覆盖 text bg 样式 */
+.toolbar-actions .el-button--primary,
+.toolbar-actions .el-button--primary[text],
+.toolbar-actions .el-button--primary[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-primary) !important;
+  border-color: var(--el-color-primary) !important;
+}
+
+.toolbar-actions .el-button--danger,
+.toolbar-actions .el-button--danger[text],
+.toolbar-actions .el-button--danger[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-danger) !important;
+  border-color: var(--el-color-danger) !important;
+}
+
+.toolbar-actions .el-button--success,
+.toolbar-actions .el-button--success[text],
+.toolbar-actions .el-button--success[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-success) !important;
+  border-color: var(--el-color-success) !important;
+}
+
+.toolbar-actions .el-button .el-icon {
+  color: #ffffff !important;
+}
+
+/* 悬停时稍微浅一点 */
+.toolbar-actions .el-button--primary:hover,
+.toolbar-actions .el-button--primary[text]:hover,
+.toolbar-actions .el-button--primary[text][bg]:hover {
+  background-color: var(--el-color-primary-light-3) !important;
+  border-color: var(--el-color-primary-light-3) !important;
+  color: #ffffff !important;
+}
+
+.toolbar-actions .el-button--primary:hover .el-icon {
+  color: #ffffff !important;
+}
+
+.toolbar-actions .el-button--danger:hover,
+.toolbar-actions .el-button--danger[text]:hover,
+.toolbar-actions .el-button--danger[text][bg]:hover {
+  background-color: var(--el-color-danger-light-3) !important;
+  border-color: var(--el-color-danger-light-3) !important;
+  color: #ffffff !important;
+}
+
+.toolbar-actions .el-button--danger:hover .el-icon {
+  color: #ffffff !important;
+}
+
+.toolbar-actions .el-button--success:hover,
+.toolbar-actions .el-button--success[text]:hover,
+.toolbar-actions .el-button--success[text][bg]:hover {
+  background-color: var(--el-color-success-light-3) !important;
+  border-color: var(--el-color-success-light-3) !important;
+  color: #ffffff !important;
+}
+
+.toolbar-actions .el-button--success:hover .el-icon {
+  color: #ffffff !important;
+}
+
 /* ===== 播放对话框玻璃拟态 ===== */
 .glass-dialog.play-dialog :deep(.el-dialog),
 .glass-dialog.access-dialog :deep(.el-dialog) {
@@ -4534,7 +4528,87 @@ html.dark {
   }
 }
 
-/* 响应式布局优化 */
+/* ===== 表单核心信息样式 ===== */
+.core-info {
+  padding: 8px 0;
+  margin-bottom: 8px;
+}
+
+/* ===== 展开/收起按钮样式 ===== */
+.expand-toggle {
+  display: flex;
+  justify-content: center;
+  margin: 8px 0 16px 0;
+  padding: 8px 0;
+  border-top: 1px dashed var(--el-border-color-lighter);
+}
+
+.expand-toggle .el-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+.expand-toggle .el-button:hover {
+  transform: translateY(-1px);
+}
+
+.expand-toggle .el-icon {
+  transition: transform 0.3s ease;
+}
+
+/* ===== 高级配置区域样式 ===== */
+.advanced-config {
+  padding: 16px;
+  background: var(--el-fill-color-lighter);
+  border-radius: 12px;
+  border: 1px solid var(--el-border-color-lighter);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== 配置分区样式 ===== */
+.config-section {
+  margin-bottom: 20px;
+}
+
+.config-section:last-child {
+  margin-bottom: 0;
+}
+
+.config-section .section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.config-section .section-title::before {
+  content: '';
+  width: 4px;
+  height: 14px;
+  background: var(--el-color-primary);
+  border-radius: 2px;
+}
+
+/* ===== 响应式布局优化 ===== */
 @media (max-width: 768px) {
   .query-form {
     padding: 8px 10px;
@@ -4552,6 +4626,26 @@ html.dark {
   .action-buttons {
     gap: 8px;
     flex-wrap: wrap;
+  }
+  
+  .advanced-config {
+    padding: 12px;
+  }
+}
+
+/* ===== 暗黑模式适配 - 表单样式 ===== */
+html.dark {
+  .expand-toggle {
+    border-top-color: rgba(255, 255, 255, 0.08);
+  }
+  
+  .advanced-config {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  
+  .config-section .section-title {
+    border-bottom-color: rgba(255, 255, 255, 0.06);
   }
 }
 </style>
