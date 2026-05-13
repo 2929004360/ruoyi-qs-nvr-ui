@@ -212,7 +212,7 @@
               append-to-body
               draggable
               destroy-on-close
-              class="device-dialog"
+              class="glass-dialog device-dialog"
               align-center
             >
               <div class="dialog-body">

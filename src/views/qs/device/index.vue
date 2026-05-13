@@ -345,7 +345,7 @@
     />
 
     <!-- 添加或修改视频监控设备对话框 -->
-    <el-dialog :title="title" v-model="open" width="960px" append-to-body draggable class="glass-dialog device-dialog">
+    <el-dialog :title="title" v-model="open" width="960px" append-to-body draggable destroy-on-close class="glass-dialog device-dialog">
       <el-form ref="deviceRef" :model="form" :rules="rules" label-width="110px">
         <!-- 基础信息分组 -->
         <el-card class="form-card" body-style="padding: 16px 20px;">

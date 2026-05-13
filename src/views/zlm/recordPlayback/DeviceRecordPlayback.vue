@@ -10,6 +10,14 @@
                 <el-icon><VideoCamera /></el-icon>
               </div>
               <span>设备列表</span>
+              <div class="header-switch">
+                <el-switch
+                    v-model="showRegion"
+                    active-text="行政区划"
+                    inactive-text="业务分组"
+                    @change="handleTreeTypeChange"
+                />
+              </div>
             </div>
             <div class="tree-container">
               <div class="date-panel">
@@ -27,7 +35,26 @@
                 <el-button :icon="ArrowRight" @click="nextDay" circle class="date-nav-btn" />
                 <el-button type="primary" @click="handleToday" plain class="today-btn">今天</el-button>
               </div>
-              <DeviceTree @clickEvent="handleDeviceClick" :isContextmenu="false"/>
+              <div v-if="showRegion">
+                <RegionTree
+                    ref="regionTree"
+                    :showIndex="false"
+                    :showContextmenu="false"
+                    :hasDevice="true"
+                    @handleNodeClick="handleDeviceClick"
+                    :isContextmenu="false"
+                />
+              </div>
+              <div v-else>
+                <GroupTree
+                    ref="groupTree"
+                    :showIndex="false"
+                    :showContextmenu="false"
+                    :hasDevice="true"
+                    @handleNodeClick="handleDeviceClick"
+                    :isContextmenu="false"
+                />
+              </div>
             </div>
           </el-col>
         </pane>
@@ -162,7 +189,8 @@
 import {getCurrentInstance, nextTick, onMounted, onUnmounted} from 'vue'
 import screenfull from 'screenfull'
 import { ElLoading, ElMessage } from 'element-plus'
-import DeviceTree from '@/components/DeviceTree'
+import RegionTree from '@/views/components/common/RegionTree.vue'
+import GroupTree from '@/views/components/common/GroupTree.vue'
 import {Pane, Splitpanes} from 'splitpanes'
 import 'splitpanes/dist/splitpanes.css'
 import {
@@ -199,6 +227,7 @@ const loading = ref<boolean>(false)
 const currentDevice = ref<any>(null)
 const recordList = ref([]);
 const selectedRecord = ref<any>(null);
+const showRegion = ref(false);
 
 const initTime = ref(moment().startOf('day').valueOf());
 const timeSegments = ref([]);
@@ -231,9 +260,14 @@ let loadingInstance: any = null
 
 const selectedDate = ref<string>(moment().format('YYYY-MM-DD'))
 
-const handleDeviceClick = async (deviceId: number) => {
+const handleDeviceClick = async (data: any) => {
   try {
-    const res: any = await getDevice(deviceId)
+    // 检查是否是叶子节点（设备）
+    if (!data.leaf) {
+      return
+    }
+    
+    const res: any = await getDevice(data.id)
     const device = res.data
     currentDevice.value = device
 
@@ -254,6 +288,18 @@ const handleDeviceClick = async (deviceId: number) => {
   } catch (e) {
     console.error('获取设备信息失败', e)
   }
+}
+
+/**
+ * 切换树形组件类型
+ */
+const handleTreeTypeChange = () => {
+  // 切换时清空当前选择
+  currentDevice.value = null
+  selectedRecord.value = null
+  timeSegments.value = []
+  recordList.value = []
+  stopPlay()
 }
 
 function getList() {

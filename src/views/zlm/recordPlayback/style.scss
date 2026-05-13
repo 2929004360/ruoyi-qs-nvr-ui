@@ -85,6 +85,12 @@ html.dark .record-splitpanes {
     align-items: center;
     gap: 4px;
   }
+
+  .header-switch {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+  }
 }
 
 /* 内容区域 */

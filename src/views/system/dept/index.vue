@@ -93,7 +93,7 @@
       </el-table>
 
       <!-- 添加或修改部门对话框 -->
-      <el-dialog :title="title" v-model="open" width="600px" append-to-body class="dept-dialog">
+      <el-dialog :title="title" v-model="open" width="600px" append-to-body draggable destroy-on-close class="glass-dialog dept-dialog">
          <el-form ref="deptRef" :model="form" :rules="rules" label-width="80px">
             <el-row>
                <el-col :span="24" v-if="form.parentId !== 0">
