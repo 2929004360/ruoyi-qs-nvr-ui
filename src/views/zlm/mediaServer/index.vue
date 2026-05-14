@@ -20,11 +20,49 @@
               </div>
             </div>
 
-            <div class="card-actions">
-              <el-button type="text" @click="handleView(item)">查看</el-button>
-              <el-button type="text" v-if="!item.defaultServer" @click="handleUpdate(item)">编辑</el-button>
-              <el-button type="text" @click="handleDelete(item)" v-if="!item.defaultServer">移除</el-button>
-              <el-button type="text" @click="handleRestartServer(item)">重启</el-button>
+            <div class="card-toolbar">
+              <div class="toolbar-actions">
+                <el-tooltip content="查看">
+                  <el-button
+                    type="primary"
+                    text
+                    bg
+                    size="small"
+                    icon="View"
+                    @click="handleView(item)"
+                  />
+                </el-tooltip>
+                <el-tooltip content="编辑" v-if="!item.defaultServer">
+                  <el-button
+                    type="success"
+                    text
+                    bg
+                    size="small"
+                    icon="Edit"
+                    @click="handleUpdate(item)"
+                  />
+                </el-tooltip>
+                <el-tooltip content="移除" v-if="!item.defaultServer">
+                  <el-button
+                    type="danger"
+                    text
+                    bg
+                    size="small"
+                    icon="Delete"
+                    @click="handleDelete(item)"
+                  />
+                </el-tooltip>
+                <el-tooltip content="重启">
+                  <el-button
+                    type="warning"
+                    text
+                    bg
+                    size="small"
+                    icon="RefreshRight"
+                    @click="handleRestartServer(item)"
+                  />
+                </el-tooltip>
+              </div>
             </div>
           </div>
           <el-icon v-if="item.defaultServer" class="default-icon" color="#67C23A">
@@ -148,7 +186,7 @@
 import router from "@/router";
 import {delMediaServer, getMediaServerList, restartServer} from "../../../api/qs/zlm.js";
 import {MediaServer} from "@/types/api";
-import {InfoFilled, Connection, Monitor, Lock} from '@element-plus/icons-vue';
+import {InfoFilled, Connection, Monitor, Lock, View, Edit, Delete, RefreshRight, SuccessFilled} from '@element-plus/icons-vue';
 
 const {proxy} = getCurrentInstance();
 
@@ -416,15 +454,19 @@ getList();
   transition: color 0.3s ease;
 }
 
-.card-actions {
+.card-toolbar {
   display: flex;
   justify-content: flex-end;
-  gap: 4px;
   padding-top: 12px;
   border-top: 1px solid #f5f7fa;
   opacity: 0;
   transform: translateY(10px);
   animation: actionsFadeIn 0.4s ease 0.4s both;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 8px;
 }
 
 @keyframes actionsFadeIn {
@@ -476,6 +518,93 @@ getList();
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+/* ===== 卡片视图按钮样式 - 白色图标 ===== */
+/* 操作按钮 - 强制覆盖 text bg 样式 */
+.toolbar-actions .el-button--primary,
+.toolbar-actions .el-button--primary[text],
+.toolbar-actions .el-button--primary[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-primary) !important;
+  border-color: var(--el-color-primary) !important;
+}
+
+.toolbar-actions .el-button--danger,
+.toolbar-actions .el-button--danger[text],
+.toolbar-actions .el-button--danger[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-danger) !important;
+  border-color: var(--el-color-danger) !important;
+}
+
+.toolbar-actions .el-button--success,
+.toolbar-actions .el-button--success[text],
+.toolbar-actions .el-button--success[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-success) !important;
+  border-color: var(--el-color-success) !important;
+}
+
+.toolbar-actions .el-button--warning,
+.toolbar-actions .el-button--warning[text],
+.toolbar-actions .el-button--warning[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-warning) !important;
+  border-color: var(--el-color-warning) !important;
+}
+
+.toolbar-actions .el-button .el-icon {
+  color: #ffffff !important;
+}
+
+/* 悬停时稍微浅一点 */
+.toolbar-actions .el-button--primary:hover,
+.toolbar-actions .el-button--primary[text]:hover,
+.toolbar-actions .el-button--primary[text][bg]:hover {
+  background-color: var(--el-color-primary-light-3) !important;
+  border-color: var(--el-color-primary-light-3) !important;
+  color: #ffffff !important;
+}
+
+.toolbar-actions .el-button--primary:hover .el-icon {
+  color: #ffffff !important;
+}
+
+.toolbar-actions .el-button--danger:hover,
+.toolbar-actions .el-button--danger[text]:hover,
+.toolbar-actions .el-button--danger[text][bg]:hover {
+  background-color: var(--el-color-danger-light-3) !important;
+  border-color: var(--el-color-danger-light-3) !important;
+  color: #ffffff !important;
+}
+
+.toolbar-actions .el-button--danger:hover .el-icon {
+  color: #ffffff !important;
+}
+
+.toolbar-actions .el-button--success:hover,
+.toolbar-actions .el-button--success[text]:hover,
+.toolbar-actions .el-button--success[text][bg]:hover {
+  background-color: var(--el-color-success-light-3) !important;
+  border-color: var(--el-color-success-light-3) !important;
+  color: #ffffff !important;
+}
+
+.toolbar-actions .el-button--success:hover .el-icon {
+  color: #ffffff !important;
+}
+
+.toolbar-actions .el-button--warning:hover,
+.toolbar-actions .el-button--warning[text]:hover,
+.toolbar-actions .el-button--warning[text][bg]:hover {
+  background-color: var(--el-color-warning-light-3) !important;
+  border-color: var(--el-color-warning-light-3) !important;
+  color: #ffffff !important;
+}
+
+.toolbar-actions .el-button--warning:hover .el-icon {
+  color: #ffffff !important;
 }
 
 :deep(.el-descriptions__label) {

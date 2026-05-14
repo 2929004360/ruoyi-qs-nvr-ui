@@ -986,33 +986,46 @@ onUnmounted(() => {
   }
 }
 
+.form-actions {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+  padding-left: 16px;
+  border-left: 1px solid var(--el-border-color-lighter);
+  margin-left: 12px !important;
+}
+
+.button-group {
+  display: flex;
+  gap: 12px;
+}
+
 .search-btn {
   transition: all 0.3s;
+}
 
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px var(--el-color-primary-light-7);
-  }
+.search-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--el-color-primary-light-7);
+}
 
-  &:active {
-    transform: translateY(0);
-  }
+.search-btn:active {
+  transform: translateY(0);
 }
 
 .reset-btn {
   transition: all 0.3s;
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
 }
 
-/* ========== 工具栏 ========== */
+.reset-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.reset-btn:active {
+  transform: translateY(0);
+}
+
+/* ===== 工具栏样式优化 ===== */
 .toolbar-row {
   padding: 4px 0;
   animation: fadeInUp 0.4s ease-out 0.2s both;
@@ -1027,42 +1040,99 @@ onUnmounted(() => {
 
 .action-btn {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-  &:not(:disabled):hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-  }
-
-  &:not(:disabled):active {
-    transform: translateY(0);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 }
 
-.delete-btn:not(:disabled):hover {
-  box-shadow: 0 6px 16px var(--el-color-danger-light-7);
+.action-btn:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
-.download-btn:not(:disabled):hover {
-  box-shadow: 0 6px 16px var(--el-color-warning-light-7);
+.action-btn:not(:disabled):active {
+  transform: translateY(0);
 }
 
-/* 按钮区域 */
-.form-actions {
-  margin-left: auto !important;
-  margin-right: 0 !important;
-  padding-left: 16px;
-  border-left: 1px solid var(--el-border-color-lighter);
-  margin-left: 12px !important;
+.delete-btn:hover {
+  box-shadow: 0 4px 12px rgba(245, 108, 108, 0.35);
+}
 
-  .button-group {
-    display: flex;
-    gap: 12px;
-  }
+.download-btn:hover {
+  box-shadow: 0 4px 12px rgba(230, 162, 60, 0.35);
+}
+
+/* ===== 卡片视图按钮样式 - 白色图标 ===== */
+/* 播放按钮 */
+.card-toolbar .btn-play {
+  color: #ffffff !important;
+}
+
+.card-toolbar .btn-play .el-icon {
+  color: #ffffff !important;
+}
+
+/* 操作按钮 - 强制覆盖 text bg 样式 */
+.toolbar-actions .el-button--primary,
+.toolbar-actions .el-button--primary[text],
+.toolbar-actions .el-button--primary[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-primary) !important;
+  border-color: var(--el-color-primary) !important;
+}
+
+.toolbar-actions .el-button--danger,
+.toolbar-actions .el-button--danger[text],
+.toolbar-actions .el-button--danger[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-danger) !important;
+  border-color: var(--el-color-danger) !important;
+}
+
+.toolbar-actions .el-button--success,
+.toolbar-actions .el-button--success[text],
+.toolbar-actions .el-button--success[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-success) !important;
+  border-color: var(--el-color-success) !important;
+}
+
+.toolbar-actions .el-button .el-icon {
+  color: #ffffff !important;
+}
+
+/* 悬停时稍微浅一点 */
+.toolbar-actions .el-button--primary:hover,
+.toolbar-actions .el-button--primary[text]:hover,
+.toolbar-actions .el-button--primary[text][bg]:hover {
+  background-color: var(--el-color-primary-light-3) !important;
+  border-color: var(--el-color-primary-light-3) !important;
+  color: #ffffff !important;
+}
+
+.toolbar-actions .el-button--primary:hover .el-icon {
+  color: #ffffff !important;
+}
+
+.toolbar-actions .el-button--danger:hover,
+.toolbar-actions .el-button--danger[text]:hover,
+.toolbar-actions .el-button--danger[text][bg]:hover {
+  background-color: var(--el-color-danger-light-3) !important;
+  border-color: var(--el-color-danger-light-3) !important;
+  color: #ffffff !important;
+}
+
+.toolbar-actions .el-button--danger:hover .el-icon {
+  color: #ffffff !important;
+}
+
+.toolbar-actions .el-button--success:hover,
+.toolbar-actions .el-button--success[text]:hover,
+.toolbar-actions .el-button--success[text][bg]:hover {
+  background-color: var(--el-color-success-light-3) !important;
+  border-color: var(--el-color-success-light-3) !important;
+  color: #ffffff !important;
+}
+
+.toolbar-actions .el-button--success:hover .el-icon {
+  color: #ffffff !important;
 }
 
 .view-switch {
