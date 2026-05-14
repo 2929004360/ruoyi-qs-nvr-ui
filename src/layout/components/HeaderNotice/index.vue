@@ -161,8 +161,8 @@ function markAllRead(): void {
 
   .notice-badge {
     position: absolute;
-    top: 2px;
-    right: 2px;
+    top: -6px;
+    right: -8px;
     background: linear-gradient(135deg, #ff6b6b, #f56c6c);
     color: #fff;
     border-radius: 10px;
@@ -176,6 +176,7 @@ function markAllRead(): void {
     pointer-events: none;
     box-shadow: 0 2px 6px rgba(245, 108, 108, 0.35);
     animation: badgePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    z-index: 10;
   }
 }
 

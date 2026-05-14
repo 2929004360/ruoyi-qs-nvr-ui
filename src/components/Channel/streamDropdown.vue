@@ -1,6 +1,6 @@
 <template>
   <span>
-    <el-button type="primary" size="small" @click="dialogOpen = true">更多地址</el-button>
+    <div class="prepend-btn" @click="dialogOpen = true">更多地址</div>
     <el-dialog v-model="dialogOpen" title="所有播放地址" width="600px" append-to-body>
       <el-tabs v-model="activeTab" type="border-card">
         <el-tab-pane v-if="hasFlv" label="FLV" name="flv">
@@ -284,6 +284,11 @@ const copyUrl = async (url: string) => {
 </script>
 
 <style scoped>
+.no-radius-btn {
+  border-radius: 0 !important;
+  color: #ffffff !important;
+}
+
 .url-list {
   padding: 16px 4px;
 }
