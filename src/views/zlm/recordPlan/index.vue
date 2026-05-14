@@ -99,11 +99,19 @@
         </el-table-column>
         <el-table-column prop="createTime" label="创建时间" align="center"/>
         <el-table-column prop="updateTime" label="更新时间" align="center"/>
-        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="150">
+        <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="200">
           <template #default="scope">
-            <el-button type="text" @click="handleLink(scope.row)">关联设备</el-button>
-            <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
-            <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
+            <div class="table-actions">
+              <el-tooltip content="关联设备">
+                <el-button type="success" text bg size="small" icon="Link" @click="handleLink(scope.row)" />
+              </el-tooltip>
+              <el-tooltip content="修改">
+                <el-button type="primary" text bg size="small" icon="Edit" @click="handleUpdate(scope.row)" />
+              </el-tooltip>
+              <el-tooltip content="删除">
+                <el-button type="danger" text bg size="small" icon="Delete" @click="handleDelete(scope.row)" />
+              </el-tooltip>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -1103,6 +1111,91 @@ getList()
   padding: 8px 0;
 }
 
+/* ========== 表格操作按钮 ========== */
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+
+.table-actions .el-button {
+  padding: 7px 10px;
+  height: auto;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.table-actions .el-button:hover {
+  transform: scale(1.08);
+}
+
+/* 强制保持白色图标 */
+.table-actions .el-button .el-icon {
+  color: #ffffff !important;
+}
+
+.table-actions .el-button--primary,
+.table-actions .el-button--primary[text],
+.table-actions .el-button--primary[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-primary) !important;
+  border-color: var(--el-color-primary) !important;
+}
+
+.table-actions .el-button--success,
+.table-actions .el-button--success[text],
+.table-actions .el-button--success[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-success) !important;
+  border-color: var(--el-color-success) !important;
+}
+
+.table-actions .el-button--danger,
+.table-actions .el-button--danger[text],
+.table-actions .el-button--danger[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-danger) !important;
+  border-color: var(--el-color-danger) !important;
+}
+
+/* 悬停效果 - 保持白色图标 */
+.table-actions .el-button--primary:hover,
+.table-actions .el-button--primary[text]:hover,
+.table-actions .el-button--primary[text][bg]:hover {
+  background-color: var(--el-color-primary-light-3) !important;
+  border-color: var(--el-color-primary-light-3) !important;
+  color: #ffffff !important;
+}
+
+.table-actions .el-button--primary:hover .el-icon {
+  color: #ffffff !important;
+}
+
+.table-actions .el-button--success:hover,
+.table-actions .el-button--success[text]:hover,
+.table-actions .el-button--success[text][bg]:hover {
+  background-color: var(--el-color-success-light-3) !important;
+  border-color: var(--el-color-success-light-3) !important;
+  color: #ffffff !important;
+}
+
+.table-actions .el-button--success:hover .el-icon {
+  color: #ffffff !important;
+}
+
+.table-actions .el-button--danger:hover,
+.table-actions .el-button--danger[text]:hover,
+.table-actions .el-button--danger[text][bg]:hover {
+  background-color: var(--el-color-danger-light-3) !important;
+  border-color: var(--el-color-danger-light-3) !important;
+  color: #ffffff !important;
+}
+
+.table-actions .el-button--danger:hover .el-icon {
+  color: #ffffff !important;
+}
+
 /* 暗黑模式适配 */
 html.dark {
   .query-form {
@@ -1180,13 +1273,10 @@ html.dark {
     border-color: var(--el-border-color);
   }
 }
-</style>
 
-
-<style>
-/* ===== 玻璃对话框效果 ===== */
-.glass-dialog.record-plan-dialog .el-dialog,
-.glass-dialog.link-dialog .el-dialog {
+/* ========== 玻璃对话框效果 ========== */
+:deep(.glass-dialog.record-plan-dialog .el-dialog),
+:deep(.glass-dialog.link-dialog .el-dialog) {
   border-radius: 20px;
   background: var(--el-bg-color-page);
   backdrop-filter: blur(20px) saturate(1.3);
@@ -1209,15 +1299,15 @@ html.dark {
 }
 
 /* 头部 */
-.glass-dialog.record-plan-dialog .el-dialog__header,
-.glass-dialog.link-dialog .el-dialog__header {
+:deep(.glass-dialog.record-plan-dialog .el-dialog__header),
+:deep(.glass-dialog.link-dialog .el-dialog__header) {
   padding: 20px 24px 16px;
   margin-right: 0;
   border-bottom: 1px solid var(--el-border-color-lighter);
   position: relative;
 }
 
-.glass-dialog.record-plan-dialog .el-dialog__header::after {
+:deep(.glass-dialog.record-plan-dialog .el-dialog__header::after) {
   content: '';
   position: absolute;
   bottom: 0;
@@ -1229,16 +1319,16 @@ html.dark {
   opacity: 0.6;
 }
 
-.glass-dialog.record-plan-dialog .el-dialog__title,
-.glass-dialog.link-dialog .el-dialog__title {
+:deep(.glass-dialog.record-plan-dialog .el-dialog__title),
+:deep(.glass-dialog.link-dialog .el-dialog__title) {
   font-size: 16px;
   font-weight: 600;
   color: var(--el-text-color-primary);
   letter-spacing: 0.3px;
 }
 
-.glass-dialog.record-plan-dialog .el-dialog__headerbtn,
-.glass-dialog.link-dialog .el-dialog__headerbtn {
+:deep(.glass-dialog.record-plan-dialog .el-dialog__headerbtn),
+:deep(.glass-dialog.link-dialog .el-dialog__headerbtn) {
   top: 18px;
   right: 18px;
   width: 32px;
@@ -1247,47 +1337,47 @@ html.dark {
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.glass-dialog.record-plan-dialog .el-dialog__headerbtn .el-dialog__close,
-.glass-dialog.link-dialog .el-dialog__headerbtn .el-dialog__close {
+:deep(.glass-dialog.record-plan-dialog .el-dialog__headerbtn .el-dialog__close),
+:deep(.glass-dialog.link-dialog .el-dialog__headerbtn .el-dialog__close) {
   color: var(--el-text-color-secondary);
   font-size: 18px;
   transition: all 0.2s ease;
 }
 
-.glass-dialog.record-plan-dialog .el-dialog__headerbtn:hover,
-.glass-dialog.link-dialog .el-dialog__headerbtn:hover {
+:deep(.glass-dialog.record-plan-dialog .el-dialog__headerbtn:hover),
+:deep(.glass-dialog.link-dialog .el-dialog__headerbtn:hover) {
   background: var(--el-fill-color-light);
   transform: rotate(90deg) scale(1.1);
 }
 
-.glass-dialog.record-plan-dialog .el-dialog__headerbtn:hover .el-dialog__close,
-.glass-dialog.link-dialog .el-dialog__headerbtn:hover .el-dialog__close {
+:deep(.glass-dialog.record-plan-dialog .el-dialog__headerbtn:hover .el-dialog__close),
+:deep(.glass-dialog.link-dialog .el-dialog__headerbtn:hover .el-dialog__close) {
   color: var(--el-color-primary);
 }
 
 /* 内容区 */
-.glass-dialog.record-plan-dialog .el-dialog__body {
+:deep(.glass-dialog.record-plan-dialog .el-dialog__body) {
   padding: 24px;
 }
 
-.glass-dialog.link-dialog .el-dialog__body {
+:deep(.glass-dialog.link-dialog .el-dialog__body) {
   padding: 20px 24px;
 }
 
 /* 底部 */
-.glass-dialog.record-plan-dialog .el-dialog__footer,
-.glass-dialog.link-dialog .el-dialog__footer {
+:deep(.glass-dialog.record-plan-dialog .el-dialog__footer),
+:deep(.glass-dialog.link-dialog .el-dialog__footer) {
   padding: 16px 24px 20px;
   border-top: 1px solid var(--el-border-color-lighter);
 }
 
 /* 表单内容 stagger 入场动画 */
-.glass-dialog.record-plan-dialog .el-form-item {
+:deep(.glass-dialog.record-plan-dialog .el-form-item) {
   animation: formItemEnter 0.35s ease-out backwards;
 }
-.glass-dialog.record-plan-dialog .el-form-item:nth-child(1) { animation-delay: 0.06s; }
-.glass-dialog.record-plan-dialog .el-form-item:nth-child(2) { animation-delay: 0.12s; }
-.glass-dialog.record-plan-dialog .el-form-item:nth-child(3) { animation-delay: 0.18s; }
+:deep(.glass-dialog.record-plan-dialog .el-form-item:nth-child(1)) { animation-delay: 0.06s; }
+:deep(.glass-dialog.record-plan-dialog .el-form-item:nth-child(2)) { animation-delay: 0.12s; }
+:deep(.glass-dialog.record-plan-dialog .el-form-item:nth-child(3)) { animation-delay: 0.18s; }
 
 @keyframes formItemEnter {
   from {
@@ -1301,47 +1391,47 @@ html.dark {
 }
 
 /* 按钮效果 */
-.glass-dialog.record-plan-dialog .dialog-footer .el-button,
-.glass-dialog.link-dialog .dialog-footer .el-button {
+:deep(.glass-dialog.record-plan-dialog .dialog-footer .el-button),
+:deep(.glass-dialog.link-dialog .dialog-footer .el-button) {
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   min-width: 80px;
 }
 
-.glass-dialog.record-plan-dialog .dialog-footer .el-button:hover,
-.glass-dialog.link-dialog .dialog-footer .el-button:hover {
+:deep(.glass-dialog.record-plan-dialog .dialog-footer .el-button:hover),
+:deep(.glass-dialog.link-dialog .dialog-footer .el-button:hover) {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(var(--el-color-primary-rgb), 0.25);
 }
 
-.glass-dialog.record-plan-dialog .dialog-footer .el-button:active,
-.glass-dialog.link-dialog .dialog-footer .el-button:active {
+:deep(.glass-dialog.record-plan-dialog .dialog-footer .el-button:active),
+:deep(.glass-dialog.link-dialog .dialog-footer .el-button:active) {
   transform: translateY(0) scale(0.97);
 }
 
-/* ===== 暗黑模式 ===== */
-html.dark .glass-dialog.record-plan-dialog .el-dialog,
-html.dark .glass-dialog.link-dialog .el-dialog {
+/* ========== 暗黑模式对话框 ========== */
+html.dark :deep(.glass-dialog.record-plan-dialog .el-dialog),
+html.dark :deep(.glass-dialog.link-dialog .el-dialog) {
   background: var(--el-bg-color-page);
   border-color: var(--el-border-color);
   box-shadow: var(--el-box-shadow-dark);
 }
 
-html.dark .glass-dialog.record-plan-dialog .el-dialog__header,
-html.dark .glass-dialog.link-dialog .el-dialog__header {
+html.dark :deep(.glass-dialog.record-plan-dialog .el-dialog__header),
+html.dark :deep(.glass-dialog.link-dialog .el-dialog__header) {
   border-bottom-color: var(--el-border-color);
 }
 
-html.dark .glass-dialog.record-plan-dialog .el-dialog__header::after {
+html.dark :deep(.glass-dialog.record-plan-dialog .el-dialog__header::after) {
   opacity: 0.8;
 }
 
-html.dark .glass-dialog.record-plan-dialog .el-dialog__footer,
-html.dark .glass-dialog.link-dialog .el-dialog__footer {
+html.dark :deep(.glass-dialog.record-plan-dialog .el-dialog__footer),
+html.dark :deep(.glass-dialog.link-dialog .el-dialog__footer) {
   border-top-color: var(--el-border-color);
 }
 
-html.dark .glass-dialog.record-plan-dialog .el-dialog__headerbtn:hover,
-html.dark .glass-dialog.link-dialog .el-dialog__headerbtn:hover {
+html.dark :deep(.glass-dialog.record-plan-dialog .el-dialog__headerbtn:hover),
+html.dark :deep(.glass-dialog.link-dialog .el-dialog__headerbtn:hover) {
   background: var(--el-fill-color);
 }
 </style>

@@ -113,13 +113,30 @@
             <span>{{ parseTime(scope.row.createTime) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center" width="220" class-name="small-padding fixed-width" fixed="right">
-          <template #default="scope">
-            <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">修改</el-button>
-            <el-button link type="primary" icon="Connection" @click="handleAssociated(scope.row)">关联通道</el-button>
-            <el-button link type="danger" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
-          </template>
-        </el-table-column>
+        <el-table-column label="操作" align="center" width="350" class-name="small-padding fixed-width" fixed="right">
+               <template #default="scope">
+                  <div class="table-actions">
+                     <el-tooltip content="修改">
+                        <el-button type="primary" text bg size="small" icon="Edit" @click="handleUpdate(scope.row)"></el-button>
+                     </el-tooltip>
+                     <el-tooltip content="关联通道">
+                        <el-button type="success" text bg size="small" icon="Connection" @click="handleAssociated(scope.row)"></el-button>
+                     </el-tooltip>
+                     <el-tooltip v-if="scope.row.status === 0" content="上线">
+                        <el-button type="primary" text bg size="small" icon="Connection" @click="handleRegister(scope.row)"></el-button>
+                     </el-tooltip>
+                     <el-tooltip v-if="scope.row.status === 1" content="注销">
+                        <el-button type="warning" text bg size="small" icon="SwitchButton" @click="handleUnregister(scope.row)"></el-button>
+                     </el-tooltip>
+                     <el-tooltip v-if="scope.row.status === 1" content="推送通道">
+                        <el-button type="info" text bg size="small" icon="Upload" @click="handlePushCatalog(scope.row)"></el-button>
+                     </el-tooltip>
+                     <el-tooltip content="删除">
+                        <el-button type="danger" text bg size="small" icon="Delete" @click="handleDelete(scope.row)"></el-button>
+                     </el-tooltip>
+                  </div>
+               </template>
+            </el-table-column>
       </el-table>
     </div>
 
@@ -371,7 +388,7 @@
 </template>
 
 <script setup name="Platform">
-import {listPlatform, getPlatform, delPlatform, addPlatform, updatePlatform} from "@/api/qs/platform";
+import {listPlatform, getPlatform, delPlatform, addPlatform, updatePlatform, unregisterPlatform, registerPlatform, pushCatalog} from "@/api/qs/platform";
 import AssociatedChannel from "./associatedChannel.vue";
 import {
   Monitor,
@@ -381,7 +398,9 @@ import {
   Location,
   User,
   Key,
-  Position
+  Position,
+  SwitchButton,
+  Upload
 } from "@element-plus/icons-vue";
 
 const {proxy} = getCurrentInstance();
@@ -531,6 +550,35 @@ function handleDelete(row) {
   }).then(() => {
     getList();
     proxy.$modal.msgSuccess("删除成功");
+  }).catch(() => {
+  });
+}
+
+function handleRegister(row) {
+  proxy.$modal.confirm('是否确认上线平台"' + row.name + '"？').then(() => {
+    return registerPlatform(row.id);
+  }).then(() => {
+    getList();
+    proxy.$modal.msgSuccess("上线成功");
+  }).catch(() => {
+  });
+}
+
+function handleUnregister(row) {
+  proxy.$modal.confirm('是否确认注销平台"' + row.name + '"？').then(() => {
+    return unregisterPlatform(row.id);
+  }).then(() => {
+    getList();
+    proxy.$modal.msgSuccess("注销成功");
+  }).catch(() => {
+  });
+}
+
+function handlePushCatalog(row) {
+  proxy.$modal.confirm('是否确认推送通道到平台"' + row.name + '"？').then(() => {
+    return pushCatalog(row.id);
+  }).then(() => {
+    proxy.$modal.msgSuccess("推送成功");
   }).catch(() => {
   });
 }
@@ -788,10 +836,70 @@ onMounted(() => {
 }
 
 :deep(.el-pager li.is-active) {
-    box-shadow: 0 2px 8px var(--el-color-primary-light-5);
-  }
+  box-shadow: 0 2px 8px var(--el-color-primary-light-5);
+}
 
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
 
+.table-actions .el-button {
+  padding: 7px 10px;
+  height: auto;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.table-actions .el-button:hover {
+  transform: scale(1.08);
+}
+
+.table-actions .el-button .el-icon {
+  color: #ffffff !important;
+}
+
+.table-actions .el-button--primary,
+.table-actions .el-button--primary[text],
+.table-actions .el-button--primary[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-primary) !important;
+  border-color: var(--el-color-primary) !important;
+}
+
+.table-actions .el-button--danger,
+.table-actions .el-button--danger[text],
+.table-actions .el-button--danger[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-danger) !important;
+  border-color: var(--el-color-danger) !important;
+}
+
+.table-actions .el-button--success,
+.table-actions .el-button--success[text],
+.table-actions .el-button--success[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-success) !important;
+  border-color: var(--el-color-success) !important;
+}
+
+.table-actions .el-button--warning,
+.table-actions .el-button--warning[text],
+.table-actions .el-button--warning[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-warning) !important;
+  border-color: var(--el-color-warning) !important;
+}
+
+.table-actions .el-button--info,
+.table-actions .el-button--info[text],
+.table-actions .el-button--info[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-info) !important;
+  border-color: var(--el-color-info) !important;
+}
 
   .input-suffix {
     color: var(--el-text-color-secondary);

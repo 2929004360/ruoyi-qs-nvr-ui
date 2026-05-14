@@ -125,3 +125,24 @@ export function unlinkDevice(data: PlatformChannelLinkRequest): Promise<AjaxResu
     data: data
   })
 }
+
+export function registerPlatform(id: number): Promise<AjaxResult> {
+  return request({
+    url: '/qs/platform/cascade/start/' + id,
+    method: 'post'
+  })
+}
+
+export function unregisterPlatform(id: number): Promise<AjaxResult> {
+  return request({
+    url: '/qs/platform/cascade/stop/' + id,
+    method: 'post'
+  })
+}
+
+export function pushCatalog(id: number): Promise<AjaxResult> {
+  return request({
+    url: '/qs/platform/cascade/pushCatalog/' + id,
+    method: 'post'
+  })
+}

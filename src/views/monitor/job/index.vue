@@ -127,20 +127,54 @@
             ></el-switch>
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center" width="200" class-name="small-padding fixed-width" fixed="right">
+        <el-table-column label="操作" align="center" width="280" class-name="small-padding fixed-width" fixed="right">
           <template #default="scope">
-            <el-tooltip content="修改" placement="top">
-               <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['monitor:job:edit']"></el-button>
-            </el-tooltip>
-            <el-tooltip content="删除" placement="top">
-               <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['monitor:job:remove']"></el-button>
-            </el-tooltip>
-            <el-tooltip content="执行一次" placement="top">
-               <el-button link type="primary" icon="CaretRight" @click="handleRun(scope.row)" v-hasPermi="['monitor:job:changeStatus']"></el-button>
-            </el-tooltip>
-            <el-tooltip content="调度日志" placement="top">
-               <el-button link type="primary" icon="Operation" @click="handleJobLog(scope.row)" v-hasPermi="['monitor:job:query']"></el-button>
-            </el-tooltip>
+            <div class="table-actions">
+              <el-tooltip content="修改" placement="top">
+                <el-button
+                  type="primary"
+                  text
+                  bg
+                  size="small"
+                  icon="Edit"
+                  @click="handleUpdate(scope.row)"
+                  v-hasPermi="['monitor:job:edit']"
+                />
+              </el-tooltip>
+              <el-tooltip content="执行一次" placement="top">
+                <el-button
+                  type="success"
+                  text
+                  bg
+                  size="small"
+                  icon="CaretRight"
+                  @click="handleRun(scope.row)"
+                  v-hasPermi="['monitor:job:changeStatus']"
+                />
+              </el-tooltip>
+              <el-tooltip content="调度日志" placement="top">
+                <el-button
+                  type="warning"
+                  text
+                  bg
+                  size="small"
+                  icon="Operation"
+                  @click="handleJobLog(scope.row)"
+                  v-hasPermi="['monitor:job:query']"
+                />
+              </el-tooltip>
+              <el-tooltip content="删除" placement="top">
+                <el-button
+                  type="danger"
+                  text
+                  bg
+                  size="small"
+                  icon="Delete"
+                  @click="handleDelete(scope.row)"
+                  v-hasPermi="['monitor:job:remove']"
+                />
+              </el-tooltip>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -654,6 +688,62 @@ getList()
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+/* 表格操作按钮 */
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+
+.table-actions .el-button {
+  padding: 7px 10px;
+  height: auto;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.table-actions .el-button:hover {
+  transform: scale(1.08);
+}
+
+/* 强制保持白色图标 */
+.table-actions .el-button .el-icon {
+  color: #ffffff !important;
+}
+
+.table-actions .el-button--primary,
+.table-actions .el-button--primary[text],
+.table-actions .el-button--primary[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-primary) !important;
+  border-color: var(--el-color-primary) !important;
+}
+
+.table-actions .el-button--success,
+.table-actions .el-button--success[text],
+.table-actions .el-button--success[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-success) !important;
+  border-color: var(--el-color-success) !important;
+}
+
+.table-actions .el-button--warning,
+.table-actions .el-button--warning[text],
+.table-actions .el-button--warning[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-warning) !important;
+  border-color: var(--el-color-warning) !important;
+}
+
+.table-actions .el-button--danger,
+.table-actions .el-button--danger[text],
+.table-actions .el-button--danger[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-danger) !important;
+  border-color: var(--el-color-danger) !important;
 }
 
 .id-badge {

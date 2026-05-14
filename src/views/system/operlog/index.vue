@@ -153,7 +153,11 @@
         </el-table-column>
         <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="100" fixed="right">
           <template #default="scope">
-            <el-button link type="primary" icon="View" @click="handleDetail(scope.row, scope.index)" v-hasPermi="['system:operlog:query']">详细</el-button>
+            <div class="table-actions">
+              <el-tooltip content="详细">
+                <el-button type="primary" text bg size="small" icon="View" @click="handleDetail(scope.row, scope.index)" v-hasPermi="['system:operlog:query']"></el-button>
+              </el-tooltip>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -522,4 +526,35 @@ getList()
 :deep(.el-pager li.is-active) {
   box-shadow: 0 2px 8px var(--el-color-primary-light-5);
 }
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+
+.table-actions .el-button {
+  padding: 7px 10px;
+  height: auto;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.table-actions .el-button:hover {
+  transform: scale(1.08);
+}
+
+.table-actions .el-button .el-icon {
+  color: #ffffff !important;
+}
+
+.table-actions .el-button--primary,
+.table-actions .el-button--primary[text],
+.table-actions .el-button--primary[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-primary) !important;
+  border-color: var(--el-color-primary) !important;
+}
+
 </style>

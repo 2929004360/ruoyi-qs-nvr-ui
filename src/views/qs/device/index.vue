@@ -157,40 +157,79 @@
       <el-table-column label="备注" align="center" prop="remark" width="180"/>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="360" fixed="right">
         <template #default="scope">
-          <el-button link
-                     type="primary"
-                     icon="VideoPlay"
-                     @click="handlePlay(scope.row)"
-                     :loading="scope.row.loading"
-                     v-if="scope.row.deviceStatus === 'ON'"
-          >
-            播放
-          </el-button>
-          <el-button link
-                     v-if="scope.row.streamStatus === '1' && scope.row.type !== '13'"
-                     type="danger"
-                     icon="SwitchButton"
-                     @click="handleStopPlay(scope.row)"
-          >
-            停止
-          </el-button>
-          <el-button link type="primary"
-                     icon="Position"
-                     @click="handleAccessAddress(scope.row)"
-                     v-if="scope.row.type === '13'">
-            接入地址
-          </el-button>
-          <el-button link type="primary" icon="VideoCamera" @click="handleCloudRecord(scope.row)">
-            云端录像
-          </el-button>
-          <el-button link type="primary" icon="Monitor" @click="handleDeviceRecord(scope.row)" v-if="!['1', '2', '3', '4', '6', '13'].includes(scope.row.type)">
-            设备录像
-          </el-button>
-          <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)">
-            修改
-          </el-button>
-          <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)">删除
-          </el-button>
+          <div class="table-actions">
+            <el-tooltip content="播放" v-if="scope.row.deviceStatus === 'ON'">
+              <el-button
+                type="primary"
+                text
+                bg
+                size="small"
+                icon="VideoPlay"
+                @click="handlePlay(scope.row)"
+                :loading="scope.row.loading"
+              />
+            </el-tooltip>
+            <el-tooltip content="停止" v-if="scope.row.streamStatus === '1' && scope.row.type !== '13'">
+              <el-button
+                type="danger"
+                text
+                bg
+                size="small"
+                icon="SwitchButton"
+                @click="handleStopPlay(scope.row)"
+              />
+            </el-tooltip>
+            <el-tooltip content="接入地址" v-if="scope.row.type === '13'">
+              <el-button
+                type="primary"
+                text
+                bg
+                size="small"
+                icon="Position"
+                @click="handleAccessAddress(scope.row)"
+              />
+            </el-tooltip>
+            <el-tooltip content="云端录像">
+              <el-button
+                type="success"
+                text
+                bg
+                size="small"
+                icon="VideoCamera"
+                @click="handleCloudRecord(scope.row)"
+              />
+            </el-tooltip>
+            <el-tooltip content="设备录像" v-if="!['1', '2', '3', '4', '6', '13'].includes(scope.row.type)">
+              <el-button
+                type="info"
+                text
+                bg
+                size="small"
+                icon="Monitor"
+                @click="handleDeviceRecord(scope.row)"
+              />
+            </el-tooltip>
+            <el-tooltip content="修改">
+              <el-button
+                type="primary"
+                text
+                bg
+                size="small"
+                icon="Edit"
+                @click="handleUpdate(scope.row)"
+              />
+            </el-tooltip>
+            <el-tooltip content="删除">
+              <el-button
+                type="danger"
+                text
+                bg
+                size="small"
+                icon="Delete"
+                @click="handleDelete(scope.row)"
+              />
+            </el-tooltip>
+          </div>
         </template>
       </el-table-column>
       </el-table>
@@ -4557,6 +4596,61 @@ html.dark {
 
 .expand-toggle .el-icon {
   transition: transform 0.3s ease;
+}
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.table-actions .el-button {
+  padding: 7px 10px;
+  height: auto;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.table-actions .el-button:hover {
+  transform: scale(1.08);
+}
+
+.table-actions .el-button .el-icon {
+  color: #ffffff !important;
+}
+
+.table-actions .el-button--primary,
+.table-actions .el-button--primary[text],
+.table-actions .el-button--primary[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-primary) !important;
+  border-color: var(--el-color-primary) !important;
+}
+
+.table-actions .el-button--success,
+.table-actions .el-button--success[text],
+.table-actions .el-button--success[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-success) !important;
+  border-color: var(--el-color-success) !important;
+}
+
+.table-actions .el-button--danger,
+.table-actions .el-button--danger[text],
+.table-actions .el-button--danger[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-danger) !important;
+  border-color: var(--el-color-danger) !important;
+}
+
+.table-actions .el-button--info,
+.table-actions .el-button--info[text],
+.table-actions .el-button--info[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-info) !important;
+  border-color: var(--el-color-info) !important;
 }
 
 /* ===== 高级配置区域样式 ===== */

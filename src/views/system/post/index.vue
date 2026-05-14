@@ -109,8 +109,14 @@
             </el-table-column>
             <el-table-column label="操作" width="180" align="center" class-name="small-padding fixed-width" fixed="right">
                <template #default="scope">
-                  <el-button link type="primary" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['system:post:edit']">修改</el-button>
-                  <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['system:post:remove']">删除</el-button>
+                  <div class="table-actions">
+                     <el-tooltip content="修改">
+                        <el-button type="primary" text bg size="small" icon="Edit" @click="handleUpdate(scope.row)" v-hasPermi="['system:post:edit']"></el-button>
+                     </el-tooltip>
+                     <el-tooltip content="删除">
+                        <el-button type="danger" text bg size="small" icon="Delete" @click="handleDelete(scope.row)" v-hasPermi="['system:post:remove']"></el-button>
+                     </el-tooltip>
+                  </div>
                </template>
             </el-table-column>
          </el-table>
@@ -551,5 +557,43 @@ getList()
 
 :deep(.el-pager li.is-active) {
   box-shadow: 0 2px 8px var(--el-color-primary-light-5);
+}
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+
+.table-actions .el-button {
+  padding: 7px 10px;
+  height: auto;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.table-actions .el-button:hover {
+  transform: scale(1.08);
+}
+
+.table-actions .el-button .el-icon {
+  color: #ffffff !important;
+}
+
+.table-actions .el-button--primary,
+.table-actions .el-button--primary[text],
+.table-actions .el-button--primary[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-primary) !important;
+  border-color: var(--el-color-primary) !important;
+}
+
+.table-actions .el-button--danger,
+.table-actions .el-button--danger[text],
+.table-actions .el-button--danger[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-danger) !important;
+  border-color: var(--el-color-danger) !important;
 }
 </style>

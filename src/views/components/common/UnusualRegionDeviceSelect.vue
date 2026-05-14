@@ -125,7 +125,11 @@
             </el-table-column>
             <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="100" fixed="right">
               <template #default="scope">
-                <el-button link type="primary" icon="Delete" @click="handleDelete(scope.row)" class="delete-link-btn">删除</el-button>
+                <div class="table-actions">
+                  <el-tooltip content="删除">
+                    <el-button type="danger" text bg size="small" icon="Delete" @click="handleDelete(scope.row)"></el-button>
+                  </el-tooltip>
+                </div>
               </template>
             </el-table-column>
           </el-table>
@@ -483,13 +487,40 @@ function openDialog() {
 }
 
 /* 操作按钮 */
-.delete-link-btn {
-  transition: all 0.3s;
-
-  &:hover:not(:disabled) {
-    transform: scale(1.05);
-  }
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
 }
+.table-actions .el-button {
+  padding: 7px 10px;
+  height: auto;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+.table-actions .el-button:hover {
+  transform: scale(1.08);
+}
+/* 强制保持白色图标 */
+.table-actions .el-button .el-icon {
+  color: #ffffff !important;
+}
+.table-actions .el-button--primary,
+.table-actions .el-button--primary[text],
+.table-actions .el-button--primary[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-primary) !important;
+  border-color: var(--el-color-primary) !important;
+}
+.table-actions .el-button--danger,
+.table-actions .el-button--danger[text],
+.table-actions .el-button--danger[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-danger) !important;
+  border-color: var(--el-color-danger) !important;
+}
+
 
 /* ========== 分页 ========== */
 .custom-pagination {

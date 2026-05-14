@@ -136,16 +136,39 @@
         </el-table-column>
         <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="200" fixed="right">
           <template #default="scope">
-            <el-button link
-                       type="primary"
-                       icon="VideoPlay"
-                       @click="handlePlay(scope.row)"
-                       :loading="scope.row.loading"
-                >
-              播放
-            </el-button>
-            <el-button link type="success" icon="Download" @click="downloadZip(scope.row)">下载</el-button>
-            <el-button link type="danger" icon="Delete" @click="handleDelete(scope.row)">删除</el-button>
+            <div class="table-actions">
+              <el-tooltip content="播放">
+                <el-button
+                  type="primary"
+                  text
+                  bg
+                  size="small"
+                  icon="VideoPlay"
+                  @click="handlePlay(scope.row)"
+                  :loading="scope.row.loading"
+                />
+              </el-tooltip>
+              <el-tooltip content="下载">
+                <el-button
+                  type="success"
+                  text
+                  bg
+                  size="small"
+                  icon="Download"
+                  @click="downloadZip(scope.row)"
+                />
+              </el-tooltip>
+              <el-tooltip content="删除">
+                <el-button
+                  type="danger"
+                  text
+                  bg
+                  size="small"
+                  icon="Delete"
+                  @click="handleDelete(scope.row)"
+                />
+              </el-tooltip>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -1831,5 +1854,112 @@ html.dark {
 
 :deep(.el-table__body-wrapper::-webkit-scrollbar-track) {
   background: transparent;
+}
+
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+
+.table-actions .el-button {
+  padding: 7px 10px;
+  height: auto;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.table-actions .el-button:hover {
+  transform: scale(1.08);
+}
+
+.table-actions .el-button .el-icon {
+  color: #ffffff !important;
+}
+
+.table-actions .el-button--primary,
+.table-actions .el-button--primary[text],
+.table-actions .el-button--primary[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-primary) !important;
+  border-color: var(--el-color-primary) !important;
+}
+
+.table-actions .el-button--success,
+.table-actions .el-button--success[text],
+.table-actions .el-button--success[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-success) !important;
+  border-color: var(--el-color-success) !important;
+}
+
+.table-actions .el-button--danger,
+.table-actions .el-button--danger[text],
+.table-actions .el-button--danger[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-danger) !important;
+  border-color: var(--el-color-danger) !important;
+}
+
+/* 悬停效果 - 保持白色图标 */
+.table-actions .el-button--primary:hover,
+.table-actions .el-button--primary[text]:hover,
+.table-actions .el-button--primary[text][bg]:hover {
+  background-color: var(--el-color-primary-light-3) !important;
+  border-color: var(--el-color-primary-light-3) !important;
+  color: #ffffff !important;
+}
+
+.table-actions .el-button--primary:hover .el-icon {
+  color: #ffffff !important;
+}
+
+.table-actions .el-button--success:hover,
+.table-actions .el-button--success[text]:hover,
+.table-actions .el-button--success[text][bg]:hover {
+  background-color: var(--el-color-success-light-3) !important;
+  border-color: var(--el-color-success-light-3) !important;
+  color: #ffffff !important;
+}
+
+.table-actions .el-button--success:hover .el-icon {
+  color: #ffffff !important;
+}
+
+.table-actions .el-button--danger:hover,
+.table-actions .el-button--danger[text]:hover,
+.table-actions .el-button--danger[text][bg]:hover {
+  background-color: var(--el-color-danger-light-3) !important;
+  border-color: var(--el-color-danger-light-3) !important;
+  color: #ffffff !important;
+}
+
+.table-actions .el-button--danger:hover .el-icon {
+  color: #ffffff !important;
+}
+
+.table-actions .el-button--primary,
+.table-actions .el-button--primary[text],
+.table-actions .el-button--primary[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-primary) !important;
+  border-color: var(--el-color-primary) !important;
+}
+
+.table-actions .el-button--success,
+.table-actions .el-button--success[text],
+.table-actions .el-button--success[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-success) !important;
+  border-color: var(--el-color-success) !important;
+}
+
+.table-actions .el-button--danger,
+.table-actions .el-button--danger[text],
+.table-actions .el-button--danger[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-danger) !important;
+  border-color: var(--el-color-danger) !important;
 }
 </style>

@@ -74,10 +74,14 @@
             </template>
          </el-table-column>
          <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-            <template #default="scope">
-               <el-button link type="primary" icon="CircleClose" @click="cancelAuthUser(scope.row)" v-hasPermi="['system:role:remove']">取消授权</el-button>
-            </template>
-         </el-table-column>
+              <template #default="scope">
+                <div class="table-actions">
+                  <el-tooltip content="取消授权">
+                    <el-button type="danger" text bg size="small" icon="CircleClose" @click="cancelAuthUser(scope.row)" v-hasPermi="['system:role:remove']"></el-button>
+                  </el-tooltip>
+                </div>
+              </template>
+            </el-table-column>
       </el-table>
 
       <pagination
@@ -178,3 +182,20 @@ function cancelAuthUserAll() {
 
 getList()
 </script>
+
+<style lang="scss" scoped>
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+.table-actions .el-button {
+  padding: 7px 10px;
+  height: auto;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+.table-actions .el-button:hover { transform: scale(1.08); }
+.table-actions .el-button .el-icon { color: #ffffff !important; }
+</style>

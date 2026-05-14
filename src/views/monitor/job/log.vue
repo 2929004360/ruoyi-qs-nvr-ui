@@ -133,9 +133,21 @@
             <span>{{ parseTime(scope.row.createTime) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center" width="100" class-name="small-padding fixed-width" fixed="right">
+        <el-table-column label="操作" align="center" width="120" class-name="small-padding fixed-width" fixed="right">
           <template #default="scope">
-            <el-button link type="primary" icon="View" @click="handleView(scope.row)" v-hasPermi="['monitor:job:query']">详细</el-button>
+            <div class="table-actions">
+              <el-tooltip content="详细">
+                <el-button
+                  type="primary"
+                  text
+                  bg
+                  size="small"
+                  icon="View"
+                  @click="handleView(scope.row)"
+                  v-hasPermi="['monitor:job:query']"
+                />
+              </el-tooltip>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -471,6 +483,38 @@ function handleExport() {
     opacity: 1;
     transform: translateX(0);
   }
+}
+
+/* 表格操作按钮 */
+.table-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
+}
+
+.table-actions .el-button {
+  padding: 7px 10px;
+  height: auto;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.table-actions .el-button:hover {
+  transform: scale(1.08);
+}
+
+/* 强制保持白色图标 */
+.table-actions .el-button .el-icon {
+  color: #ffffff !important;
+}
+
+.table-actions .el-button--primary,
+.table-actions .el-button--primary[text],
+.table-actions .el-button--primary[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-primary) !important;
+  border-color: var(--el-color-primary) !important;
 }
 
 .id-badge {
