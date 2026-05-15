@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <div class="search-box">
-      <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px" class="query-form">
+      <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="130px" class="query-form">
         <el-form-item label="平台名称" prop="name">
           <el-input
             v-model="queryParams.name"
@@ -19,15 +19,9 @@
           />
         </el-form-item>
         <el-form-item label="状态" prop="status">
-          <el-select v-model="queryParams.status" placeholder="请选择状态" clearable style="width: 240px">
+          <el-select v-model="queryParams.status" placeholder="请选择状态" clearable style="width: 250px;">
             <el-option label="离线" :value="0"/>
             <el-option label="在线" :value="1"/>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="启用状态" prop="enable">
-          <el-select v-model="queryParams.enable" placeholder="请选择启用状态" clearable style="width: 240px">
-            <el-option label="禁用" :value="0"/>
-            <el-option label="启用" :value="1"/>
           </el-select>
         </el-form-item>
         <el-form-item class="form-actions">
@@ -71,11 +65,11 @@
           >删除
           </el-button>
         </el-col>
-        <right-toolbar v-model:showSearch="showSearch" @queryTable="getList"></right-toolbar>
+        <right-toolbar v-model:showSearch="showSearch" v-model:viewMode="viewMode" :showViewSwitch="true" @queryTable="getList"/>
       </el-row>
     </div>
 
-    <div class="table-wrapper">
+    <div v-if="viewMode === 'list'" class="table-wrapper">
       <el-table
         v-loading="loading"
         :data="platformList"
@@ -90,15 +84,18 @@
           </template>
         </el-table-column>
         <el-table-column label="平台名称" align="center" prop="name" min-width="150" fixed/>
-        <el-table-column label="国标编码" align="center" prop="serverGbId" min-width="150" :show-overflow-tooltip="true"/>
-        <el-table-column label="服务器IP" align="center" prop="serverIp" width="140"/>
+        <el-table-column label="国标编码" align="center" prop="serverGbId" min-width="180" :show-overflow-tooltip="true"/>
+        <el-table-column label="服务器IP" align="center" prop="serverIp" width="150"/>
         <el-table-column label="服务器端口" align="center" prop="serverPort" width="100"/>
         <el-table-column label="传输协议" align="center" prop="transport" width="100"/>
         <el-table-column label="启用状态" align="center" prop="enable" width="100">
           <template #default="scope">
-            <el-tag :type="scope.row.enable === 1 ? 'success' : 'info'">
-              {{ scope.row.enable === 1 ? '启用' : '禁用' }}
-            </el-tag>
+            <el-switch
+              v-model="scope.row.enable"
+              :active-value="1"
+              :inactive-value="0"
+              @change="handleEnableChange(scope.row)"
+            />
           </template>
         </el-table-column>
         <el-table-column label="在线状态" align="center" prop="status" width="100">
@@ -108,36 +105,146 @@
             </el-tag>
           </template>
         </el-table-column>
+        <el-table-column label="关联设备" align="center" prop="deviceCount" width="110">
+          <template #default="scope">
+            <el-tag type="info" effect="plain">{{ scope.row.deviceCount || 0 }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column label="创建时间" align="center" prop="createTime" width="180">
           <template #default="scope">
             <span>{{ parseTime(scope.row.createTime) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="操作" align="center" width="350" class-name="small-padding fixed-width" fixed="right">
-               <template #default="scope">
-                  <div class="table-actions">
-                     <el-tooltip content="修改">
-                        <el-button type="primary" text bg size="small" icon="Edit" @click="handleUpdate(scope.row)"></el-button>
-                     </el-tooltip>
-                     <el-tooltip content="关联通道">
-                        <el-button type="success" text bg size="small" icon="Connection" @click="handleAssociated(scope.row)"></el-button>
-                     </el-tooltip>
-                     <el-tooltip v-if="scope.row.status === 0" content="上线">
-                        <el-button type="primary" text bg size="small" icon="Connection" @click="handleRegister(scope.row)"></el-button>
-                     </el-tooltip>
-                     <el-tooltip v-if="scope.row.status === 1" content="注销">
-                        <el-button type="warning" text bg size="small" icon="SwitchButton" @click="handleUnregister(scope.row)"></el-button>
-                     </el-tooltip>
-                     <el-tooltip v-if="scope.row.status === 1" content="推送通道">
-                        <el-button type="info" text bg size="small" icon="Upload" @click="handlePushCatalog(scope.row)"></el-button>
-                     </el-tooltip>
-                     <el-tooltip content="删除">
-                        <el-button type="danger" text bg size="small" icon="Delete" @click="handleDelete(scope.row)"></el-button>
-                     </el-tooltip>
-                  </div>
-               </template>
-            </el-table-column>
+        <el-table-column label="操作" align="center" width="380" class-name="small-padding fixed-width fixed-right">
+          <template #default="scope">
+            <div class="table-actions">
+                <el-tooltip content="修改">
+                  <el-button type="primary" text bg size="small" icon="Edit" @click="handleUpdate(scope.row)"/>
+                </el-tooltip>
+                <el-tooltip content="关联通道">
+                  <el-button type="success" text bg size="small" icon="Connection" @click="handleAssociated(scope.row)"/>
+                </el-tooltip>
+                <template v-if="scope.row.enable === 1">
+                  <el-tooltip v-if="scope.row.status === 0" content="上线">
+                    <el-button type="primary" text bg size="small" icon="Connection" @click="handleRegister(scope.row)"/>
+                  </el-tooltip>
+                  <el-tooltip v-if="scope.row.status === 1" content="注销">
+                    <el-button type="warning" text bg size="small" icon="SwitchButton" @click="handleUnregister(scope.row)"/>
+                  </el-tooltip>
+                  <el-tooltip v-if="scope.row.status === 1" content="推送通道">
+                    <el-button type="info" text bg size="small" icon="Upload" @click="handlePushCatalog(scope.row)"/>
+                  </el-tooltip>
+                </template>
+                <el-tooltip content="删除">
+                  <el-button type="danger" text bg size="small" icon="Delete" @click="handleDelete(scope.row)"/>
+                </el-tooltip>
+              </div>
+          </template>
+        </el-table-column>
       </el-table>
+    </div>
+
+    <div v-else class="card-view" v-loading="loading">
+      <el-row :gutter="16">
+        <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6" v-for="item in platformList" :key="item.id">
+          <div class="platform-card" :class="{ 'is-selected': item.checked, 'is-online': item.status === 1 }">
+            <div class="card-header">
+              <div class="header-left">
+                <el-checkbox v-model="item.checked" @change="handleCardSelection" class="card-checkbox"/>
+                <div class="platform-icon">
+                  <el-icon><Monitor/></el-icon>
+                </div>
+                <div class="platform-name" :title="item.name">{{ item.name }}</div>
+              </div>
+              <div class="header-actions">
+                <el-switch
+                  v-model="item.enable"
+                  :active-value="1"
+                  :inactive-value="0"
+                  @change="handleEnableChange(item)"
+                  size="small"
+                />
+                <div class="status-dot" :class="item.status === 1 ? 'pulse online' : 'breathe offline'"/>
+              </div>
+            </div>
+
+            <div class="card-body">
+              <div class="info-row">
+                <div class="info-item">
+                  <span class="info-label">编号</span>
+                  <span class="info-value">{{ item.id }}</span>
+                </div>
+              </div>
+
+              <div class="info-row">
+                <div class="info-item full">
+                  <span class="info-label">国标编码</span>
+                  <span class="info-value" :title="item.serverGbId">{{ item.serverGbId || '-' }}</span>
+                </div>
+              </div>
+
+              <div class="info-row">
+                <div class="info-item">
+                  <span class="info-label">服务器IP</span>
+                  <span class="info-value">{{ item.serverIp || '-' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">端口</span>
+                  <span class="info-value">{{ item.serverPort || '-' }}</span>
+                </div>
+              </div>
+
+              <div class="info-row">
+                <div class="info-item">
+                  <span class="info-label">传输协议</span>
+                  <span class="info-value">{{ item.transport || '-' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">关联设备</span>
+                  <span class="info-value">
+                    <el-tag type="info" effect="plain" size="small">{{ item.deviceCount || 0 }}</el-tag>
+                  </span>
+                </div>
+              </div>
+              <div class="info-row">
+                <div class="info-item full">
+                  <span class="info-label">创建时间</span>
+                  <span class="info-value">{{ parseTime(item.createTime) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-footer">
+              <el-button
+                type="primary"
+                size="small"
+                icon="Edit"
+                @click="handleUpdate(item)"
+                class="btn-primary"
+              >编辑</el-button>
+              <div class="footer-actions">
+                <el-tooltip content="关联通道">
+                  <el-button type="success" text bg size="small" icon="Connection" @click="handleAssociated(item)"/>
+                </el-tooltip>
+                <template v-if="item.enable === 1">
+                  <el-tooltip v-if="item.status === 0" content="上线">
+                    <el-button type="primary" text bg size="small" icon="Connection" @click="handleRegister(item)"/>
+                  </el-tooltip>
+                  <el-tooltip v-if="item.status === 1" content="注销">
+                    <el-button type="warning" text bg size="small" icon="SwitchButton" @click="handleUnregister(item)"/>
+                  </el-tooltip>
+                  <el-tooltip v-if="item.status === 1" content="推送通道">
+                    <el-button type="info" text bg size="small" icon="Upload" @click="handlePushCatalog(item)"/>
+                  </el-tooltip>
+                </template>
+                <el-tooltip content="删除">
+                  <el-button type="danger" text bg size="small" icon="Delete" @click="handleDelete(item)"/>
+                </el-tooltip>
+              </div>
+            </div>
+          </div>
+        </el-col>
+      </el-row>
     </div>
 
     <pagination
@@ -166,13 +273,12 @@
           </el-col>
         </el-row>
 
-        <!-- 平台配置 -->
         <div class="section-divider">
           <div class="section-divider-icon-wrapper">
-            <el-icon class="section-divider-icon"><Monitor /></el-icon>
+            <el-icon class="section-divider-icon"><Monitor/></el-icon>
           </div>
           <div class="section-divider-title">平台配置</div>
-          <div class="section-divider-line"></div>
+          <div class="section-divider-line"/>
         </div>
         <el-row :gutter="20">
           <el-col :span="12">
@@ -191,7 +297,7 @@
             <el-form-item label="服务器IP" prop="serverIp">
               <el-input v-model="form.serverIp" placeholder="请输入服务器IP地址">
                 <template #prefix>
-                  <el-icon><Location /></el-icon>
+                  <el-icon><Location/></el-icon>
                 </template>
               </el-input>
             </el-form-item>
@@ -203,13 +309,12 @@
           </el-col>
         </el-row>
 
-        <!-- 设备配置 -->
         <div class="section-divider">
           <div class="section-divider-icon-wrapper">
-            <el-icon class="section-divider-icon"><Camera /></el-icon>
+            <el-icon class="section-divider-icon"><Camera/></el-icon>
           </div>
           <div class="section-divider-title">设备配置</div>
-          <div class="section-divider-line"></div>
+          <div class="section-divider-line"/>
         </div>
         <el-row :gutter="20">
           <el-col :span="12">
@@ -221,7 +326,7 @@
             <el-form-item label="设备IP" prop="deviceIp">
               <el-input v-model="form.deviceIp" placeholder="请输入设备IP地址">
                 <template #prefix>
-                  <el-icon><Location /></el-icon>
+                  <el-icon><Location/></el-icon>
                 </template>
               </el-input>
             </el-form-item>
@@ -243,20 +348,19 @@
           </el-col>
         </el-row>
 
-        <!-- SIP认证 -->
         <div class="section-divider">
           <div class="section-divider-icon-wrapper">
-            <el-icon class="section-divider-icon"><Lock /></el-icon>
+            <el-icon class="section-divider-icon"><Lock/></el-icon>
           </div>
           <div class="section-divider-title">SIP认证</div>
-          <div class="section-divider-line"></div>
+          <div class="section-divider-line"/>
         </div>
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="用户名" prop="username">
               <el-input v-model="form.username" placeholder="请输入SIP认证用户名">
                 <template #prefix>
-                  <el-icon><User /></el-icon>
+                  <el-icon><User/></el-icon>
                 </template>
               </el-input>
             </el-form-item>
@@ -265,7 +369,7 @@
             <el-form-item label="密码" prop="password">
               <el-input v-model="form.password" type="password" placeholder="请输入SIP认证密码" show-password>
                 <template #prefix>
-                  <el-icon><Key /></el-icon>
+                  <el-icon><Key/></el-icon>
                 </template>
               </el-input>
             </el-form-item>
@@ -292,13 +396,12 @@
           </el-col>
         </el-row>
 
-        <!-- 扩展配置 -->
         <div class="section-divider">
           <div class="section-divider-icon-wrapper">
-            <el-icon class="section-divider-icon"><Setting /></el-icon>
+            <el-icon class="section-divider-icon"><Setting/></el-icon>
           </div>
           <div class="section-divider-title">扩展配置</div>
-          <div class="section-divider-line"></div>
+          <div class="section-divider-line"/>
         </div>
         <el-row :gutter="20">
           <el-col :span="12">
@@ -330,7 +433,7 @@
         <el-form-item label="安装地址" prop="address">
           <el-input v-model="form.address" placeholder="请输入安装地址">
             <template #prefix>
-              <el-icon><Position /></el-icon>
+              <el-icon><Position/></el-icon>
             </template>
           </el-input>
         </el-form-item>
@@ -388,8 +491,8 @@
 </template>
 
 <script setup name="Platform">
-import {listPlatform, getPlatform, delPlatform, addPlatform, updatePlatform, unregisterPlatform, registerPlatform, pushCatalog} from "@/api/qs/platform";
-import AssociatedChannel from "./associatedChannel.vue";
+import {listPlatform, getPlatform, delPlatform, addPlatform, updatePlatform, unregisterPlatform, registerPlatform, pushCatalog} from '@/api/qs/platform';
+import AssociatedChannel from './associatedChannel.vue';
 import {
   Monitor,
   Camera,
@@ -401,18 +504,19 @@ import {
   Position,
   SwitchButton,
   Upload
-} from "@element-plus/icons-vue";
+} from '@element-plus/icons-vue';
 
 const {proxy} = getCurrentInstance();
 
 const showSearch = ref(true);
+const viewMode = ref('card');
 const loading = ref(true);
 const open = ref(false);
 const ids = ref([]);
 const single = ref(true);
 const multiple = ref(true);
 const total = ref(0);
-const title = ref("");
+const title = ref('');
 const platformList = ref([]);
 const associatedOpen = ref(false);
 const associatedPlatformId = ref(null);
@@ -429,14 +533,17 @@ const queryParams = ref({
 const form = ref({});
 
 const rules = ref({
-  name: [{required: true, message: "平台名称不能为空", trigger: "blur"}],
-  serverGbId: [{required: true, message: "平台国标编码不能为空", trigger: "blur"}]
+  name: [{required: true, message: '平台名称不能为空', trigger: 'blur'}],
+  serverGbId: [{required: true, message: '平台国标编码不能为空', trigger: 'blur'}]
 });
 
 function getList() {
   loading.value = true;
   listPlatform(queryParams.value).then(response => {
-    platformList.value = response.rows;
+    platformList.value = response.rows.map(row => ({
+      ...row,
+      checked: false
+    }));
     total.value = response.total;
     loading.value = false;
   });
@@ -475,7 +582,7 @@ function reset() {
     catalogGroup: null,
     registerWay: null,
     secrecy: null,
-    asMessageChannel: 0,
+    asMessageChannel: 1,
     catalogWithPlatform: 1,
     catalogWithGroup: 0,
     catalogWithRegion: 0,
@@ -483,7 +590,7 @@ function reset() {
     sendStreamIp: null,
     serverId: null
   };
-  proxy.resetForm("formRef");
+  proxy.resetForm('formRef');
 }
 
 function handleQuery() {
@@ -492,7 +599,7 @@ function handleQuery() {
 }
 
 function resetQuery() {
-  proxy.resetForm("queryRef");
+  proxy.resetForm('queryRef');
   handleQuery();
 }
 
@@ -502,10 +609,17 @@ function handleSelectionChange(selection) {
   multiple.value = !selection.length;
 }
 
+function handleCardSelection() {
+  const selected = platformList.value.filter(item => item.checked);
+  ids.value = selected.map(item => item.id);
+  single.value = selected.length !== 1;
+  multiple.value = !selected.length;
+}
+
 function handleAdd() {
   reset();
   open.value = true;
-  title.value = "添加国标GB28181平台配置";
+  title.value = '添加国标GB28181平台配置';
 }
 
 function handleAssociated(row) {
@@ -519,22 +633,22 @@ function handleUpdate(row) {
   getPlatform(id).then(response => {
     form.value = response.data;
     open.value = true;
-    title.value = "修改国标GB28181平台配置";
+    title.value = '修改国标GB28181平台配置';
   });
 }
 
 function submitForm() {
-  proxy.$refs["formRef"].validate(valid => {
+  proxy.$refs['formRef'].validate(valid => {
     if (valid) {
       if (form.value.id != null) {
         updatePlatform(form.value).then(response => {
-          proxy.$modal.msgSuccess("修改成功");
+          proxy.$modal.msgSuccess('修改成功');
           open.value = false;
           getList();
         });
       } else {
         addPlatform(form.value).then(response => {
-          proxy.$modal.msgSuccess("新增成功");
+          proxy.$modal.msgSuccess('新增成功');
           open.value = false;
           getList();
         });
@@ -549,7 +663,7 @@ function handleDelete(row) {
     return delPlatform(id);
   }).then(() => {
     getList();
-    proxy.$modal.msgSuccess("删除成功");
+    proxy.$modal.msgSuccess('删除成功');
   }).catch(() => {
   });
 }
@@ -559,7 +673,7 @@ function handleRegister(row) {
     return registerPlatform(row.id);
   }).then(() => {
     getList();
-    proxy.$modal.msgSuccess("上线成功");
+    proxy.$modal.msgSuccess('上线成功');
   }).catch(() => {
   });
 }
@@ -569,7 +683,7 @@ function handleUnregister(row) {
     return unregisterPlatform(row.id);
   }).then(() => {
     getList();
-    proxy.$modal.msgSuccess("注销成功");
+    proxy.$modal.msgSuccess('注销成功');
   }).catch(() => {
   });
 }
@@ -578,8 +692,19 @@ function handlePushCatalog(row) {
   proxy.$modal.confirm('是否确认推送通道到平台"' + row.name + '"？').then(() => {
     return pushCatalog(row.id);
   }).then(() => {
-    proxy.$modal.msgSuccess("推送成功");
+    proxy.$modal.msgSuccess('推送成功');
   }).catch(() => {
+  });
+}
+
+function handleEnableChange(row) {
+  const text = row.enable === 1 ? '启用' : '禁用';
+  proxy.$modal.confirm('是否确认' + text + '平台"' + row.name + '"？').then(() => {
+    return updatePlatform({id: row.id, enable: row.enable});
+  }).then(() => {
+    proxy.$modal.msgSuccess(text + '成功');
+  }).catch(() => {
+    row.enable = row.enable === 1 ? 0 : 1;
   });
 }
 
@@ -610,17 +735,17 @@ onMounted(() => {
 }
 
 .query-form {
-  padding: 10px 15px;
+  padding: 14px 16px;
   background: var(--el-bg-color-overlay);
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid var(--el-border-color-lighter);
-  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.04);
   margin-bottom: 0 !important;
   animation: fadeInUp 0.4s ease-out 0.15s both;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 10px;
+  gap: 12px;
 
   :deep(.el-form-item) {
     margin-bottom: 0;
@@ -681,14 +806,14 @@ onMounted(() => {
 }
 
 .toolbar-row {
-  padding: 4px 0;
+  padding: 6px 0;
   animation: fadeInUp 0.4s ease-out 0.2s both;
 }
 
 .action-buttons {
   display: flex;
   gap: 12px;
-  margin-top: 12px;
+  margin-top: 14px;
   align-items: center;
 }
 
@@ -729,16 +854,16 @@ onMounted(() => {
 
 .table-wrapper {
   background: var(--el-bg-color-overlay);
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid var(--el-border-color-lighter);
-  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.04);
   overflow: hidden;
   animation: fadeInUp 0.4s ease-out 0.25s both;
   transition: box-shadow 0.3s;
 }
 
 .table-wrapper:hover {
-  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.06);
 }
 
 .custom-table {
@@ -901,57 +1026,355 @@ onMounted(() => {
   border-color: var(--el-color-info) !important;
 }
 
-  .input-suffix {
-    color: var(--el-text-color-secondary);
+.input-suffix {
+  color: var(--el-text-color-secondary);
+  font-size: 13px;
+}
+
+.form-divider {
+  margin: 20px 0;
+  border-color: var(--el-border-color-lighter);
+
+  :deep(.el-divider__text) {
+    background: var(--el-fill-color-light);
+    padding: 0 16px;
     font-size: 13px;
+    color: var(--el-text-color-secondary);
+    font-weight: 500;
   }
+}
 
-  .form-divider {
-    margin: 20px 0;
-    border-color: var(--el-border-color-lighter);
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 28px 0 20px;
+  animation: fadeInUp 0.4s ease-out 0.15s both;
+}
 
-    :deep(.el-divider__text) {
-      background: var(--el-fill-color-light);
-      padding: 0 16px;
-      font-size: 13px;
-      color: var(--el-text-color-secondary);
-      font-weight: 500;
+.section-divider-icon-wrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--el-color-primary-light-6) 0%, var(--el-color-primary-light-4) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 10px rgba(64, 158, 255, 0.18);
+}
+
+.section-divider-icon {
+  font-size: 18px;
+  color: #ffffff;
+}
+
+.section-divider-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+.section-divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--el-color-primary-light-4) 0%, transparent 100%);
+}
+
+.card-view {
+  animation: fadeInUp 0.4s ease-out 0.25s both;
+}
+
+.platform-card {
+  background: var(--el-bg-color-overlay);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+  animation: cardFadeIn 0.4s ease-out both;
+  display: flex;
+  flex-direction: column;
+
+  @for $i from 1 through 20 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{$i * 0.04 + 0.25}s;
     }
   }
 
-  .section-divider {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 28px 0 20px;
-    animation: fadeInUp 0.4s ease-out 0.15s both;
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    border-color: var(--el-color-primary-light-4);
   }
 
-  .section-divider-icon-wrapper {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--el-color-primary-light-6) 0%, var(--el-color-primary-light-4) 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 3px 10px rgba(64, 158, 255, 0.18);
+  &.is-selected {
+    border-color: var(--el-color-primary);
+    box-shadow: 0 0 0 1px var(--el-color-primary), 0 8px 28px var(--el-color-primary-light-6);
   }
 
-  .section-divider-icon {
-    font-size: 18px;
+  &.is-online {
+    .card-header {
+      background: linear-gradient(135deg, var(--el-color-success-light-9) 0%, var(--el-bg-color-overlay) 100%);
+    }
+  }
+}
+
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.card-header {
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  background: linear-gradient(135deg, var(--el-fill-color-lighter) 0%, var(--el-bg-color-overlay) 100%);
+  transition: background 0.3s;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.card-checkbox {
+  flex-shrink: 0;
+
+  :deep(.el-checkbox__input) {
+    .el-checkbox__inner {
+      border-color: var(--el-border-color-light);
+      background: var(--el-bg-color);
+    }
+  }
+
+  :deep(.el-checkbox__input.is-checked) {
+    .el-checkbox__inner {
+      background-color: var(--el-color-primary);
+      border-color: var(--el-color-primary);
+    }
+  }
+}
+
+.platform-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--el-color-primary-light-5) 0%, var(--el-color-primary-light-3) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px var(--el-color-primary-light-6);
+
+  .el-icon {
+    font-size: 20px;
     color: #ffffff;
   }
+}
 
-  .section-divider-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--el-text-color-primary);
+.platform-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 180px;
+}
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: var(--el-fill-color-lighter);
+  flex-shrink: 0;
+
+  &.online {
+    background: var(--el-color-success-light-8);
   }
 
-  .section-divider-line {
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, var(--el-color-primary-light-4) 0%, transparent 100%);
+  &.offline {
+    background: var(--el-color-danger-light-8);
   }
+}
+
+.status-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--el-color-danger);
+  flex-shrink: 0;
+  box-shadow: 0 0 0 4px var(--el-color-danger-light-9);
+
+  &.online {
+    background: var(--el-color-success);
+    box-shadow: 0 0 0 4px var(--el-color-success-light-9);
+  }
+
+  &.offline {
+    background: var(--el-color-danger);
+    box-shadow: 0 0 0 4px var(--el-color-danger-light-9);
+  }
+
+  &.pulse {
+    animation: statusPulse 2s ease-in-out infinite;
+  }
+
+  &.breathe {
+    animation: statusBreathe 2s ease-in-out infinite;
+  }
+}
+
+@keyframes statusPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 4px var(--el-color-success-light-9), 0 0 0 0 rgba(16, 185, 129, 0.4);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 0 4px var(--el-color-success-light-9), 0 0 0 12px rgba(16, 185, 129, 0);
+    opacity: 0.8;
+  }
+}
+
+@keyframes statusBreathe {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.status-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+.card-body {
+  padding: 16px;
+  flex: 1;
+}
+
+.info-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.info-item {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  &.full {
+    flex: 0 0 100%;
+  }
+}
+
+.info-label {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  font-weight: 500;
+}
+
+.info-value {
+  font-size: 13px;
+  color: var(--el-text-color-primary);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 6px 10px;
+  background: var(--el-fill-color-lighter);
+  border-radius: 6px;
+}
+
+.card-footer {
+  padding: 0 16px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid var(--el-border-color-lighter);
+  padding-top: 14px;
+}
+
+.btn-primary {
+  flex: 1;
+  font-weight: 600;
+}
+
+.footer-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.footer-actions .el-button {
+  color: #ffffff !important;
+}
+
+.footer-actions .el-button--primary,
+.footer-actions .el-button--primary[text],
+.footer-actions .el-button--primary[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-primary) !important;
+  border-color: var(--el-color-primary) !important;
+}
+
+.footer-actions .el-button--danger,
+.footer-actions .el-button--danger[text],
+.footer-actions .el-button--danger[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-danger) !important;
+  border-color: var(--el-color-danger) !important;
+}
+
+.footer-actions .el-button--success,
+.footer-actions .el-button--success[text],
+.footer-actions .el-button--success[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-success) !important;
+  border-color: var(--el-color-success) !important;
+}
+
+.footer-actions .el-button--warning,
+.footer-actions .el-button--warning[text],
+.footer-actions .el-button--warning[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-warning) !important;
+  border-color: var(--el-color-warning) !important;
+}
+
+.footer-actions .el-button--info,
+.footer-actions .el-button--info[text],
+.footer-actions .el-button--info[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-info) !important;
+  border-color: var(--el-color-info) !important;
+}
 </style>
