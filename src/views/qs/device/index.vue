@@ -126,7 +126,7 @@
       </el-table-column>
       <el-table-column label="通道号" align="center" width="150">
         <template #default="scope">
-          <div v-if="scope.row.channel">
+          <div v-if="scope.row.channel !== '' && scope.row.channel !== null">
             {{scope.row.channel}}
           </div>
           <div v-else>
@@ -155,7 +155,7 @@
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" width="180"/>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="360" fixed="right">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="420" fixed="right">
         <template #default="scope">
           <div class="table-actions">
             <el-tooltip content="播放" v-if="scope.row.deviceStatus === 'ON'">
@@ -209,26 +209,31 @@
                 @click="handleDeviceRecord(scope.row)"
               />
             </el-tooltip>
-            <el-tooltip content="修改">
+            
+            <!-- 更多操作下拉菜单 -->
+            <el-dropdown @command="(command) => handleMoreAction(command, scope.row)" trigger="click" style="margin-left: 12px;">
               <el-button
                 type="primary"
                 text
                 bg
                 size="small"
-                icon="Edit"
-                @click="handleUpdate(scope.row)"
-              />
-            </el-tooltip>
-            <el-tooltip content="删除">
-              <el-button
-                type="danger"
-                text
-                bg
-                size="small"
-                icon="Delete"
-                @click="handleDelete(scope.row)"
-              />
-            </el-tooltip>
+                icon="More"
+              >
+                更多<el-icon class="el-icon--right"><arrow-down /></el-icon>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu class="device-dropdown-menu">
+                  <el-dropdown-item command="edit" icon="Edit">编辑</el-dropdown-item>
+                  <el-dropdown-item command="delete" icon="Delete" class="is-danger">删除</el-dropdown-item>
+                  <!-- 大华设备校时 -->
+                  <el-dropdown-item v-if="scope.row.type === '9'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
+                  <!-- 大华设备信息 -->
+                  <el-dropdown-item v-if="scope.row.type === '9'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
+                  <!-- 大华设备重启 -->
+                  <el-dropdown-item v-if="scope.row.type === '9'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </div>
         </template>
       </el-table-column>
@@ -279,7 +284,7 @@
 
               <div class="info-channel">
                 <span class="channel-label">通道</span>
-                <span class="channel-val">{{ item.channel || item.gbChannelId || '-' }}</span>
+                <span class="channel-val">{{ item.channel !== '' && item.channel !== null ? item.channel : item.gbChannelId || '-' }}</span>
               </div>
 
               <div class="info-footer">
@@ -348,26 +353,29 @@
                     @click="handleDeviceRecord(item)"
                   />
                 </el-tooltip>
-                <el-tooltip content="编辑">
+                
+                <!-- 更多操作下拉菜单 -->
+                <el-dropdown @command="(command) => handleMoreAction(command, item)" trigger="click" style="margin-left: 12px;">
                   <el-button
                     type="primary"
                     text
                     bg
                     size="small"
-                    icon="Edit"
-                    @click="handleUpdate(item)"
+                    icon="More"
                   />
-                </el-tooltip>
-                <el-tooltip content="删除">
-                  <el-button
-                    type="danger"
-                    text
-                    bg
-                    size="small"
-                    icon="Delete"
-                    @click="handleDelete(item)"
-                  />
-                </el-tooltip>
+                  <template #dropdown>
+                    <el-dropdown-menu class="device-dropdown-menu">
+                      <el-dropdown-item command="edit" icon="Edit">编辑</el-dropdown-item>
+                      <el-dropdown-item command="delete" icon="Delete" class="is-danger">删除</el-dropdown-item>
+                      <!-- 大华设备校时 -->
+                      <el-dropdown-item v-if="item.type === '9'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
+                      <!-- 大华设备信息 -->
+                      <el-dropdown-item v-if="item.type === '9'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
+                      <!-- 大华设备重启 -->
+                      <el-dropdown-item v-if="item.type === '9'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
               </div>
             </div>
           </div>
@@ -1010,6 +1018,208 @@
       </template>
     </el-dialog>
 
+    <!-- 大华设备校时对话框 -->
+    <el-dialog title="设备校时" v-model="timeSyncDialogVisible" width="500px" append-to-body>
+      <el-form label-width="100px">
+        <el-form-item label="设备IP">
+          <el-input v-model="timeSyncForm.deviceIp" disabled />
+        </el-form-item>
+        <el-form-item label="设备时间">
+          <el-input v-model="timeSyncForm.deviceTime" disabled placeholder="点击获取时间" />
+          <el-button type="primary" @click="handleGetTime" style="margin-left: 10px;">获取时间</el-button>
+        </el-form-item>
+        <el-form-item label="同步时间">
+          <el-date-picker
+            v-model="timeSyncForm.syncTime"
+            type="datetime"
+            placeholder="选择同步时间"
+            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            style="width: 100%;"
+          />
+          <el-button type="primary" @click="handleSetCurrentTime" style="margin-left: 10px;">设置为当前时间</el-button>
+        </el-form-item>
+        <el-form-item label="同步方式">
+          <el-radio-group v-model="timeSyncForm.syncType">
+            <el-radio :label="true">设备时间同步到本地</el-radio>
+            <el-radio :label="false">本地时间同步到设备</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="timeSyncDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleTimeSync" :loading="timeSyncLoading">同步</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 大华设备信息对话框 -->
+    <el-dialog title="大华设备信息" v-model="deviceInfoDialogVisible" width="800px" append-to-body>
+      <el-tabs v-model="deviceInfoTabActive" type="border-card">
+        <!-- 设备信息标签页 -->
+        <el-tab-pane label="设备信息" name="deviceInfo">
+          <el-descriptions :column="2" border v-loading="deviceInfoLoading">
+            <el-descriptions-item label="序列号">{{ deviceInfo.serialNumber || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="通道数量">{{ deviceInfo.channelNum || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="硬盘数量">{{ deviceInfo.diskNum || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="DVR类型">{{ deviceInfo.dvrType || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="报警输入端口">{{ deviceInfo.alarmInPortNum || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="报警输出端口">{{ deviceInfo.alarmOutPortNum || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="登录超时时间(分钟)">{{ deviceInfo.limitLoginTime || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="剩余登录次数">{{ deviceInfo.leftLogTimes || '-' }}</el-descriptions-item>
+            <el-descriptions-item label="解锁剩余时间(秒)">{{ deviceInfo.lockLeftTime || '-' }}</el-descriptions-item>
+          </el-descriptions>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="deviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleRefreshDeviceInfo" :loading="deviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 系统参数标签页 -->
+        <el-tab-pane label="系统参数" name="systemParam">
+          <el-form :model="systemParam" label-width="120px" v-loading="deviceInfoLoading">
+            <el-form-item label="视频制式">
+              <el-select v-model="systemParam.videoStandard" style="width: 100%;">
+                <el-option label="PAL" :value="0" />
+                <el-option label="NTSC" :value="1" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="国家/地区">
+              <el-input v-model="systemParam.country" />
+            </el-form-item>
+          </el-form>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="deviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetSystemParam" :loading="deviceInfoLoading" icon="Refresh">获取</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 视频参数标签页 -->
+        <el-tab-pane label="视频参数" name="videoParam">
+          <el-form :model="videoParam" label-width="120px" v-loading="deviceInfoLoading">
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="通道ID">
+                  <el-input-number v-model="videoParam.channelId" :min="0" style="width: 100%;" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="码流类型">
+                  <el-select v-model="videoParam.streamType" style="width: 100%;">
+                    <el-option label="主码流" :value="0" />
+                    <el-option label="辅码流1" :value="1" />
+                    <el-option label="辅码流2" :value="2" />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-form-item label="视频使能">
+              <el-select v-model="videoParam.videoEnable" style="width: 100%;">
+                <el-option label="关闭" :value="0" />
+                <el-option label="开启" :value="1" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="压缩格式">
+              <el-select v-model="videoParam.compression" style="width: 100%;">
+                <el-option label="MPEG4" :value="0" />
+                <el-option label="MS-MPEG4" :value="1" />
+                <el-option label="MPEG2" :value="2" />
+                <el-option label="MPEG1" :value="3" />
+                <el-option label="H.263" :value="4" />
+                <el-option label="MJPG" :value="5" />
+                <el-option label="FCC-MPEG4" :value="6" />
+                <el-option label="H.264" :value="7" />
+                <el-option label="H.265" :value="8" />
+                <el-option label="SVAC" :value="9" />
+              </el-select>
+            </el-form-item>
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="宽度">
+                  <el-input-number v-model="videoParam.width" style="width: 100%;" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="高度">
+                  <el-input-number v-model="videoParam.height" style="width: 100%;" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-form-item label="码率控制">
+              <el-select v-model="videoParam.bitRateControl" style="width: 100%;">
+                <el-option label="固定码流(CBR)" :value="0" />
+                <el-option label="可变码流(VBR)" :value="1" />
+              </el-select>
+            </el-form-item>
+            <el-form-item label="码率(kbps)">
+              <el-input-number v-model="videoParam.bitRate" style="width: 100%;" />
+            </el-form-item>
+            <el-form-item label="帧率">
+              <el-input-number v-model="videoParam.frameRate" :step="0.1" style="width: 100%;" />
+            </el-form-item>
+            <el-form-item label="I帧间隔">
+              <el-input-number v-model="videoParam.iframeInterval" style="width: 100%;" />
+            </el-form-item>
+            <el-form-item label="图像质量">
+              <el-select v-model="videoParam.imageQuality" style="width: 100%;">
+                <el-option label="图像质量10%" :value="1" />
+                <el-option label="图像质量30%" :value="2" />
+                <el-option label="图像质量50%" :value="3" />
+                <el-option label="图像质量60%" :value="4" />
+                <el-option label="图像质量80%" :value="5" />
+                <el-option label="图像质量100%" :value="6" />
+              </el-select>
+            </el-form-item>
+          </el-form>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="deviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetVideoParam" :loading="deviceInfoLoading" icon="Refresh">获取</el-button>
+            <el-button type="success" @click="handleSetVideoParam" :loading="deviceInfoLoading" icon="Check">设置</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 设备视频参数标签页 -->
+        <el-tab-pane label="设备视频参数" name="deviceVideoParam">
+          <el-form :model="deviceVideoParam" label-width="120px" v-loading="deviceInfoLoading">
+            <el-form-item label="通道ID">
+              <el-input-number v-model="deviceVideoParam.channelId" :min="0" style="width: 100%;" />
+            </el-form-item>
+            <el-form-item label="亮度">
+              <el-input-number v-model="deviceVideoParam.brightness" :min="0" :max="100" style="width: 100%;" />
+            </el-form-item>
+            <el-form-item label="对比度">
+              <el-input-number v-model="deviceVideoParam.contrast" :min="0" :max="100" style="width: 100%;" />
+            </el-form-item>
+            <el-form-item label="饱和度">
+              <el-input-number v-model="deviceVideoParam.saturation" :min="0" :max="100" style="width: 100%;" />
+            </el-form-item>
+            <el-form-item label="色度">
+              <el-input-number v-model="deviceVideoParam.chroma" :min="0" :max="100" style="width: 100%;" />
+            </el-form-item>
+            <el-form-item label="锐度">
+              <el-input-number v-model="deviceVideoParam.sharpness" :min="0" :max="100" style="width: 100%;" />
+            </el-form-item>
+            <el-form-item label="色调">
+              <el-input-number v-model="deviceVideoParam.hue" :min="0" :max="100" style="width: 100%;" />
+            </el-form-item>
+            <el-form-item label="增益">
+              <el-input-number v-model="deviceVideoParam.gain" style="width: 100%;" />
+            </el-form-item>
+            <el-form-item label="黑白模式">
+              <el-select v-model="deviceVideoParam.blackWhiteMode" style="width: 100%;">
+                <el-option label="关闭" :value="0" />
+                <el-option label="开启" :value="1" />
+              </el-select>
+            </el-form-item>
+          </el-form>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="deviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetDeviceVideoParam" :loading="deviceInfoLoading" icon="Refresh">获取</el-button>
+            <el-button type="success" @click="handleSetDeviceVideoParam" :loading="deviceInfoLoading" icon="Check">设置</el-button>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+    </el-dialog>
+
     <SelectMapPosition ref="selectMapPositionRef" @onSubmit="selectMapPositionSubmit"/>
     <ChannelCode ref="channelCodeRef" @handleOk="channelCodeOk"/>
   </div>
@@ -1039,8 +1249,8 @@ import {
 } from "@/api/qs/device"
 import {listHaiKangIsupDevice} from "@/api/qs/haikang-isup";
 import {HaikangIsupDevice, PullConfig, RTPServerParam, WSDiscoveryDevice, WSOnvifDevice} from "@/types/api";
-import {DaHuaDevice} from "@/types/api/qs/dahua";
-import {listDaHusDevice} from "@/api/qs/dahua";
+import {DaHuaDevice, DaHuaDeviceInfo} from "@/types/api/qs/dahua";
+import {listDaHuaDevice, getDaHuaTime, setDaHuaTime, rebootDaHuaDevice, getDaHuaDeviceInfo, getDaHuaSystemParam, getDaHuaVideoParam, setDaHuaVideoParam, getDaHuaDeviceVideoParam, setDaHuaDeviceVideoParam} from "@/api/qs/dahua";
 import {
   closeStreams,
   getStreamPushAddress,
@@ -1052,7 +1262,7 @@ import {
   startGb28181Play, stopGb28181Play,
   startJt1078Play, stopJt1078Play
 } from "@/api/qs/zlm";
-import {DocumentCopy, InfoFilled, Refresh, Sunny, Moon, SwitchButton, CircleClose, Position, Plus, Delete, WindPower, List, Grid, CircleCheck, Picture, VideoCamera, MapLocation, Monitor} from '@element-plus/icons-vue'
+import {DocumentCopy, InfoFilled, Refresh, Sunny, Moon, SwitchButton, CircleClose, Position, Plus, Delete, WindPower, List, Grid, CircleCheck, Picture, VideoCamera, MapLocation, Monitor, More, ArrowDown, Clock} from '@element-plus/icons-vue'
 import StreamDropdown from "@/components/Channel/streamDropdown.vue";
 import MediaInfo from "@/components/Channel/mediaInfo.vue";
 import SelectMapPosition from '@/components/SelectMapPosition';
@@ -1146,6 +1356,63 @@ const presetRules = {
 const lightOn = ref(false);
 const wiperOn = ref(false);
 
+// 大华设备校时
+const timeSyncDialogVisible = ref(false);
+const timeSyncLoading = ref(false);
+const timeSyncForm = reactive({
+  deviceId: null as number | null,
+  deviceIp: '',
+  deviceTime: '',
+  syncTime: '',
+  syncType: false
+});
+
+// 大华设备信息
+const deviceInfoDialogVisible = ref(false);
+const deviceInfoLoading = ref(false);
+const deviceInfoTabActive = ref('deviceInfo');
+const deviceInfo = reactive<DaHuaDeviceInfo>({
+  serialNumber: '',
+  alarmInPortNum: undefined,
+  alarmOutPortNum: undefined,
+  diskNum: undefined,
+  dvrType: undefined,
+  channelNum: undefined,
+  limitLoginTime: undefined,
+  leftLogTimes: undefined,
+  lockLeftTime: undefined
+});
+const systemParam = reactive({
+  videoStandard: undefined as number | undefined,
+  country: ''
+});
+const videoParam = reactive({
+  channelId: 0,
+  streamType: 0,
+  formatType: undefined,
+  videoEnable: undefined,
+  compression: undefined,
+  width: undefined,
+  height: undefined,
+  bitRateControl: undefined,
+  bitRate: undefined,
+  frameRate: undefined,
+  iframeInterval: undefined,
+  imageQuality: undefined
+});
+const deviceVideoParam = reactive({
+  channelId: 0,
+  brightness: undefined,
+  contrast: undefined,
+  saturation: undefined,
+  chroma: undefined,
+  sharpness: undefined,
+  hue: undefined,
+  gain: undefined,
+  blackWhiteMode: undefined
+});
+const currentDeviceId = ref<number | null>(null);
+const currentDeviceRow = ref<any>(null);
 
 // 接入地址
 const streamPushAddressForm = ref({});
@@ -2371,6 +2638,289 @@ const handleWiperControl = async (value) => {
   }
 }
 
+// ==================== 大华设备校时 ====================
+
+// 更多操作处理
+const handleMoreAction = (command: string, row: QsDevice) => {
+  switch (command) {
+    case 'edit':
+      handleUpdate(row);
+      break;
+    case 'delete':
+      handleDelete(row);
+      break;
+    case 'timeSync':
+      openTimeSyncDialog(row);
+      break;
+    case 'deviceInfo':
+      openDeviceInfoDialog(row);
+      break;
+    case 'reboot':
+      handleReboot(row);
+      break;
+  }
+}
+
+// 重启大华设备
+const handleReboot = async (row: QsDevice) => {
+  try {
+    await proxy.$modal.confirm(`是否确认重启设备"${row.deviceName}"？`);
+    
+    const response = await rebootDaHuaDevice(row.id!);
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('重启命令已发送，设备正在重启...');
+    } else {
+      proxy.$modal.msgError(response.msg || '重启失败');
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('重启设备失败:', error);
+      proxy.$modal.msgError('重启设备失败');
+    }
+  }
+}
+
+// 打开设备信息对话框
+const openDeviceInfoDialog = (row: QsDevice) => {
+  currentDeviceId.value = row.id;
+  currentDeviceRow.value = row;
+  deviceInfoTabActive.value = 'deviceInfo';
+  Object.assign(deviceInfo, {
+    serialNumber: '',
+    alarmInPortNum: undefined,
+    alarmOutPortNum: undefined,
+    diskNum: undefined,
+    dvrType: undefined,
+    channelNum: undefined,
+    limitLoginTime: undefined,
+    leftLogTimes: undefined,
+    lockLeftTime: undefined
+  });
+  Object.assign(systemParam, {
+    videoStandard: undefined,
+    country: ''
+  });
+  Object.assign(videoParam, {
+    channelId: 0,
+    streamType: 0,
+    formatType: undefined,
+    videoEnable: undefined,
+    compression: undefined,
+    width: undefined,
+    height: undefined,
+    bitRateControl: undefined,
+    bitRate: undefined,
+    frameRate: undefined,
+    iframeInterval: undefined,
+    imageQuality: undefined
+  });
+  Object.assign(deviceVideoParam, {
+    channelId: 0,
+    brightness: undefined,
+    contrast: undefined,
+    saturation: undefined,
+    chroma: undefined,
+    sharpness: undefined,
+    hue: undefined,
+    gain: undefined,
+    blackWhiteMode: undefined
+  });
+  deviceInfoDialogVisible.value = true;
+  handleRefreshDeviceInfo();
+}
+
+// 获取系统参数
+const handleGetSystemParam = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    deviceInfoLoading.value = true;
+    const res = await getDaHuaSystemParam(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(systemParam, res.data);
+      proxy.$modal.msgSuccess('获取系统参数成功');
+    }
+  } catch (error) {
+    console.error('获取系统参数失败:', error);
+    proxy.$modal.msgError('获取系统参数失败');
+  } finally {
+    deviceInfoLoading.value = false;
+  }
+}
+
+// 获取视频参数
+const handleGetVideoParam = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    deviceInfoLoading.value = true;
+    const res = await getDaHuaVideoParam(currentDeviceId.value, videoParam.channelId, videoParam.streamType);
+    if (res.data) {
+      Object.assign(videoParam, res.data);
+      proxy.$modal.msgSuccess('获取视频参数成功');
+    }
+  } catch (error) {
+    console.error('获取视频参数失败:', error);
+    proxy.$modal.msgError('获取视频参数失败');
+  } finally {
+    deviceInfoLoading.value = false;
+  }
+}
+
+// 设置视频参数
+const handleSetVideoParam = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    deviceInfoLoading.value = true;
+    const res = await setDaHuaVideoParam(currentDeviceId.value, videoParam.channelId, videoParam.streamType, videoParam);
+    if (res.code === 200) {
+      proxy.$modal.msgSuccess('设置视频参数成功');
+    } else {
+      proxy.$modal.msgError(res.msg || '设置视频参数失败');
+    }
+  } catch (error) {
+    console.error('设置视频参数失败:', error);
+    proxy.$modal.msgError('设置视频参数失败');
+  } finally {
+    deviceInfoLoading.value = false;
+  }
+}
+
+// 获取设备视频参数
+const handleGetDeviceVideoParam = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    deviceInfoLoading.value = true;
+    const res = await getDaHuaDeviceVideoParam(currentDeviceId.value, deviceVideoParam.channelId);
+    if (res.data) {
+      Object.assign(deviceVideoParam, res.data);
+      proxy.$modal.msgSuccess('获取设备视频参数成功');
+    }
+  } catch (error) {
+    console.error('获取设备视频参数失败:', error);
+    proxy.$modal.msgError('获取设备视频参数失败');
+  } finally {
+    deviceInfoLoading.value = false;
+  }
+}
+
+// 设置设备视频参数
+const handleSetDeviceVideoParam = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    deviceInfoLoading.value = true;
+    const res = await setDaHuaDeviceVideoParam(currentDeviceId.value, deviceVideoParam.channelId, deviceVideoParam);
+    if (res.code === 200) {
+      proxy.$modal.msgSuccess('设置设备视频参数成功');
+    } else {
+      proxy.$modal.msgError(res.msg || '设置设备视频参数失败');
+    }
+  } catch (error) {
+    console.error('设置设备视频参数失败:', error);
+    proxy.$modal.msgError('设置设备视频参数失败');
+  } finally {
+    deviceInfoLoading.value = false;
+  }
+}
+
+// 刷新设备信息
+const handleRefreshDeviceInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    deviceInfoLoading.value = true;
+    const res = await getDaHuaDeviceInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(deviceInfo, res.data);
+      proxy.$modal.msgSuccess('获取设备信息成功');
+    }
+  } catch (error) {
+    console.error('获取设备信息失败:', error);
+    proxy.$modal.msgError('获取设备信息失败');
+  } finally {
+    deviceInfoLoading.value = false;
+  }
+}
+
+// 打开校时对话框
+const openTimeSyncDialog = (row: QsDevice) => {
+  timeSyncForm.deviceId = row.id;
+  timeSyncForm.deviceIp = row.ipAddress || '';
+  timeSyncForm.deviceTime = '';
+  timeSyncForm.syncTime = '';
+  timeSyncForm.syncType = false;
+  timeSyncDialogVisible.value = true;
+}
+
+// 获取设备时间
+const handleGetTime = async () => {
+  if (!timeSyncForm.deviceIp) {
+    proxy.$modal.msgError('设备IP不能为空');
+    return;
+  }
+  try {
+    timeSyncLoading.value = true;
+    const res = await getDaHuaTime(timeSyncForm.deviceIp);
+    timeSyncForm.deviceTime = res.data || '';
+    proxy.$modal.msgSuccess('获取时间成功');
+  } catch (error) {
+    console.error('获取设备时间失败:', error);
+    proxy.$modal.msgError('获取设备时间失败');
+  } finally {
+    timeSyncLoading.value = false;
+  }
+}
+
+// 设置为当前时间
+const handleSetCurrentTime = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  timeSyncForm.syncTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+}
+
+// 执行时间同步
+const handleTimeSync = async () => {
+  if (!timeSyncForm.deviceId) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  if (!timeSyncForm.syncTime) {
+    proxy.$modal.msgError('请选择同步时间');
+    return;
+  }
+  try {
+    timeSyncLoading.value = true;
+    await setDaHuaTime(timeSyncForm.deviceId, timeSyncForm.syncTime, timeSyncForm.syncType);
+    proxy.$modal.msgSuccess('时间同步成功');
+    timeSyncDialogVisible.value = false;
+  } catch (error) {
+    console.error('时间同步失败:', error);
+    proxy.$modal.msgError('时间同步失败');
+  } finally {
+    timeSyncLoading.value = false;
+  }
+}
+
 // 监听播放对话框打开，加载预置点列表
 watch(easyPlayerOpen, (newVal) => {
   if (newVal && isPtz.value && isPresetSupported.value) {
@@ -2380,6 +2930,57 @@ watch(easyPlayerOpen, (newVal) => {
   }
 })
 </script>
+
+<style lang="scss">
+/* 下拉菜单样式 - 非scoped，用于teleport到body的元素 */
+.device-dropdown-menu {
+  border-radius: 10px !important;
+  border: 1px solid var(--el-border-color-lighter) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08) !important;
+  padding: 6px !important;
+  min-width: 120px !important;
+}
+
+.device-dropdown-menu .el-dropdown-menu__item {
+  border-radius: 6px !important;
+  margin: 2px 0 !important;
+  padding: 10px 14px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: 14px !important;
+  color: var(--el-text-color-primary) !important;
+  transition: all 0.2s ease !important;
+}
+
+.device-dropdown-menu .el-dropdown-menu__item:hover {
+  background-color: var(--el-color-primary-light-9) !important;
+  color: var(--el-color-primary) !important;
+  transform: translateX(2px) !important;
+}
+
+.device-dropdown-menu .el-dropdown-menu__item.is-danger {
+  color: var(--el-color-danger) !important;
+}
+
+.device-dropdown-menu .el-dropdown-menu__item.is-danger:hover {
+  background-color: var(--el-color-danger-light-9) !important;
+  color: var(--el-color-danger) !important;
+}
+
+.device-dropdown-menu .time-sync-item {
+  color: var(--el-color-primary) !important;
+  font-weight: 500 !important;
+}
+
+.device-dropdown-menu .time-sync-item:hover {
+  background-color: var(--el-color-primary-light-9) !important;
+}
+
+.device-dropdown-menu .el-dropdown-menu__item .el-icon {
+  font-size: 16px !important;
+}
+</style>
 
 <style lang="scss" scoped>
 /* ========== 基础容器 ========== */
