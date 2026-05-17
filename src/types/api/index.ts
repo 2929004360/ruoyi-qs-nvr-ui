@@ -38,3 +38,4 @@ export * from "./qs/recordPlan";
 export * from "./qs/recordPlanItem";
 export * from "./qs/region";
 export * from "./qs/group";
+export * from "./qs/snapshot";

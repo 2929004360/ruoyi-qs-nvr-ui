@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="app-container">
     <div class="search-box">
       <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px" class="query-form">
@@ -155,7 +155,7 @@
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" width="180"/>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="420" fixed="right">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="300" fixed="right">
         <template #default="scope">
           <div class="table-actions">
             <el-tooltip content="播放" v-if="scope.row.deviceStatus === 'ON'">
@@ -224,11 +224,14 @@
               <template #dropdown>
                 <el-dropdown-menu class="device-dropdown-menu">
                   <el-dropdown-item command="edit" icon="Edit">编辑</el-dropdown-item>
+                  <el-dropdown-item command="viewSnapshots" icon="Picture">查看抓图</el-dropdown-item>
                   <el-dropdown-item command="delete" icon="Delete" class="is-danger">删除</el-dropdown-item>
                   <!-- 大华设备校时 -->
                   <el-dropdown-item v-if="scope.row.type === '9'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
                   <!-- 大华设备信息 -->
                   <el-dropdown-item v-if="scope.row.type === '9'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
+                  <!-- 大华设备抓图 -->
+                  <el-dropdown-item v-if="scope.row.type === '9'" command="capture" icon="Camera">抓图</el-dropdown-item>
                   <!-- 大华设备重启 -->
                   <el-dropdown-item v-if="scope.row.type === '9'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
                 </el-dropdown-menu>
@@ -366,11 +369,14 @@
                   <template #dropdown>
                     <el-dropdown-menu class="device-dropdown-menu">
                       <el-dropdown-item command="edit" icon="Edit">编辑</el-dropdown-item>
+                      <el-dropdown-item command="viewSnapshots" icon="Picture">查看抓图</el-dropdown-item>
                       <el-dropdown-item command="delete" icon="Delete" class="is-danger">删除</el-dropdown-item>
                       <!-- 大华设备校时 -->
                       <el-dropdown-item v-if="item.type === '9'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
                       <!-- 大华设备信息 -->
                       <el-dropdown-item v-if="item.type === '9'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
+                      <!-- 大华设备抓图 -->
+                      <el-dropdown-item v-if="item.type === '9'" command="capture" icon="Camera">抓图</el-dropdown-item>
                       <!-- 大华设备重启 -->
                       <el-dropdown-item v-if="item.type === '9'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
                     </el-dropdown-menu>
@@ -1222,6 +1228,7 @@
 
     <SelectMapPosition ref="selectMapPositionRef" @onSubmit="selectMapPositionSubmit"/>
     <ChannelCode ref="channelCodeRef" @handleOk="channelCodeOk"/>
+    <DeviceSnapshotDialog ref="snapshotDialogRef"/>
   </div>
 </template>
 
@@ -1250,7 +1257,7 @@ import {
 import {listHaiKangIsupDevice} from "@/api/qs/haikang-isup";
 import {HaikangIsupDevice, PullConfig, RTPServerParam, WSDiscoveryDevice, WSOnvifDevice} from "@/types/api";
 import {DaHuaDevice, DaHuaDeviceInfo} from "@/types/api/qs/dahua";
-import {listDaHuaDevice, getDaHuaTime, setDaHuaTime, rebootDaHuaDevice, getDaHuaDeviceInfo, getDaHuaSystemParam, getDaHuaVideoParam, setDaHuaVideoParam, getDaHuaDeviceVideoParam, setDaHuaDeviceVideoParam} from "@/api/qs/dahua";
+import { listDaHuaDevice, getDaHuaTime, setDaHuaTime, rebootDaHuaDevice, getDaHuaDeviceInfo, getDaHuaSystemParam, getDaHuaVideoParam, setDaHuaVideoParam, getDaHuaDeviceVideoParam, setDaHuaDeviceVideoParam, captureDaHuaAndSave } from "@/api/qs/dahua";
 import {
   closeStreams,
   getStreamPushAddress,
@@ -1262,21 +1269,24 @@ import {
   startGb28181Play, stopGb28181Play,
   startJt1078Play, stopJt1078Play
 } from "@/api/qs/zlm";
-import {DocumentCopy, InfoFilled, Refresh, Sunny, Moon, SwitchButton, CircleClose, Position, Plus, Delete, WindPower, List, Grid, CircleCheck, Picture, VideoCamera, MapLocation, Monitor, More, ArrowDown, Clock} from '@element-plus/icons-vue'
+import {DocumentCopy, InfoFilled, Refresh, Sunny, Moon, SwitchButton, CircleClose, Position, Plus, Delete, WindPower, List, Grid, CircleCheck, Picture, VideoCamera, MapLocation, Monitor, More, ArrowDown, Clock, Camera} from '@element-plus/icons-vue'
 import StreamDropdown from "@/components/Channel/streamDropdown.vue";
 import MediaInfo from "@/components/Channel/mediaInfo.vue";
 import SelectMapPosition from '@/components/SelectMapPosition';
 import ChannelCode from '@/views/components/common/channelCode.vue';
+import DeviceSnapshotDialog from '@/components/DeviceSnapshotDialog/index.vue';
 import {getOnvifDeviceList, onvifLogin} from "@/api/qs/onvif";
 import {getAllDevices, getChannelsByDeviceId} from "@/api/qs/gb28181";
 import type {Gb28181Device, Gb28181Channel} from "@/types/api/qs/gb28181";
 import {getAllDevice} from "@/api/qs/jt1078";
 import type {Jt1078Device} from "@/types/api/qs/jt1078";
 import {ElMessageBox} from "element-plus";
+import {useRouter} from "vue-router";
 
 const {toClipboard} = useClipboard()
 
 const {proxy} = getCurrentInstance()
+const router = useRouter()
 const {
   qs_status,
   qs_live_stream_type,
@@ -1413,6 +1423,7 @@ const deviceVideoParam = reactive({
 });
 const currentDeviceId = ref<number | null>(null);
 const currentDeviceRow = ref<any>(null);
+const snapshotDialogRef = ref();
 
 // 接入地址
 const streamPushAddressForm = ref({});
@@ -2646,6 +2657,9 @@ const handleMoreAction = (command: string, row: QsDevice) => {
     case 'edit':
       handleUpdate(row);
       break;
+    case 'viewSnapshots':
+      snapshotDialogRef.value?.openDialog(row.id!, row.deviceName);
+      break;
     case 'delete':
       handleDelete(row);
       break;
@@ -2655,9 +2669,32 @@ const handleMoreAction = (command: string, row: QsDevice) => {
     case 'deviceInfo':
       openDeviceInfoDialog(row);
       break;
+    case 'capture':
+      handleCapture(row);
+      break;
     case 'reboot':
       handleReboot(row);
       break;
+  }
+}
+
+// 大华设备抓图
+const handleCapture = async (row: QsDevice) => {
+  try {
+    await proxy.$modal.confirm(`是否确认对设备"${row.deviceName}"进行抓图？`);
+    
+    const channelId = row.channel || 0;
+    const response = await captureDaHuaAndSave(row.id!, channelId, 'manual');
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('抓图成功，已保存到数据库');
+    } else {
+      proxy.$modal.msgError(response.msg || '抓图失败');
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('抓图失败:', error);
+      proxy.$modal.msgError('抓图失败');
+    }
   }
 }
 

@@ -165,3 +165,17 @@ export function setDaHuaDeviceVideoParam(id: number, channelId: number, param: D
     data: param
   })
 }
+
+/**
+ * 大华设备抓图并保存
+ * @param id 设备ID
+ * @param channelId 通道ID
+ * @param snapshotType 抓图类型
+ */
+export function captureDaHuaAndSave(id: number, channelId: number, snapshotType: string = 'manual'): Promise<AjaxResult<number>> {
+  return request({
+    url: `/dahua/device/captureAndSave/${id}/${channelId}`,
+    method: 'post',
+    params: { snapshotType }
+  })
+}
