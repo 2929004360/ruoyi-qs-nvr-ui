@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="app-container">
     <div class="search-box">
       <el-form :model="queryParams" ref="queryRef" :inline="true" v-show="showSearch" label-width="68px" class="query-form">
@@ -1059,7 +1059,7 @@
     </el-dialog>
 
     <!-- 大华设备信息对话框 -->
-    <el-dialog title="大华设备信息" v-model="deviceInfoDialogVisible" width="800px" append-to-body>
+    <el-dialog title="大华设备信息" v-model="deviceInfoDialogVisible" width="850px" append-to-body class="glass-dialog device-info-dialog">
       <el-tabs v-model="deviceInfoTabActive" type="border-card">
         <!-- 设备信息标签页 -->
         <el-tab-pane label="设备信息" name="deviceInfo">
@@ -1223,6 +1223,364 @@
             <el-button type="success" @click="handleSetDeviceVideoParam" :loading="deviceInfoLoading" icon="Check">设置</el-button>
           </div>
         </el-tab-pane>
+
+        <!-- 存储信息标签页 -->
+        <el-tab-pane label="存储信息" name="storageInfo">
+          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+            <el-empty v-if="!storageInfo.storageDevices || storageInfo.storageDevices.length === 0" description="暂无存储设备信息"/>
+            <el-collapse v-else accordion>
+              <el-collapse-item v-for="(device, index) in storageInfo.storageDevices" :key="index" :title="device.name || `存储设备${index + 1}`">
+                <el-descriptions :column="2" border size="small">
+                  <el-descriptions-item label="设备名称">{{ device.name || '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="介质类型">
+                    <el-tag v-if="device.mediaTypeDesc" :type="device.mediaType === 2 ? 'warning' : ''">{{ device.mediaTypeDesc }}</el-tag>
+                    <span v-else>{{ device.mediaType !== undefined ? device.mediaType : '-' }}</span>
+                  </el-descriptions-item>
+                  <el-descriptions-item label="总线类型">{{ device.busTypeDesc || device.busType || '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="卷类型">{{ device.volumeTypeDesc || device.volumeType || '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="总容量">{{ device.totalSpaceGB !== undefined ? `${device.totalSpaceGB.toFixed(2)} GB` : '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="可用空间">{{ device.freeSpaceGB !== undefined ? `${device.freeSpaceGB.toFixed(2)} GB` : '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="已用空间">{{ device.usedSpaceGB !== undefined ? `${device.usedSpaceGB.toFixed(2)} GB` : '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="使用率">
+                    <el-progress v-if="device.usagePercent !== undefined" :percentage="device.usagePercent" :color="device.usagePercent > 80 ? '#f56c6c' : '#67c23a'"/>
+                    <span v-else>-</span>
+                  </el-descriptions-item>
+                  <el-descriptions-item label="设备状态">
+                    <el-tag :type="device.state === 1 ? 'success' : 'info'">{{ device.stateDesc || device.state || '-' }}</el-tag>
+                  </el-descriptions-item>
+                  <el-descriptions-item label="操作状态">{{ device.opStateDesc || device.opState || '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="序列号" v-if="device.serial">{{ device.serial }}</el-descriptions-item>
+                  <el-descriptions-item label="固件版本" v-if="device.firmware">{{ device.firmware }}</el-descriptions-item>
+                </el-descriptions>
+                <div v-if="device.partitions && device.partitions.length > 0" style="margin-top: 15px;">
+                  <div style="font-weight: bold; margin-bottom: 10px;">分区信息:</div>
+                  <el-table :data="device.partitions" border size="small" style="width: 100%">
+                    <el-table-column prop="name" label="分区名称"/>
+                    <el-table-column label="总容量">
+                      <template #default="{ row }">
+                        {{ row.totalSpaceGB !== undefined ? `${row.totalSpaceGB.toFixed(2)} GB` : '-' }}
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="可用空间">
+                      <template #default="{ row }">
+                        {{ row.freeSpaceGB !== undefined ? `${row.freeSpaceGB.toFixed(2)} GB` : '-' }}
+                      </template>
+                    </el-table-column>
+                  </el-table>
+                </div>
+              </el-collapse-item>
+            </el-collapse>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="deviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetStorageInfo" :loading="deviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 系统资源标签页 -->
+        <el-tab-pane label="系统资源" name="systemResourceInfo">
+          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+            <el-empty v-if="!systemResourceInfo.success" description="暂无系统资源信息"/>
+            <el-descriptions :column="2" border v-else>
+              <el-descriptions-item label="CPU使用率">
+                <el-progress v-if="systemResourceInfo.cpuUsage !== undefined" :percentage="systemResourceInfo.cpuUsage" :color="systemResourceInfo.cpuUsage > 80 ? '#f56c6c' : '#67c23a'"/>
+                <span v-else>-</span>
+              </el-descriptions-item>
+              <el-descriptions-item label="内存使用率">
+                <el-progress v-if="systemResourceInfo.memoryUsage !== undefined" :percentage="systemResourceInfo.memoryUsage" :color="systemResourceInfo.memoryUsage > 80 ? '#f56c6c' : '#67c23a'"/>
+                <span v-else>-</span>
+              </el-descriptions-item>
+              <el-descriptions-item label="IP通道接入速度" v-if="systemResourceInfo.ipChannelIn !== undefined">{{ systemResourceInfo.ipChannelIn }} Mbps</el-descriptions-item>
+              <el-descriptions-item label="网络剩余能力" v-if="systemResourceInfo.netRemain !== undefined">{{ systemResourceInfo.netRemain }} Mbps</el-descriptions-item>
+              <el-descriptions-item label="网络总能力" v-if="systemResourceInfo.netCapability !== undefined">{{ systemResourceInfo.netCapability }} Mbps</el-descriptions-item>
+              <el-descriptions-item label="远程预览能力" v-if="systemResourceInfo.previewRemain !== undefined">{{ systemResourceInfo.previewRemain }}</el-descriptions-item>
+              <el-descriptions-item label="远程回放能力" v-if="systemResourceInfo.playBackRemain !== undefined">{{ systemResourceInfo.playBackRemain }}</el-descriptions-item>
+              <el-descriptions-item label="远程发送能力" v-if="systemResourceInfo.netSendRemain !== undefined">{{ systemResourceInfo.netSendRemain }}</el-descriptions-item>
+              <el-descriptions-item label="解码能力" v-if="systemResourceInfo.decodeAbility !== undefined">{{ systemResourceInfo.decodeAbility }}</el-descriptions-item>
+            </el-descriptions>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="deviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetSystemResourceInfo" :loading="deviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- SD卡信息标签页 -->
+        <el-tab-pane label="SD卡信息" name="sdCardInfo">
+          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+            <el-empty v-if="!sdCardInfo.success" description="暂无SD卡信息"/>
+            <div v-else>
+              <el-descriptions :column="2" border style="margin-bottom: 20px;">
+                <el-descriptions-item label="SD卡状态">
+                  <el-tag :type="sdCardInfo.exists ? 'success' : 'info'">{{ sdCardInfo.exists ? '已检测到' : '未检测到' }}</el-tag>
+                </el-descriptions-item>
+                <el-descriptions-item label="总容量(GB)" v-if="sdCardInfo.totalSpaceGB !== undefined">{{ sdCardInfo.totalSpaceGB }} GB</el-descriptions-item>
+                <el-descriptions-item label="可用空间(GB)" v-if="sdCardInfo.freeSpaceGB !== undefined">{{ sdCardInfo.freeSpaceGB }} GB</el-descriptions-item>
+                <el-descriptions-item label="已用空间(GB)" v-if="sdCardInfo.usedSpaceGB !== undefined">{{ sdCardInfo.usedSpaceGB }} GB</el-descriptions-item>
+                <el-descriptions-item label="使用率" v-if="sdCardInfo.usagePercent !== undefined">
+                  <el-progress :percentage="sdCardInfo.usagePercent" :status="sdCardInfo.usagePercent > 90 ? 'exception' : 'success'"/>
+                </el-descriptions-item>
+                <el-descriptions-item label="硬盘数量" v-if="sdCardInfo.diskCount !== undefined">{{ sdCardInfo.diskCount }}</el-descriptions-item>
+              </el-descriptions>
+              
+              <div v-if="sdCardInfo.diskList && sdCardInfo.diskList.length > 0">
+                <div style="font-weight: bold; margin-bottom: 10px;">硬盘详细信息:</div>
+                <el-table :data="sdCardInfo.diskList" border size="small" style="width: 100%">
+                  <el-table-column prop="diskNumber" label="硬盘编号" width="100"/>
+                  <el-table-column prop="partitionNumber" label="分区号" width="100"/>
+                  <el-table-column prop="volume" label="卷名"/>
+                  <el-table-column prop="freeSpace" label="剩余容量"/>
+                  <el-table-column prop="signal" label="信号"/>
+                  <el-table-column label="状态">
+                    <template #default="{ row }">
+                      <el-tag :type="row.status === 1 ? 'success' : 'info'">
+                        {{ getDiskStatusText(row.diskStatus, row.status) }}
+                      </el-tag>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="deviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetSDCardInfo" :loading="deviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 码流信息标签页 -->
+        <el-tab-pane label="码流信息" name="bitrateInfo">
+          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+            <el-empty v-if="!bitrateInfo.success || !bitrateInfo.channelBitrates || bitrateInfo.channelBitrates.length === 0" description="暂无码流信息"/>
+            <el-table :data="bitrateInfo.channelBitrates" border v-else style="width: 100%">
+              <el-table-column prop="channelId" label="通道号"/>
+              <el-table-column prop="streamType" label="码流类型"/>
+              <el-table-column prop="bitrate" label="实时码率 (kbps)"/>
+              <el-table-column prop="bitrateDesc" label="描述" v-if="bitrateInfo.channelBitrates[0]?.bitrateDesc"/>
+            </el-table>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="deviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetBitrateInfo" :loading="deviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 网络状态标签页 -->
+        <el-tab-pane label="网络状态" name="networkStatusInfo">
+          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+            <el-empty v-if="!networkStatusInfo.success" description="暂无网络状态信息"/>
+            <el-descriptions :column="2" border v-else>
+              <el-descriptions-item label="IP地址">{{ networkStatusInfo.ipAddress || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="子网掩码">{{ networkStatusInfo.subnetMask || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="网关">{{ networkStatusInfo.gateway || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="MAC地址">{{ networkStatusInfo.macAddress || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="网络连接">
+                <el-tag :type="networkStatusInfo.linkStatus ? 'success' : 'info'">{{ networkStatusInfo.linkStatusDesc || (networkStatusInfo.linkStatus ? '已连接' : '未连接') }}</el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item label="DNS 1">{{ networkStatusInfo.dns1 || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="DNS 2">{{ networkStatusInfo.dns2 || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="网络可用" v-if="networkStatusInfo.networkAvailable !== undefined">
+                <el-tag :type="networkStatusInfo.networkAvailable ? 'success' : 'warning'">{{ networkStatusInfo.networkAvailable ? '是' : '否' }}</el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item label="无线功能" v-if="networkStatusInfo.hasWireless !== undefined">
+                <el-tag :type="networkStatusInfo.hasWireless ? 'success' : 'info'">{{ networkStatusInfo.hasWireless ? '支持' : '不支持' }}</el-tag>
+              </el-descriptions-item>
+            </el-descriptions>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="deviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetNetworkStatusInfo" :loading="deviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 软件版本标签页 -->
+        <el-tab-pane label="软件版本" name="softwareVersionInfo">
+          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+            <el-empty v-if="!softwareVersionInfo.success" description="暂无软件版本信息"/>
+            <el-descriptions :column="2" border v-else>
+              <el-descriptions-item label="设备型号">{{ softwareVersionInfo.deviceModel || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="序列号">{{ softwareVersionInfo.serialNumber || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="软件版本" :span="2">{{ softwareVersionInfo.fullVersion || softwareVersionInfo.softwareVersion || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="Web版本" v-if="softwareVersionInfo.webVersion">{{ softwareVersionInfo.webVersion }}</el-descriptions-item>
+              <el-descriptions-item label="硬件版本" v-if="softwareVersionInfo.hardwareVersion">{{ softwareVersionInfo.hardwareVersion }}</el-descriptions-item>
+              <el-descriptions-item label="外围版本" v-if="softwareVersionInfo.peripheralVersion">{{ softwareVersionInfo.peripheralVersion }}</el-descriptions-item>
+              <el-descriptions-item label="地理版本" v-if="softwareVersionInfo.geographyVersion">{{ softwareVersionInfo.geographyVersion }}</el-descriptions-item>
+              <el-descriptions-item label="协议版本" v-if="softwareVersionInfo.protocolVersion !== undefined">{{ softwareVersionInfo.protocolVersion }}</el-descriptions-item>
+              <el-descriptions-item label="软件构建时间" v-if="softwareVersionInfo.softwareBuildDate !== undefined">{{ softwareVersionInfo.softwareBuildDate }}</el-descriptions-item>
+              <el-descriptions-item label="Web构建时间" v-if="softwareVersionInfo.webBuildDate !== undefined">{{ softwareVersionInfo.webBuildDate }}</el-descriptions-item>
+              <el-descriptions-item label="外围构建时间" v-if="softwareVersionInfo.peripheralBuildDate !== undefined">{{ softwareVersionInfo.peripheralBuildDate }}</el-descriptions-item>
+              <el-descriptions-item label="地理构建时间" v-if="softwareVersionInfo.geographyBuildDate !== undefined">{{ softwareVersionInfo.geographyBuildDate }}</el-descriptions-item>
+              <el-descriptions-item label="硬件时间" v-if="softwareVersionInfo.hardwareDate !== undefined">{{ softwareVersionInfo.hardwareDate }}</el-descriptions-item>
+            </el-descriptions>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="deviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetSoftwareVersionInfo" :loading="deviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 录像状态标签页 -->
+        <el-tab-pane label="录像状态" name="recordStateInfo">
+          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+            <el-empty v-if="!recordStateInfo.success" description="暂无录像状态信息"/>
+            <div v-else>
+              <el-descriptions :column="2" border style="margin-bottom: 20px;">
+                <el-descriptions-item label="整体录像状态">
+                  <el-tag :type="recordStateInfo.wholeRecording ? 'success' : 'info'">{{ recordStateInfo.wholeRecording ? '正在录像' : '未录像' }}</el-tag>
+                </el-descriptions-item>
+                <el-descriptions-item label="整体编码状态">
+                  <el-tag :type="recordStateInfo.wholeEncoding ? 'success' : 'info'">{{ recordStateInfo.wholeEncoding ? '正在编码' : '未编码' }}</el-tag>
+                </el-descriptions-item>
+              </el-descriptions>
+              <div v-if="recordStateInfo.channelStates && recordStateInfo.channelStates.length > 0">
+                <div style="font-weight: bold; margin-bottom: 10px;">通道录像状态:</div>
+                <el-table :data="recordStateInfo.channelStates" border size="small" style="width: 100%">
+                  <el-table-column prop="channelId" label="通道号" width="100"/>
+                  <el-table-column prop="mainStreamRecording" label="主码流录像" width="120">
+                    <template #default="{ row }">
+                      <el-tag :type="row.mainStreamRecording ? 'success' : 'info'">{{ row.mainStreamRecording ? '录像中' : '未录像' }}</el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="extraStream1Recording" label="辅码流1录像" width="120">
+                    <template #default="{ row }">
+                      <el-tag :type="row.extraStream1Recording ? 'success' : 'info'">{{ row.extraStream1Recording ? '录像中' : '未录像' }}</el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="extraStream2Recording" label="辅码流2录像" width="120">
+                    <template #default="{ row }">
+                      <el-tag :type="row.extraStream2Recording ? 'success' : 'info'">{{ row.extraStream2Recording ? '录像中' : '未录像' }}</el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="extraStream3Recording" label="辅码流3录像" width="120">
+                    <template #default="{ row }">
+                      <el-tag :type="row.extraStream3Recording ? 'success' : 'info'">{{ row.extraStream3Recording ? '录像中' : '未录像' }}</el-tag>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="deviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetRecordStateInfo" :loading="deviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 电源状态标签页 -->
+        <el-tab-pane label="电源状态" name="powerStateInfo">
+          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+            <el-empty v-if="!powerStateInfo.success" description="暂无电源状态信息"/>
+            <div v-else>
+              <el-empty v-if="!powerStateInfo.powerStates || powerStateInfo.powerStates.length === 0" description="暂无电源设备信息"/>
+              <el-table :data="powerStateInfo.powerStates" border size="small" style="width: 100%" v-else>
+                <el-table-column prop="powerId" label="电源ID" width="100"/>
+                <el-table-column prop="powerName" label="电源名称" width="150"/>
+                <el-table-column prop="status" label="电源状态" width="120">
+                  <template #default="{ row }">
+                    <el-tag :type="row.status ? 'success' : 'info'">{{ row.statusDesc || (row.status ? '正常' : '异常') }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="online" label="在线状态" width="100">
+                  <template #default="{ row }">
+                    <el-tag :type="row.online ? 'success' : 'warning'">{{ row.online ? '在线' : '离线' }}</el-tag>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="deviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetPowerStateInfo" :loading="deviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 报警布防标签页 -->
+        <el-tab-pane label="报警布防" name="alarmArmInfo">
+          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+            <el-empty v-if="!alarmArmInfo.success" description="暂无报警布防信息"/>
+            <div v-else>
+              <el-empty v-if="!alarmArmInfo.channelStates || alarmArmInfo.channelStates.length === 0" description="暂无报警设备信息"/>
+              <el-table :data="alarmArmInfo.channelStates" border size="small" style="width: 100%" v-else>
+                <el-table-column prop="channelId" label="通道号" width="100"/>
+                <el-table-column prop="channelName" label="通道名称" width="150"/>
+                <el-table-column prop="armed" label="布防状态" width="120">
+                  <template #default="{ row }">
+                    <el-tag :type="row.armed ? 'success' : 'warning'">{{ row.armed ? '已布防' : '未布防' }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="armType" label="布防类型" width="120">
+                  <template #default="{ row }">
+                    {{ row.armTypeDesc || row.armType }}
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="deviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetAlarmArmInfo" :loading="deviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 摄像头属性标签页 -->
+        <el-tab-pane label="摄像头属性" name="cameraInfo">
+          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+            <el-empty v-if="!cameraInfo.success" description="暂无摄像头属性信息"/>
+            <div v-else>
+              <el-empty v-if="!cameraInfo.cameraList || cameraInfo.cameraList.length === 0" description="暂无摄像头信息"/>
+              <el-table :data="cameraInfo.cameraList" border size="small" style="width: 100%" v-else>
+                <el-table-column prop="channelId" label="通道号" width="100"/>
+                <el-table-column prop="cameraName" label="摄像头名称" width="150"/>
+                <el-table-column prop="cameraType" label="摄像头类型" width="120"/>
+                <el-table-column prop="online" label="在线状态" width="100">
+                  <template #default="{ row }">
+                    <el-tag :type="row.online ? 'success' : 'warning'">{{ row.online ? '在线' : '离线' }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="status" label="状态" width="120">
+                  <template #default="{ row }">
+                    {{ row.statusDesc || row.status }}
+                  </template>
+                </el-table-column>
+                <el-table-column prop="manufacturer" label="厂商" width="120"/>
+                <el-table-column prop="model" label="型号" width="150"/>
+                <el-table-column prop="ipAddress" label="IP地址" width="150"/>
+                <el-table-column prop="port" label="端口" width="80"/>
+              </el-table>
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="deviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetCameraInfo" :loading="deviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- RTSP URL标签页 -->
+        <el-tab-pane label="RTSP URL" name="rtspUrlInfo">
+          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+            <el-empty v-if="!rtspUrlInfo.success" description="暂无RTSP URL信息"/>
+            <div v-else>
+              <el-empty v-if="!rtspUrlInfo.urlList || rtspUrlInfo.urlList.length === 0" description="暂无RTSP URL信息"/>
+              <el-table :data="rtspUrlInfo.urlList" border size="small" style="width: 100%" v-else>
+                <el-table-column prop="channelId" label="通道号" width="100"/>
+                <el-table-column prop="streamType" label="码流类型" width="150"/>
+                <el-table-column prop="url" label="RTSP URL">
+                  <template #default="{ row }">
+                    <div class="flex items-center gap-2">
+                      <el-input v-model="row.url" disabled size="small" style="flex: 1;"/>
+                      <el-button type="primary" size="small" link @click="handleCopy(row.url)">复制</el-button>
+                    </div>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="description" label="描述" width="200"/>
+              </el-table>
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="deviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetRtspUrlInfo" :loading="deviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
       </el-tabs>
     </el-dialog>
 
@@ -1256,8 +1614,28 @@ import {
 } from "@/api/qs/device"
 import {listHaiKangIsupDevice} from "@/api/qs/haikang-isup";
 import {HaikangIsupDevice, PullConfig, RTPServerParam, WSDiscoveryDevice, WSOnvifDevice} from "@/types/api";
-import {DaHuaDevice, DaHuaDeviceInfo} from "@/types/api/qs/dahua";
-import { listDaHuaDevice, getDaHuaTime, setDaHuaTime, rebootDaHuaDevice, getDaHuaDeviceInfo, getDaHuaSystemParam, getDaHuaVideoParam, setDaHuaVideoParam, getDaHuaDeviceVideoParam, setDaHuaDeviceVideoParam, captureDaHuaAndSave } from "@/api/qs/dahua";
+import {
+  DaHuaDevice,
+  DaHuaDeviceInfo,
+  DaHuaStorageInfo,
+  DaHuaSystemResourceInfo,
+  DaHuaSDCardInfo,
+  DaHuaBitrateInfo,
+  DaHuaNetworkStatusInfo,
+  DaHuaSoftwareVersionInfo,
+  DaHuaRecordStateInfo,
+  DaHuaPowerStateInfo,
+  DaHuaAlarmArmInfo,
+  DaHuaCameraInfo,
+  DaHuaRtspUrlInfo
+} from "@/types/api/qs/dahua";
+import {
+  listDaHuaDevice, getDaHuaTime, setDaHuaTime, rebootDaHuaDevice, getDaHuaDeviceInfo, getDaHuaSystemParam,
+  getDaHuaVideoParam, setDaHuaVideoParam, getDaHuaDeviceVideoParam, setDaHuaDeviceVideoParam, captureDaHuaAndSave,
+  getDaHuaStorageInfo, getDaHuaSystemResourceInfo, getDaHuaSDCardInfo, getDaHuaBitrateInfo,
+  getDaHuaNetworkStatusInfo, getDaHuaSoftwareVersionInfo, getDaHuaRecordStateInfo, getDaHuaPowerStateInfo,
+  getDaHuaAlarmArmInfo, getDaHuaCameraInfo, getDaHuaRtspUrlInfo
+} from "@/api/qs/dahua";
 import {
   closeStreams,
   getStreamPushAddress,
@@ -1420,6 +1798,50 @@ const deviceVideoParam = reactive({
   hue: undefined,
   gain: undefined,
   blackWhiteMode: undefined
+});
+const storageInfo = reactive<DaHuaStorageInfo>({
+  storageDevices: []
+});
+const systemResourceInfo = reactive<DaHuaSystemResourceInfo>({
+  success: false,
+  cpuUsage: 0,
+  memoryUsage: 0
+});
+const sdCardInfo = reactive<DaHuaSDCardInfo>({
+  success: false,
+  exists: false
+});
+const bitrateInfo = reactive<DaHuaBitrateInfo>({
+  success: false,
+  channelBitrates: []
+});
+const networkStatusInfo = reactive<DaHuaNetworkStatusInfo>({
+  success: false
+});
+const softwareVersionInfo = reactive<DaHuaSoftwareVersionInfo>({
+  success: false
+});
+const recordStateInfo = reactive<DaHuaRecordStateInfo>({
+  success: false,
+  wholeRecording: false,
+  wholeEncoding: false,
+  channelStates: []
+});
+const powerStateInfo = reactive<DaHuaPowerStateInfo>({
+  success: false,
+  powerStates: []
+});
+const alarmArmInfo = reactive<DaHuaAlarmArmInfo>({
+  success: false,
+  alarmStates: []
+});
+const cameraInfo = reactive<DaHuaCameraInfo>({
+  success: false,
+  cameraProperties: []
+});
+const rtspUrlInfo = reactive<DaHuaRtspUrlInfo>({
+  success: false,
+  rtspUrls: []
 });
 const currentDeviceId = ref<number | null>(null);
 const currentDeviceRow = ref<any>(null);
@@ -2762,6 +3184,26 @@ const openDeviceInfoDialog = (row: QsDevice) => {
     gain: undefined,
     blackWhiteMode: undefined
   });
+  storageInfo.storageDevices = [];
+  Object.assign(systemResourceInfo, {
+    success: false,
+    cpuUsage: 0,
+    memoryUsage: 0
+  });
+  Object.assign(sdCardInfo, {
+    success: false,
+    exists: false
+  });
+  Object.assign(bitrateInfo, {
+    success: false,
+    channelBitrates: []
+  });
+  Object.assign(networkStatusInfo, {
+    success: false
+  });
+  Object.assign(softwareVersionInfo, {
+    success: false
+  });
   deviceInfoDialogVisible.value = true;
   handleRefreshDeviceInfo();
 }
@@ -2868,6 +3310,253 @@ const handleSetDeviceVideoParam = async () => {
   } catch (error) {
     console.error('设置设备视频参数失败:', error);
     proxy.$modal.msgError('设置设备视频参数失败');
+  } finally {
+    deviceInfoLoading.value = false;
+  }
+}
+
+// 获取存储信息
+const handleGetStorageInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    deviceInfoLoading.value = true;
+    const res = await getDaHuaStorageInfo(currentDeviceId.value);
+    if (res.data) {
+      storageInfo.storageDevices = res.data.storageDevices || [];
+      proxy.$modal.msgSuccess('获取存储信息成功');
+    }
+  } catch (error) {
+    console.error('获取存储信息失败:', error);
+    proxy.$modal.msgError('获取存储信息失败');
+  } finally {
+    deviceInfoLoading.value = false;
+  }
+}
+
+// 获取系统资源信息
+const handleGetSystemResourceInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    deviceInfoLoading.value = true;
+    const res = await getDaHuaSystemResourceInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(systemResourceInfo, res.data);
+      proxy.$modal.msgSuccess('获取系统资源信息成功');
+    }
+  } catch (error) {
+    console.error('获取系统资源信息失败:', error);
+    proxy.$modal.msgError('获取系统资源信息失败');
+  } finally {
+    deviceInfoLoading.value = false;
+  }
+}
+
+// 获取SD卡信息
+// 获取磁盘状态文本
+const getDiskStatusText = (diskStatus: number | undefined, status: number | undefined) => {
+  if (diskStatus !== undefined) {
+    const statusMap: Record<number, string> = {
+      0: '未知',
+      1: '正常',
+      2: '异常',
+      3: '未格式化',
+      4: '格式化中',
+      5: '正在检测',
+      6: '休眠',
+      7: '离线'
+    };
+    return statusMap[diskStatus] || `状态(${diskStatus})`;
+  }
+  if (status !== undefined) {
+    return `状态(${status})`;
+  }
+  return '-';
+};
+
+const handleGetSDCardInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    deviceInfoLoading.value = true;
+    const res = await getDaHuaSDCardInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(sdCardInfo, res.data);
+      proxy.$modal.msgSuccess('获取SD卡信息成功');
+    }
+  } catch (error) {
+    console.error('获取SD卡信息失败:', error);
+    proxy.$modal.msgError('获取SD卡信息失败');
+  } finally {
+    deviceInfoLoading.value = false;
+  }
+}
+
+// 获取码流信息
+const handleGetBitrateInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    deviceInfoLoading.value = true;
+    const res = await getDaHuaBitrateInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(bitrateInfo, res.data);
+      proxy.$modal.msgSuccess('获取码流信息成功');
+    }
+  } catch (error) {
+    console.error('获取码流信息失败:', error);
+    proxy.$modal.msgError('获取码流信息失败');
+  } finally {
+    deviceInfoLoading.value = false;
+  }
+}
+
+// 获取网络状态信息
+const handleGetNetworkStatusInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    deviceInfoLoading.value = true;
+    const res = await getDaHuaNetworkStatusInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(networkStatusInfo, res.data);
+      proxy.$modal.msgSuccess('获取网络状态信息成功');
+    }
+  } catch (error) {
+    console.error('获取网络状态信息失败:', error);
+    proxy.$modal.msgError('获取网络状态信息失败');
+  } finally {
+    deviceInfoLoading.value = false;
+  }
+}
+
+// 获取软件版本信息
+const handleGetSoftwareVersionInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    deviceInfoLoading.value = true;
+    const res = await getDaHuaSoftwareVersionInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(softwareVersionInfo, res.data);
+      proxy.$modal.msgSuccess('获取软件版本信息成功');
+    }
+  } catch (error) {
+    console.error('获取软件版本信息失败:', error);
+    proxy.$modal.msgError('获取软件版本信息失败');
+  } finally {
+    deviceInfoLoading.value = false;
+  }
+}
+
+const handleGetRecordStateInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    deviceInfoLoading.value = true;
+    const res = await getDaHuaRecordStateInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(recordStateInfo, res.data);
+      proxy.$modal.msgSuccess('获取录像状态信息成功');
+    }
+  } catch (error) {
+    console.error('获取录像状态信息失败:', error);
+    proxy.$modal.msgError('获取录像状态信息失败');
+  } finally {
+    deviceInfoLoading.value = false;
+  }
+}
+
+const handleGetPowerStateInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    deviceInfoLoading.value = true;
+    const res = await getDaHuaPowerStateInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(powerStateInfo, res.data);
+      proxy.$modal.msgSuccess('获取电源状态信息成功');
+    }
+  } catch (error) {
+    console.error('获取电源状态信息失败:', error);
+    proxy.$modal.msgError('获取电源状态信息失败');
+  } finally {
+    deviceInfoLoading.value = false;
+  }
+}
+
+const handleGetAlarmArmInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    deviceInfoLoading.value = true;
+    const res = await getDaHuaAlarmArmInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(alarmArmInfo, res.data);
+      proxy.$modal.msgSuccess('获取报警布防信息成功');
+    }
+  } catch (error) {
+    console.error('获取报警布防信息失败:', error);
+    proxy.$modal.msgError('获取报警布防信息失败');
+  } finally {
+    deviceInfoLoading.value = false;
+  }
+}
+
+const handleGetCameraInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    deviceInfoLoading.value = true;
+    const res = await getDaHuaCameraInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(cameraInfo, res.data);
+      proxy.$modal.msgSuccess('获取摄像头属性信息成功');
+    }
+  } catch (error) {
+    console.error('获取摄像头属性信息失败:', error);
+    proxy.$modal.msgError('获取摄像头属性信息失败');
+  } finally {
+    deviceInfoLoading.value = false;
+  }
+}
+
+const handleGetRtspUrlInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    deviceInfoLoading.value = true;
+    const res = await getDaHuaRtspUrlInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(rtspUrlInfo, res.data);
+      proxy.$modal.msgSuccess('获取RTSP URL信息成功');
+    }
+  } catch (error) {
+    console.error('获取RTSP URL信息失败:', error);
+    proxy.$modal.msgError('获取RTSP URL信息失败');
   } finally {
     deviceInfoLoading.value = false;
   }
@@ -3858,8 +4547,325 @@ watch(easyPlayerOpen, (newVal) => {
   right: -1px;
   top: -1px;
   border-bottom: 1px solid var(--el-color-primary-light-3);
-  border-left: 1px solid var(--el-color-primary-light-3);
-  border-radius: 0 0 0 100%;
+}
+
+/* ========== 大华设备信息对话框样式 ========== */
+:deep(.glass-dialog.device-info-dialog .el-dialog) {
+  border-radius: 20px;
+  background: var(--el-bg-color-page);
+  backdrop-filter: blur(20px) saturate(1.3);
+  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  border: 1px solid var(--el-border-color-lighter);
+  box-shadow: var(--el-box-shadow-light);
+  overflow: hidden;
+  animation: dialogEnter 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes dialogEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 头部 */
+:deep(.glass-dialog.device-info-dialog .el-dialog__header) {
+  padding: 20px 24px 16px;
+  margin-right: 0;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  position: relative;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-dialog__header::after) {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 24px;
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--el-color-primary), var(--el-color-primary-light-5));
+  border-radius: 2px;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-dialog__title) {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  letter-spacing: 0.3px;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-dialog__headerbtn) {
+  top: 18px;
+  right: 20px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:deep(.glass-dialog.device-info-dialog .el-dialog__headerbtn:hover) {
+  background: var(--el-fill-color-light);
+  transform: rotate(90deg);
+}
+
+:deep(.glass-dialog.device-info-dialog .el-dialog__close) {
+  color: var(--el-text-color-secondary);
+  font-size: 20px;
+  transition: color 0.25s;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-dialog__headerbtn:hover .el-dialog__close) {
+  color: var(--el-color-primary);
+}
+
+/* 主体 */
+:deep(.glass-dialog.device-info-dialog .el-dialog__body) {
+  padding: 0;
+}
+
+/* 标签页样式 */
+:deep(.glass-dialog.device-info-dialog .el-tabs) {
+  border: none;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-tabs--border-card) {
+  border: none;
+  box-shadow: none;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-tabs__header) {
+  margin: 0;
+  background: var(--el-fill-color-lighter);
+  border: none;
+  padding: 0 24px;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-tabs__nav-wrap::after) {
+  display: none;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-tabs__nav) {
+  border: none;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-tabs__item) {
+  padding: 14px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--el-text-color-secondary);
+  border: none;
+  background: transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-tabs__item:hover) {
+  color: var(--el-color-primary);
+  background: var(--el-fill-color-light);
+}
+
+:deep(.glass-dialog.device-info-dialog .el-tabs__item.is-active) {
+  color: var(--el-color-primary);
+  background: var(--el-bg-color);
+  font-weight: 600;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-tabs__active-bar) {
+  height: 3px;
+  background: linear-gradient(90deg, var(--el-color-primary), var(--el-color-primary-light-5));
+  border-radius: 2px 2px 0 0;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-tabs__content) {
+  padding: 24px;
+  background: var(--el-bg-color);
+}
+
+/* 描述列表优化 */
+:deep(.glass-dialog.device-info-dialog .el-descriptions) {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  animation: fadeInUp 0.4s ease-out;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-descriptions__header) {
+  background: var(--el-fill-color-light);
+}
+
+:deep(.glass-dialog.device-info-dialog .el-descriptions__label) {
+  background: var(--el-fill-color-lighter);
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  padding: 14px 16px;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-descriptions__body .el-descriptions__cell) {
+  padding: 14px 16px;
+}
+
+/* 表格优化 */
+:deep(.glass-dialog.device-info-dialog .el-table) {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+:deep(.glass-dialog.device-info-dialog .el-table__header-wrapper th) {
+  background: var(--el-fill-color-light) !important;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  padding: 14px 0;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-table__body-wrapper tr) {
+  transition: all 0.25s ease;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-table__body-wrapper tr:hover) {
+  background-color: var(--el-color-primary-light-9) !important;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-table__body-wrapper td) {
+  padding: 12px 0;
+}
+
+/* 折叠面板优化 */
+:deep(.glass-dialog.device-info-dialog .el-collapse) {
+  border: none;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-collapse-item) {
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-collapse-item:last-child) {
+  margin-bottom: 0;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-collapse-item:hover) {
+  border-color: var(--el-color-primary-light-5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+:deep(.glass-dialog.device-info-dialog .el-collapse-item__header) {
+  padding: 14px 18px;
+  background: var(--el-fill-color-lighter);
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-collapse-item__wrap) {
+  background: var(--el-bg-color);
+  border: none;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-collapse-item__content) {
+  padding: 18px;
+}
+
+/* 表单优化 */
+:deep(.glass-dialog.device-info-dialog .el-form-item) {
+  margin-bottom: 20px;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-form-item__label) {
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+:deep(.glass-dialog.device-info-dialog .el-input__wrapper) {
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-select .el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px var(--el-color-primary-light-5) inset;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-select .el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px var(--el-color-primary) inset, 0 0 0 3px var(--el-color-primary-light-8);
+}
+
+/* 按钮底部区域 */
+:deep(.glass-dialog.device-info-dialog .dialog-footer) {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 24px;
+  border-top: 1px solid var(--el-border-color-lighter);
+  margin-top: 24px;
+}
+
+:deep(.glass-dialog.device-info-dialog .dialog-footer .el-button) {
+  border-radius: 10px;
+  padding: 10px 24px;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:deep(.glass-dialog.device-info-dialog .dialog-footer .el-button:not(:disabled):hover) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+:deep(.glass-dialog.device-info-dialog .dialog-footer .el-button--primary:not(:disabled):hover) {
+  box-shadow: 0 4px 14px rgba(var(--el-color-primary-rgb), 0.3);
+}
+
+:deep(.glass-dialog.device-info-dialog .dialog-footer .el-button--success:not(:disabled):hover) {
+  box-shadow: 0 4px 14px rgba(var(--el-color-success-rgb), 0.3);
+}
+
+/* 进度条优化 */
+:deep(.glass-dialog.device-info-dialog .el-progress-bar__outer) {
+  border-radius: 10px;
+  background: var(--el-fill-color-lighter);
+}
+
+:deep(.glass-dialog.device-info-dialog .el-progress-bar__inner) {
+  border-radius: 10px;
+}
+
+/* 标签优化 */
+:deep(.glass-dialog.device-info-dialog .el-tag) {
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+/* 空状态优化 */
+:deep(.glass-dialog.device-info-dialog .el-empty) {
+  padding: 40px 0;
+}
+
+/* 加载动画 */
+:deep(.glass-dialog.device-info-dialog .el-loading-mask) {
+  border-radius: 12px;
+}
+
+/* 深色模式适配 */
+@media (prefers-color-scheme: dark) {
+  :deep(.glass-dialog.device-info-dialog .el-dialog) {
+    border-color: var(--el-border-color);
+  }
+  
+  :deep(.glass-dialog.device-info-dialog .el-dialog__header) {
+    border-color: var(--el-border-color);
+  }
+  
+  :deep(.glass-dialog.device-info-dialog .dialog-footer) {
+    border-color: var(--el-border-color);
+  }
 }
 
 .control-left .fa {

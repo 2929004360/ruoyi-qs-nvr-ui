@@ -1,5 +1,22 @@
 import request from '@/utils/request'
-import {DaHuaDevice, DaHuaDeviceInfo, DaHuaSystemParam, DaHuaVideoParam, DaHuaDeviceVideoParam} from "@/types/api/qs/dahua";
+import {
+  DaHuaDevice,
+  DaHuaDeviceInfo,
+  DaHuaSystemParam,
+  DaHuaVideoParam,
+  DaHuaDeviceVideoParam,
+  DaHuaStorageInfo,
+  DaHuaSystemResourceInfo,
+  DaHuaSDCardInfo,
+  DaHuaBitrateInfo,
+  DaHuaNetworkStatusInfo,
+  DaHuaSoftwareVersionInfo,
+  DaHuaRecordStateInfo,
+  DaHuaPowerStateInfo,
+  DaHuaAlarmArmInfo,
+  DaHuaCameraInfo,
+  DaHuaRtspUrlInfo
+} from "@/types/api/qs/dahua";
 import {AjaxResult} from "@/types";
 
 // 查询大华设备列表
@@ -177,5 +194,126 @@ export function captureDaHuaAndSave(id: number, channelId: number, snapshotType:
     url: `/dahua/device/captureAndSave/${id}/${channelId}`,
     method: 'post',
     params: { snapshotType }
+  })
+}
+
+/**
+ * 获取大华设备存储信息
+ * @param id 设备ID
+ */
+export function getDaHuaStorageInfo(id: number): Promise<AjaxResult<DaHuaStorageInfo>> {
+  return request({
+    url: `/dahua/device/storageInfo/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取大华设备系统资源信息
+ * @param id 设备ID
+ */
+export function getDaHuaSystemResourceInfo(id: number): Promise<AjaxResult<DaHuaSystemResourceInfo>> {
+  return request({
+    url: `/dahua/device/systemResourceInfo/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取大华设备SD卡信息
+ * @param id 设备ID
+ */
+export function getDaHuaSDCardInfo(id: number): Promise<AjaxResult<DaHuaSDCardInfo>> {
+  return request({
+    url: `/dahua/device/sdCardInfo/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取大华设备码流信息
+ * @param id 设备ID
+ */
+export function getDaHuaBitrateInfo(id: number): Promise<AjaxResult<DaHuaBitrateInfo>> {
+  return request({
+    url: `/dahua/device/bitrateInfo/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取大华设备网络状态信息
+ * @param id 设备ID
+ */
+export function getDaHuaNetworkStatusInfo(id: number): Promise<AjaxResult<DaHuaNetworkStatusInfo>> {
+  return request({
+    url: `/dahua/device/networkStatusInfo/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取大华设备软件版本信息
+ * @param id 设备ID
+ */
+export function getDaHuaSoftwareVersionInfo(id: number): Promise<AjaxResult<DaHuaSoftwareVersionInfo>> {
+  return request({
+    url: `/dahua/device/softwareVersionInfo/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取大华设备录像状态信息
+ * @param id 设备ID
+ */
+export function getDaHuaRecordStateInfo(id: number): Promise<AjaxResult<DaHuaRecordStateInfo>> {
+  return request({
+    url: `/dahua/device/recordStateInfo/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取大华设备电源状态信息
+ * @param id 设备ID
+ */
+export function getDaHuaPowerStateInfo(id: number): Promise<AjaxResult<DaHuaPowerStateInfo>> {
+  return request({
+    url: `/dahua/device/powerStateInfo/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取大华设备报警布撤防信息
+ * @param id 设备ID
+ */
+export function getDaHuaAlarmArmInfo(id: number): Promise<AjaxResult<DaHuaAlarmArmInfo>> {
+  return request({
+    url: `/dahua/device/alarmArmInfo/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取大华设备摄像头属性信息
+ * @param id 设备ID
+ */
+export function getDaHuaCameraInfo(id: number): Promise<AjaxResult<DaHuaCameraInfo>> {
+  return request({
+    url: `/dahua/device/cameraInfo/${id}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 获取大华设备RTSP URL信息
+ * @param id 设备ID
+ */
+export function getDaHuaRtspUrlInfo(id: number): Promise<AjaxResult<DaHuaRtspUrlInfo>> {
+  return request({
+    url: `/dahua/device/rtspUrlInfo/${id}`,
+    method: 'get'
   })
 }
