@@ -24,3 +24,25 @@ export function queryHaiKangRecord(
         timeout: 30000
     })
 }
+
+export interface HaikangRecordDownloadRequest {
+    id: number;
+    channelId: number;
+    startTime: string;
+    endTime: string;
+    recordFileType?: number;
+}
+
+/**
+ * 海康设备录像直接下载到用户电脑
+ * @param data 下载请求
+ */
+export function downloadHaikangRecordDirect(data: HaikangRecordDownloadRequest): Promise<any> {
+    return request({
+        url: '/haikang/device/downloadRecordDirect',
+        method: 'post',
+        data: data,
+        responseType: 'blob',
+        timeout: 300000
+    })
+}

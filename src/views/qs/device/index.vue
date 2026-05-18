@@ -227,15 +227,15 @@
                   <el-dropdown-item command="viewSnapshots" icon="Picture">查看抓图</el-dropdown-item>
                   <el-dropdown-item command="delete" icon="Delete" class="is-danger">删除</el-dropdown-item>
                   <!-- 大华设备校时 -->
-                  <el-dropdown-item v-if="scope.row.type === '9'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
+                  <el-dropdown-item v-if="scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
                   <!-- 大华设备信息 -->
-                  <el-dropdown-item v-if="scope.row.type === '9'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
+                  <el-dropdown-item v-if="scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
                   <!-- 大华设备抓图 -->
-                  <el-dropdown-item v-if="scope.row.type === '9'" command="capture" icon="Camera">抓图</el-dropdown-item>
+                  <el-dropdown-item v-if="scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
                   <!-- 大华设备重启 -->
-                  <el-dropdown-item v-if="scope.row.type === '9'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
-                  <!-- 大华设备录像下载 -->
-                  <el-dropdown-item v-if="scope.row.type === '9'" command="downloadRecord" icon="Download">录像下载</el-dropdown-item>
+                  <el-dropdown-item v-if="scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
+                  <!-- 录像下载 -->
+                  <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="downloadRecord" icon="Download">录像下载</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -374,15 +374,15 @@
                       <el-dropdown-item command="viewSnapshots" icon="Picture">查看抓图</el-dropdown-item>
                       <el-dropdown-item command="delete" icon="Delete" class="is-danger">删除</el-dropdown-item>
                       <!-- 大华设备校时 -->
-                      <el-dropdown-item v-if="item.type === '9'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
+                      <el-dropdown-item v-if="item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
                       <!-- 大华设备信息 -->
-                      <el-dropdown-item v-if="item.type === '9'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
+                      <el-dropdown-item v-if="item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
                       <!-- 大华设备抓图 -->
-                      <el-dropdown-item v-if="item.type === '9'" command="capture" icon="Camera">抓图</el-dropdown-item>
+                      <el-dropdown-item v-if="item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
                       <!-- 大华设备重启 -->
-                      <el-dropdown-item v-if="item.type === '9'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
-                      <!-- 大华设备录像下载 -->
-                      <el-dropdown-item v-if="item.type === '9'" command="downloadRecord" icon="Download">录像下载</el-dropdown-item>
+                      <el-dropdown-item v-if="item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
+                      <!-- 录像下载 -->
+                      <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="downloadRecord" icon="Download">录像下载</el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
                 </el-dropdown>
@@ -1718,6 +1718,7 @@ import {
   getDaHuaNetworkStatusInfo, getDaHuaSoftwareVersionInfo, getDaHuaRecordStateInfo, getDaHuaPowerStateInfo,
   getDaHuaAlarmArmInfo, getDaHuaCameraInfo, getDaHuaRtspUrlInfo, downloadDaHuaRecord, downloadDaHuaRecordDirect
 } from "@/api/qs/dahua";
+import { queryHaiKangRecord, downloadHaikangRecordDirect } from "@/api/qs/haikang";
 import { saveAs } from "file-saver";
 import {
   closeStreams,
@@ -3181,18 +3182,38 @@ const handleMoreAction = (command: string, row: QsDevice) => {
       handleDelete(row);
       break;
     case 'timeSync':
+      if (row.deviceStatus !== 'ON') {
+        proxy.$modal.msgWarning('设备离线，无法校时');
+        return;
+      }
       openTimeSyncDialog(row);
       break;
     case 'deviceInfo':
+      if (row.deviceStatus !== 'ON') {
+        proxy.$modal.msgWarning('设备离线，无法查看设备信息');
+        return;
+      }
       openDeviceInfoDialog(row);
       break;
     case 'capture':
+      if (row.deviceStatus !== 'ON') {
+        proxy.$modal.msgWarning('设备离线，无法抓图');
+        return;
+      }
       handleCapture(row);
       break;
     case 'reboot':
+      if (row.deviceStatus !== 'ON') {
+        proxy.$modal.msgWarning('设备离线，无法重启');
+        return;
+      }
       handleReboot(row);
       break;
     case 'downloadRecord':
+      if (row.deviceStatus !== 'ON') {
+        proxy.$modal.msgWarning('设备离线，无法下载录像');
+        return;
+      }
       openDownloadRecordDialog(row);
       break;
   }
@@ -3237,8 +3258,12 @@ const handleReboot = async (row: QsDevice) => {
   }
 }
 
+// 当前下载的设备行
+let currentDownloadDevice: QsDevice | null = null;
+
 // 打开录像下载对话框
 const openDownloadRecordDialog = (row: QsDevice) => {
+  currentDownloadDevice = row;
   downloadRecordForm.deviceId = row.id;
   downloadRecordForm.deviceName = row.deviceName || '';
   downloadRecordForm.channelId = row.channel || 0;
@@ -3295,6 +3320,11 @@ const handleDownloadRecord = async () => {
     return;
   }
   
+  if (!currentDownloadDevice) {
+    proxy.$modal.msgError('请先选择设备');
+    return;
+  }
+  
   downloadRecordLoading.value = true;
   downloadResult.value = null;
   
@@ -3306,20 +3336,43 @@ const handleDownloadRecord = async () => {
   });
   
   try {
-    const request: DaHuaRecordDownloadRequest = {
-      id: downloadRecordForm.deviceId,
-      channelId: downloadRecordForm.channelId,
-      startTime: downloadRecordForm.startTime,
-      endTime: downloadRecordForm.endTime,
-      recordFileType: downloadRecordForm.recordFileType
-    };
+    const deviceType = String(currentDownloadDevice.type);
+    const isDaHuaDevice = deviceType === '9'; // 9=大华SDK
+    const isHaikangDevice = deviceType === '7' || deviceType === '8'; // 7=海康SDK,8=海康ISUP
     
-    // 直接下载到用户电脑
-    const blob = await downloadDaHuaRecordDirect(request);
+    let blob: any;
+    let extension: string = '.dav';
+    
+    if (isDaHuaDevice) {
+      const request: DaHuaRecordDownloadRequest = {
+        id: downloadRecordForm.deviceId,
+        channelId: downloadRecordForm.channelId,
+        startTime: downloadRecordForm.startTime,
+        endTime: downloadRecordForm.endTime,
+        recordFileType: downloadRecordForm.recordFileType
+      };
+      
+      blob = await downloadDaHuaRecordDirect(request);
+      extension = '.dav';
+    } else if (isHaikangDevice) {
+      const request = {
+        id: downloadRecordForm.deviceId,
+        channelId: downloadRecordForm.channelId,
+        startTime: downloadRecordForm.startTime,
+        endTime: downloadRecordForm.endTime,
+        recordFileType: downloadRecordForm.recordFileType
+      };
+      
+      blob = await downloadHaikangRecordDirect(request);
+      extension = '.mp4';
+    } else {
+      proxy.$modal.msgError('仅支持大华和海康设备录像下载');
+      return;
+    }
     
     // 如果 size > 0，直接当作文件下载
     if (blob.size > 0) {
-      const fileName = `device_${request.id}_channel_${request.channelId}_${request.startTime.replace(/[:\s]/g, '-')}.dav`;
+      const fileName = `device_${downloadRecordForm.deviceId}_channel_${downloadRecordForm.channelId}_${downloadRecordForm.startTime.replace(/[:\s]/g, '-')}${extension}`;
       saveAs(blob, fileName);
       proxy.$modal.msgSuccess('录像下载成功');
     } else {
