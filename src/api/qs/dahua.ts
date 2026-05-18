@@ -15,7 +15,9 @@ import {
   DaHuaPowerStateInfo,
   DaHuaAlarmArmInfo,
   DaHuaCameraInfo,
-  DaHuaRtspUrlInfo
+  DaHuaRtspUrlInfo,
+  DaHuaRecordDownloadRequest,
+  DaHuaRecordDownloadResponse
 } from "@/types/api/qs/dahua";
 import {AjaxResult} from "@/types";
 
@@ -315,5 +317,32 @@ export function getDaHuaRtspUrlInfo(id: number): Promise<AjaxResult<DaHuaRtspUrl
   return request({
     url: `/dahua/device/rtspUrlInfo/${id}`,
     method: 'get'
+  })
+}
+
+/**
+ * 大华设备录像下载（返回文件信息）
+ * @param req 下载请求参数
+ */
+export function downloadDaHuaRecord(data: DaHuaRecordDownloadRequest): Promise<AjaxResult<DaHuaRecordDownloadResponse>> {
+  return request({
+    url: '/dahua/device/downloadRecord',
+    method: 'post',
+    data: data,
+    timeout: 300000 // 5分钟超时
+  })
+}
+
+/**
+ * 大华设备录像直接下载到用户电脑
+ * @param req 下载请求参数
+ */
+export function downloadDaHuaRecordDirect(data: DaHuaRecordDownloadRequest): Promise<any> {
+  return request({
+    url: '/dahua/device/downloadRecordDirect',
+    method: 'post',
+    data: data,
+    responseType: 'blob',
+    timeout: 300000 // 5分钟超时
   })
 }

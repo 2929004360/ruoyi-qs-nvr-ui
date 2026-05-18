@@ -355,3 +355,33 @@ export interface DaHuaSoftwareVersionInfo {
   /** Web构建时间 */
   webBuildDate?: number;
 }
+
+/** 大华设备录像下载请求 */
+export interface DaHuaRecordDownloadRequest {
+  /** 设备ID */
+  id: number;
+  /** 通道ID */
+  channelId: number;
+  /** 开始时间 */
+  startTime: string;
+  /** 结束时间 */
+  endTime: string;
+  /** 录像文件类型（0-主码流，1-子码流1，2-子码流2），可选 */
+  recordFileType?: number;
+}
+
+/** 大华设备录像下载响应 */
+export interface DaHuaRecordDownloadResponse {
+  /** 是否成功 */
+  success: boolean;
+  /** 错误信息 */
+  errorMessage?: string;
+  /** 文件本地路径 */
+  filePath?: string;
+  /** 文件访问URL */
+  fileUrl?: string;
+  /** 文件大小（字节） */
+  fileSize?: number;
+  /** 下载进度（0-100） */
+  progress?: number;
+}

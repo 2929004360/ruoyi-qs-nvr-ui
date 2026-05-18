@@ -234,6 +234,8 @@
                   <el-dropdown-item v-if="scope.row.type === '9'" command="capture" icon="Camera">抓图</el-dropdown-item>
                   <!-- 大华设备重启 -->
                   <el-dropdown-item v-if="scope.row.type === '9'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
+                  <!-- 大华设备录像下载 -->
+                  <el-dropdown-item v-if="scope.row.type === '9'" command="downloadRecord" icon="Download">录像下载</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -379,6 +381,8 @@
                       <el-dropdown-item v-if="item.type === '9'" command="capture" icon="Camera">抓图</el-dropdown-item>
                       <!-- 大华设备重启 -->
                       <el-dropdown-item v-if="item.type === '9'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
+                      <!-- 大华设备录像下载 -->
+                      <el-dropdown-item v-if="item.type === '9'" command="downloadRecord" icon="Download">录像下载</el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
                 </el-dropdown>
@@ -1584,6 +1588,81 @@
       </el-tabs>
     </el-dialog>
 
+    <!-- 大华设备录像下载对话框 -->
+    <el-dialog title="大华设备录像下载" v-model="downloadRecordDialogVisible" width="650px" append-to-body class="glass-dialog download-record-dialog">
+      <el-form :model="downloadRecordForm" label-width="100px" v-loading="downloadRecordLoading">
+        <el-form-item label="设备名称">
+          <el-input v-model="downloadRecordForm.deviceName" disabled />
+        </el-form-item>
+        <el-form-item label="通道号">
+          <el-input-number v-model="downloadRecordForm.channelId" :min="0" style="width: 100%;" />
+        </el-form-item>
+        <el-form-item label="开始时间">
+          <el-date-picker
+            v-model="downloadRecordForm.startTime"
+            type="datetime"
+            placeholder="选择开始时间"
+            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            style="width: 100%;"
+          />
+        </el-form-item>
+        <el-form-item label="结束时间">
+          <el-date-picker
+            v-model="downloadRecordForm.endTime"
+            type="datetime"
+            placeholder="选择结束时间"
+            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            style="width: 100%;"
+          />
+        </el-form-item>
+        <el-form-item label="码流类型">
+          <el-select v-model="downloadRecordForm.recordFileType" placeholder="选择码流类型" style="width: 100%;">
+            <el-option label="主码流" :value="0" />
+            <el-option label="辅码流1" :value="1" />
+            <el-option label="辅码流2" :value="2" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+
+      <!-- 下载进度 -->
+      <div v-if="downloadResult && downloadResult.success" style="margin-top: 15px;">
+        <el-divider>下载结果</el-divider>
+        <el-descriptions :column="1" border>
+          <el-descriptions-item label="文件大小">
+            {{ downloadResult.fileSize ? (downloadResult.fileSize / 1024 / 1024).toFixed(2) + ' MB' : '-' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="文件路径">
+            {{ downloadResult.filePath || '-' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="访问链接">
+            <div v-if="downloadResult.fileUrl" class="flex items-center gap-2">
+              <el-input v-model="downloadResult.fileUrl" disabled size="small" style="flex: 1;" />
+              <el-button type="primary" size="small" link @click="handleCopy(downloadResult.fileUrl)">复制</el-button>
+            </div>
+            <span v-else>-</span>
+          </el-descriptions-item>
+        </el-descriptions>
+      </div>
+
+      <!-- 错误提示 -->
+      <el-alert
+        v-if="downloadResult && !downloadResult.success"
+        type="error"
+        :title="downloadResult.errorMessage || '下载失败'"
+        style="margin-top: 15px;"
+        show-icon
+      />
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="downloadRecordDialogVisible = false">关闭</el-button>
+          <el-button type="primary" @click="handleDownloadRecord" :loading="downloadRecordLoading" icon="Download">下载</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
     <SelectMapPosition ref="selectMapPositionRef" @onSubmit="selectMapPositionSubmit"/>
     <ChannelCode ref="channelCodeRef" @handleOk="channelCodeOk"/>
     <DeviceSnapshotDialog ref="snapshotDialogRef"/>
@@ -1593,6 +1672,7 @@
 <script setup lang="ts" name="Device">
 import {onUnmounted, watch, nextTick, reactive, ref, getCurrentInstance, toRefs} from "vue";
 import useClipboard from "vue-clipboard3";
+import { ElLoading } from "element-plus";
 import EasyPlayer from "@/components/EasyPlayer";
 import type {DeviceQueryParams, QsDevice} from "@/types/api/qs/device"
 import {
@@ -1627,15 +1707,18 @@ import {
   DaHuaPowerStateInfo,
   DaHuaAlarmArmInfo,
   DaHuaCameraInfo,
-  DaHuaRtspUrlInfo
+  DaHuaRtspUrlInfo,
+  DaHuaRecordDownloadRequest,
+  DaHuaRecordDownloadResponse
 } from "@/types/api/qs/dahua";
 import {
   listDaHuaDevice, getDaHuaTime, setDaHuaTime, rebootDaHuaDevice, getDaHuaDeviceInfo, getDaHuaSystemParam,
   getDaHuaVideoParam, setDaHuaVideoParam, getDaHuaDeviceVideoParam, setDaHuaDeviceVideoParam, captureDaHuaAndSave,
   getDaHuaStorageInfo, getDaHuaSystemResourceInfo, getDaHuaSDCardInfo, getDaHuaBitrateInfo,
   getDaHuaNetworkStatusInfo, getDaHuaSoftwareVersionInfo, getDaHuaRecordStateInfo, getDaHuaPowerStateInfo,
-  getDaHuaAlarmArmInfo, getDaHuaCameraInfo, getDaHuaRtspUrlInfo
+  getDaHuaAlarmArmInfo, getDaHuaCameraInfo, getDaHuaRtspUrlInfo, downloadDaHuaRecord, downloadDaHuaRecordDirect
 } from "@/api/qs/dahua";
+import { saveAs } from "file-saver";
 import {
   closeStreams,
   getStreamPushAddress,
@@ -1843,6 +1926,18 @@ const rtspUrlInfo = reactive<DaHuaRtspUrlInfo>({
   success: false,
   rtspUrls: []
 });
+// 大华设备录像下载
+const downloadRecordDialogVisible = ref(false);
+const downloadRecordLoading = ref(false);
+const downloadRecordForm = reactive({
+  deviceId: null as number | null,
+  deviceName: '',
+  channelId: 0,
+  startTime: '',
+  endTime: '',
+  recordFileType: 0
+});
+const downloadResult = ref<DaHuaRecordDownloadResponse | null>(null);
 const currentDeviceId = ref<number | null>(null);
 const currentDeviceRow = ref<any>(null);
 const snapshotDialogRef = ref();
@@ -3097,6 +3192,9 @@ const handleMoreAction = (command: string, row: QsDevice) => {
     case 'reboot':
       handleReboot(row);
       break;
+    case 'downloadRecord':
+      openDownloadRecordDialog(row);
+      break;
   }
 }
 
@@ -3136,6 +3234,111 @@ const handleReboot = async (row: QsDevice) => {
       console.error('重启设备失败:', error);
       proxy.$modal.msgError('重启设备失败');
     }
+  }
+}
+
+// 打开录像下载对话框
+const openDownloadRecordDialog = (row: QsDevice) => {
+  downloadRecordForm.deviceId = row.id;
+  downloadRecordForm.deviceName = row.deviceName || '';
+  downloadRecordForm.channelId = row.channel || 0;
+  
+  // 默认设置时间为过去10分钟到现在
+  const now = new Date();
+  const tenMinutesAgo = new Date(now.getTime() - 10 * 60 * 1000);
+  
+  downloadRecordForm.startTime = formatDateTime(tenMinutesAgo);
+  downloadRecordForm.endTime = formatDateTime(now);
+  downloadRecordForm.recordFileType = 0;
+  
+  downloadResult.value = null;
+  downloadRecordDialogVisible.value = true;
+}
+
+// 格式化日期时间
+const formatDateTime = (date: Date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hour = String(date.getHours()).padStart(2, '0');
+  const minute = String(date.getMinutes()).padStart(2, '0');
+  const second = String(date.getSeconds()).padStart(2, '0');
+  return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+}
+
+// 处理录像下载
+const handleDownloadRecord = async () => {
+  if (!downloadRecordForm.deviceId) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  if (!downloadRecordForm.startTime) {
+    proxy.$modal.msgError('请选择开始时间');
+    return;
+  }
+  if (!downloadRecordForm.endTime) {
+    proxy.$modal.msgError('请选择结束时间');
+    return;
+  }
+  
+  // 验证时间差是否超过10分钟
+  const start = new Date(downloadRecordForm.startTime);
+  const end = new Date(downloadRecordForm.endTime);
+  const diffMinutes = (end.getTime() - start.getTime()) / (1000 * 60);
+  
+  if (diffMinutes > 10) {
+    proxy.$modal.msgWarning('下载时间范围不能超过10分钟');
+    return;
+  }
+  if (diffMinutes <= 0) {
+    proxy.$modal.msgError('结束时间必须大于开始时间');
+    return;
+  }
+  
+  downloadRecordLoading.value = true;
+  downloadResult.value = null;
+  
+  // 显示加载提示
+  const loading = ElLoading.service({
+    lock: true,
+    text: "正在下载录像，请稍候...",
+    background: "rgba(0, 0, 0, 0.7)",
+  });
+  
+  try {
+    const request: DaHuaRecordDownloadRequest = {
+      id: downloadRecordForm.deviceId,
+      channelId: downloadRecordForm.channelId,
+      startTime: downloadRecordForm.startTime,
+      endTime: downloadRecordForm.endTime,
+      recordFileType: downloadRecordForm.recordFileType
+    };
+    
+    // 直接下载到用户电脑
+    const blob = await downloadDaHuaRecordDirect(request);
+    
+    // 如果 size > 0，直接当作文件下载
+    if (blob.size > 0) {
+      const fileName = `device_${request.id}_channel_${request.channelId}_${request.startTime.replace(/[:\s]/g, '-')}.dav`;
+      saveAs(blob, fileName);
+      proxy.$modal.msgSuccess('录像下载成功');
+    } else {
+      // 尝试解析错误信息
+      const text = await blob.text();
+      try {
+        const errorData = JSON.parse(text);
+        proxy.$modal.msgError(errorData.msg || errorData.data?.errorMessage || '录像下载失败');
+      } catch (e) {
+        proxy.$modal.msgError('录像下载失败');
+      }
+    }
+  } catch (error) {
+    console.error('录像下载失败:', error);
+    proxy.$modal.msgError('录像下载失败');
+  } finally {
+    downloadRecordLoading.value = false;
+    // 关闭加载提示
+    loading.close();
   }
 }
 
