@@ -226,14 +226,16 @@
                   <el-dropdown-item command="edit" icon="Edit">编辑</el-dropdown-item>
                   <el-dropdown-item command="viewSnapshots" icon="Picture">查看抓图</el-dropdown-item>
                   <el-dropdown-item command="delete" icon="Delete" class="is-danger">删除</el-dropdown-item>
-                  <!-- 大华设备校时 -->
-                  <el-dropdown-item v-if="scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
-                  <!-- 大华设备信息 -->
-                  <el-dropdown-item v-if="scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
+                  <!-- 设备校时（海康/大华） -->
+                  <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
+                  <!-- 设备信息（大华/海康） -->
+                  <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
+                  <!-- 海康设备抓图 -->
+                  <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8'" :disabled="scope.row.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
                   <!-- 大华设备抓图 -->
                   <el-dropdown-item v-if="scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
-                  <!-- 大华设备重启 -->
-                  <el-dropdown-item v-if="scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
+                  <!-- 设备重启（海康/大华） -->
+                  <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
                   <!-- 录像下载 -->
                   <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="downloadRecord" icon="Download">录像下载</el-dropdown-item>
                 </el-dropdown-menu>
@@ -373,14 +375,16 @@
                       <el-dropdown-item command="edit" icon="Edit">编辑</el-dropdown-item>
                       <el-dropdown-item command="viewSnapshots" icon="Picture">查看抓图</el-dropdown-item>
                       <el-dropdown-item command="delete" icon="Delete" class="is-danger">删除</el-dropdown-item>
-                      <!-- 大华设备校时 -->
-                      <el-dropdown-item v-if="item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
-                      <!-- 大华设备信息 -->
-                      <el-dropdown-item v-if="item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
+                      <!-- 设备校时（海康/大华） -->
+                      <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
+                      <!-- 设备信息（大华/海康） -->
+                      <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
+                      <!-- 海康设备抓图 -->
+                      <el-dropdown-item v-if="item.type === '7' || item.type === '8'" :disabled="item.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
                       <!-- 大华设备抓图 -->
                       <el-dropdown-item v-if="item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
-                      <!-- 大华设备重启 -->
-                      <el-dropdown-item v-if="item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
+                      <!-- 设备重启（海康/大华） -->
+                      <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
                       <!-- 录像下载 -->
                       <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="downloadRecord" icon="Download">录像下载</el-dropdown-item>
                     </el-dropdown-menu>
@@ -1028,7 +1032,7 @@
       </template>
     </el-dialog>
 
-    <!-- 大华设备校时对话框 -->
+    <!-- 设备校时对话框 -->
     <el-dialog title="设备校时" v-model="timeSyncDialogVisible" width="500px" append-to-body>
       <el-form label-width="100px">
         <el-form-item label="设备IP">
@@ -1049,11 +1053,14 @@
           />
           <el-button type="primary" @click="handleSetCurrentTime" style="margin-left: 10px;">设置为当前时间</el-button>
         </el-form-item>
-        <el-form-item label="同步方式">
+        <el-form-item label="同步方式" v-if="timeSyncForm.deviceType === '9'">
           <el-radio-group v-model="timeSyncForm.syncType">
             <el-radio :label="true">设备时间同步到本地</el-radio>
             <el-radio :label="false">本地时间同步到设备</el-radio>
           </el-radio-group>
+        </el-form-item>
+        <el-form-item v-if="timeSyncForm.deviceType === '7' || timeSyncForm.deviceType === '8'">
+          <div style="color: #909399; font-size: 12px;">海康设备仅支持本地时间同步到设备</div>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -1062,31 +1069,113 @@
       </template>
     </el-dialog>
 
-    <!-- 大华设备信息对话框 -->
-    <el-dialog title="大华设备信息" v-model="deviceInfoDialogVisible" width="850px" append-to-body class="glass-dialog device-info-dialog">
+    <!-- 设备信息对话框 -->
+    <el-dialog :title="(currentDeviceRow?.type === '7' || currentDeviceRow?.type === '8') ? '海康设备信息' : '大华设备信息'" v-model="deviceInfoDialogVisible" width="850px" append-to-body class="glass-dialog device-info-dialog">
       <el-tabs v-model="deviceInfoTabActive" type="border-card">
         <!-- 设备信息标签页 -->
         <el-tab-pane label="设备信息" name="deviceInfo">
-          <el-descriptions :column="2" border v-loading="deviceInfoLoading">
-            <el-descriptions-item label="序列号">{{ deviceInfo.serialNumber || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="通道数量">{{ deviceInfo.channelNum || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="硬盘数量">{{ deviceInfo.diskNum || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="DVR类型">{{ deviceInfo.dvrType || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="报警输入端口">{{ deviceInfo.alarmInPortNum || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="报警输出端口">{{ deviceInfo.alarmOutPortNum || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="登录超时时间(分钟)">{{ deviceInfo.limitLoginTime || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="剩余登录次数">{{ deviceInfo.leftLogTimes || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="解锁剩余时间(秒)">{{ deviceInfo.lockLeftTime || '-' }}</el-descriptions-item>
-          </el-descriptions>
+          <div class="device-info-dashboard" v-loading="deviceInfoLoading">
+            <div class="dashboard-header">
+              <div class="dashboard-title">
+                <el-icon class="dashboard-icon"><Cpu /></el-icon>
+                <span>设备基本信息</span>
+              </div>
+              <div class="dashboard-badge" v-if="deviceInfo.serialNumber">
+                <el-icon><CollectionTag /></el-icon>
+                <span>{{ deviceInfo.serialNumber }}</span>
+              </div>
+            </div>
+            <div class="info-cards-grid">
+              <div class="info-card primary" style="animation-delay: 0.04s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><Medal /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">序列号</div>
+                  <div class="info-card-value">{{ deviceInfo.serialNumber || '-' }}</div>
+                </div>
+              </div>
+              <div class="info-card success" style="animation-delay: 0.08s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><VideoCamera /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">通道数量</div>
+                  <div class="info-card-value">{{ deviceInfo.channelNum || '-' }}</div>
+                </div>
+              </div>
+              <div class="info-card warning" style="animation-delay: 0.12s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><Histogram /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">硬盘数量</div>
+                  <div class="info-card-value">{{ deviceInfo.diskNum || '-' }}</div>
+                </div>
+              </div>
+              <div class="info-card danger" style="animation-delay: 0.16s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><Monitor /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">DVR类型</div>
+                  <div class="info-card-value">{{ deviceInfo.dvrType || '-' }}</div>
+                </div>
+              </div>
+              <div class="info-card info" style="animation-delay: 0.20s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><Bell /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">报警输入端口</div>
+                  <div class="info-card-value">{{ deviceInfo.alarmInPortNum || '-' }}</div>
+                </div>
+              </div>
+              <div class="info-card purple" style="animation-delay: 0.24s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><Bell /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">报警输出端口</div>
+                  <div class="info-card-value">{{ deviceInfo.alarmOutPortNum || '-' }}</div>
+                </div>
+              </div>
+              <div class="info-card teal" style="animation-delay: 0.28s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><Timer /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">登录超时(分钟)</div>
+                  <div class="info-card-value">{{ deviceInfo.limitLoginTime || '-' }}</div>
+                </div>
+              </div>
+              <div class="info-card orange" style="animation-delay: 0.32s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><Key /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">剩余登录次数</div>
+                  <div class="info-card-value">{{ deviceInfo.leftLogTimes || '-' }}</div>
+                </div>
+              </div>
+              <div class="info-card pink" style="animation-delay: 0.36s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><Lock /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">解锁剩余时间(秒)</div>
+                  <div class="info-card-value">{{ deviceInfo.lockLeftTime || '-' }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
           <div class="dialog-footer" style="margin-top: 20px;">
             <el-button @click="deviceInfoDialogVisible = false">关闭</el-button>
             <el-button type="primary" @click="handleRefreshDeviceInfo" :loading="deviceInfoLoading" icon="Refresh">刷新</el-button>
+            <el-button type="warning" @click="handleDeviceInfoTimeSync" icon="Clock">校时</el-button>
+            <el-button type="danger" @click="handleDeviceInfoReboot" icon="Refresh">重启</el-button>
           </div>
         </el-tab-pane>
 
-        <!-- 系统参数标签页 -->
-        <el-tab-pane label="系统参数" name="systemParam">
-          <el-form :model="systemParam" label-width="120px" v-loading="deviceInfoLoading">
+        <!-- 系统参数标签页 - 仅大华显示 -->
+        <el-tab-pane label="系统参数" name="systemParam" v-if="currentDeviceRow?.type === '9'">
+          <div class="tab-content-wrapper" v-loading="deviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><SetUp /></el-icon>
+              <span>系统参数配置</span>
+            </div>
+            <el-form :model="systemParam" label-width="120px" class="data-form">
             <el-form-item label="视频制式">
               <el-select v-model="systemParam.videoStandard" style="width: 100%;">
                 <el-option label="PAL" :value="0" />
@@ -1097,15 +1186,21 @@
               <el-input v-model="systemParam.country" />
             </el-form-item>
           </el-form>
+          </div>
           <div class="dialog-footer" style="margin-top: 20px;">
             <el-button @click="deviceInfoDialogVisible = false">关闭</el-button>
             <el-button type="primary" @click="handleGetSystemParam" :loading="deviceInfoLoading" icon="Refresh">获取</el-button>
           </div>
         </el-tab-pane>
 
-        <!-- 视频参数标签页 -->
-        <el-tab-pane label="视频参数" name="videoParam">
-          <el-form :model="videoParam" label-width="120px" v-loading="deviceInfoLoading">
+        <!-- 视频参数标签页 - 仅大华显示 -->
+        <el-tab-pane label="视频参数" name="videoParam" v-if="currentDeviceRow?.type === '9'">
+          <div class="tab-content-wrapper" v-loading="deviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><VideoCamera /></el-icon>
+              <span>视频参数配置</span>
+            </div>
+            <el-form :model="videoParam" label-width="120px" class="data-form">
             <el-row :gutter="20">
               <el-col :span="12">
                 <el-form-item label="通道ID">
@@ -1180,6 +1275,7 @@
               </el-select>
             </el-form-item>
           </el-form>
+          </div>
           <div class="dialog-footer" style="margin-top: 20px;">
             <el-button @click="deviceInfoDialogVisible = false">关闭</el-button>
             <el-button type="primary" @click="handleGetVideoParam" :loading="deviceInfoLoading" icon="Refresh">获取</el-button>
@@ -1187,9 +1283,14 @@
           </div>
         </el-tab-pane>
 
-        <!-- 设备视频参数标签页 -->
-        <el-tab-pane label="设备视频参数" name="deviceVideoParam">
-          <el-form :model="deviceVideoParam" label-width="120px" v-loading="deviceInfoLoading">
+        <!-- 设备视频参数标签页 - 仅大华显示 -->
+        <el-tab-pane label="设备视频参数" name="deviceVideoParam" v-if="currentDeviceRow?.type === '9'">
+          <div class="tab-content-wrapper" v-loading="deviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><Camera /></el-icon>
+              <span>设备视频参数</span>
+            </div>
+            <el-form :model="deviceVideoParam" label-width="120px" class="data-form">
             <el-form-item label="通道ID">
               <el-input-number v-model="deviceVideoParam.channelId" :min="0" style="width: 100%;" />
             </el-form-item>
@@ -1221,6 +1322,7 @@
               </el-select>
             </el-form-item>
           </el-form>
+          </div>
           <div class="dialog-footer" style="margin-top: 20px;">
             <el-button @click="deviceInfoDialogVisible = false">关闭</el-button>
             <el-button type="primary" @click="handleGetDeviceVideoParam" :loading="deviceInfoLoading" icon="Refresh">获取</el-button>
@@ -1230,7 +1332,11 @@
 
         <!-- 存储信息标签页 -->
         <el-tab-pane label="存储信息" name="storageInfo">
-          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+          <div class="tab-content-wrapper" v-loading="deviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><Histogram /></el-icon>
+              <span>存储设备信息</span>
+            </div>
             <el-empty v-if="!storageInfo.storageDevices || storageInfo.storageDevices.length === 0" description="暂无存储设备信息"/>
             <el-collapse v-else accordion>
               <el-collapse-item v-for="(device, index) in storageInfo.storageDevices" :key="index" :title="device.name || `存储设备${index + 1}`">
@@ -1257,7 +1363,7 @@
                   <el-descriptions-item label="固件版本" v-if="device.firmware">{{ device.firmware }}</el-descriptions-item>
                 </el-descriptions>
                 <div v-if="device.partitions && device.partitions.length > 0" style="margin-top: 15px;">
-                  <div style="font-weight: bold; margin-bottom: 10px;">分区信息:</div>
+                  <div class="panel-section-title">分区信息:</div>
                   <el-table :data="device.partitions" border size="small" style="width: 100%">
                     <el-table-column prop="name" label="分区名称"/>
                     <el-table-column label="总容量">
@@ -1281,9 +1387,13 @@
           </div>
         </el-tab-pane>
 
-        <!-- 系统资源标签页 -->
-        <el-tab-pane label="系统资源" name="systemResourceInfo">
-          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+        <!-- 系统资源标签页 - 仅大华显示 -->
+        <el-tab-pane label="系统资源" name="systemResourceInfo" v-if="currentDeviceRow?.type === '9'">
+          <div class="tab-content-wrapper" v-loading="deviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><Cpu /></el-icon>
+              <span>系统资源监控</span>
+            </div>
             <el-empty v-if="!systemResourceInfo.success" description="暂无系统资源信息"/>
             <el-descriptions :column="2" border v-else>
               <el-descriptions-item label="CPU使用率">
@@ -1311,7 +1421,11 @@
 
         <!-- SD卡信息标签页 -->
         <el-tab-pane label="SD卡信息" name="sdCardInfo">
-          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+          <div class="tab-content-wrapper" v-loading="deviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><Monitor /></el-icon>
+              <span>SD卡信息</span>
+            </div>
             <el-empty v-if="!sdCardInfo.success" description="暂无SD卡信息"/>
             <div v-else>
               <el-descriptions :column="2" border style="margin-bottom: 20px;">
@@ -1328,7 +1442,7 @@
               </el-descriptions>
               
               <div v-if="sdCardInfo.diskList && sdCardInfo.diskList.length > 0">
-                <div style="font-weight: bold; margin-bottom: 10px;">硬盘详细信息:</div>
+                <div class="panel-section-title">硬盘详细信息:</div>
                 <el-table :data="sdCardInfo.diskList" border size="small" style="width: 100%">
                   <el-table-column prop="diskNumber" label="硬盘编号" width="100"/>
                   <el-table-column prop="partitionNumber" label="分区号" width="100"/>
@@ -1354,7 +1468,11 @@
 
         <!-- 码流信息标签页 -->
         <el-tab-pane label="码流信息" name="bitrateInfo">
-          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+          <div class="tab-content-wrapper" v-loading="deviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><VideoCamera /></el-icon>
+              <span>码流信息</span>
+            </div>
             <el-empty v-if="!bitrateInfo.success || !bitrateInfo.channelBitrates || bitrateInfo.channelBitrates.length === 0" description="暂无码流信息"/>
             <el-table :data="bitrateInfo.channelBitrates" border v-else style="width: 100%">
               <el-table-column prop="channelId" label="通道号"/>
@@ -1371,7 +1489,11 @@
 
         <!-- 网络状态标签页 -->
         <el-tab-pane label="网络状态" name="networkStatusInfo">
-          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+          <div class="tab-content-wrapper" v-loading="deviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><Place /></el-icon>
+              <span>网络状态</span>
+            </div>
             <el-empty v-if="!networkStatusInfo.success" description="暂无网络状态信息"/>
             <el-descriptions :column="2" border v-else>
               <el-descriptions-item label="IP地址">{{ networkStatusInfo.ipAddress || '-' }}</el-descriptions-item>
@@ -1399,7 +1521,11 @@
 
         <!-- 软件版本标签页 -->
         <el-tab-pane label="软件版本" name="softwareVersionInfo">
-          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+          <div class="tab-content-wrapper" v-loading="deviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><InfoFilled /></el-icon>
+              <span>软件版本信息</span>
+            </div>
             <el-empty v-if="!softwareVersionInfo.success" description="暂无软件版本信息"/>
             <el-descriptions :column="2" border v-else>
               <el-descriptions-item label="设备型号">{{ softwareVersionInfo.deviceModel || '-' }}</el-descriptions-item>
@@ -1425,7 +1551,11 @@
 
         <!-- 录像状态标签页 -->
         <el-tab-pane label="录像状态" name="recordStateInfo">
-          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+          <div class="tab-content-wrapper" v-loading="deviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><VideoCamera /></el-icon>
+              <span>录像状态</span>
+            </div>
             <el-empty v-if="!recordStateInfo.success" description="暂无录像状态信息"/>
             <div v-else>
               <el-descriptions :column="2" border style="margin-bottom: 20px;">
@@ -1437,25 +1567,25 @@
                 </el-descriptions-item>
               </el-descriptions>
               <div v-if="recordStateInfo.channelStates && recordStateInfo.channelStates.length > 0">
-                <div style="font-weight: bold; margin-bottom: 10px;">通道录像状态:</div>
+                <div class="panel-section-title">通道录像状态:</div>
                 <el-table :data="recordStateInfo.channelStates" border size="small" style="width: 100%">
-                  <el-table-column prop="channelId" label="通道号" width="100"/>
-                  <el-table-column prop="mainStreamRecording" label="主码流录像" width="120">
+                  <el-table-column prop="channelId" label="通道号"/>
+                  <el-table-column prop="mainStreamRecording" label="主码流录像">
                     <template #default="{ row }">
                       <el-tag :type="row.mainStreamRecording ? 'success' : 'info'">{{ row.mainStreamRecording ? '录像中' : '未录像' }}</el-tag>
                     </template>
                   </el-table-column>
-                  <el-table-column prop="extraStream1Recording" label="辅码流1录像" width="120">
+                  <el-table-column prop="extraStream1Recording" label="辅码流1录像">
                     <template #default="{ row }">
                       <el-tag :type="row.extraStream1Recording ? 'success' : 'info'">{{ row.extraStream1Recording ? '录像中' : '未录像' }}</el-tag>
                     </template>
                   </el-table-column>
-                  <el-table-column prop="extraStream2Recording" label="辅码流2录像" width="120">
+                  <el-table-column prop="extraStream2Recording" label="辅码流2录像">
                     <template #default="{ row }">
                       <el-tag :type="row.extraStream2Recording ? 'success' : 'info'">{{ row.extraStream2Recording ? '录像中' : '未录像' }}</el-tag>
                     </template>
                   </el-table-column>
-                  <el-table-column prop="extraStream3Recording" label="辅码流3录像" width="120">
+                  <el-table-column prop="extraStream3Recording" label="辅码流3录像">
                     <template #default="{ row }">
                       <el-tag :type="row.extraStream3Recording ? 'success' : 'info'">{{ row.extraStream3Recording ? '录像中' : '未录像' }}</el-tag>
                     </template>
@@ -1472,7 +1602,11 @@
 
         <!-- 电源状态标签页 -->
         <el-tab-pane label="电源状态" name="powerStateInfo">
-          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+          <div class="tab-content-wrapper" v-loading="deviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><SwitchButton /></el-icon>
+              <span>电源状态</span>
+            </div>
             <el-empty v-if="!powerStateInfo.success" description="暂无电源状态信息"/>
             <div v-else>
               <el-empty v-if="!powerStateInfo.powerStates || powerStateInfo.powerStates.length === 0" description="暂无电源设备信息"/>
@@ -1500,19 +1634,23 @@
 
         <!-- 报警布防标签页 -->
         <el-tab-pane label="报警布防" name="alarmArmInfo">
-          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+          <div class="tab-content-wrapper" v-loading="deviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><Bell /></el-icon>
+              <span>报警布防信息</span>
+            </div>
             <el-empty v-if="!alarmArmInfo.success" description="暂无报警布防信息"/>
             <div v-else>
               <el-empty v-if="!alarmArmInfo.channelStates || alarmArmInfo.channelStates.length === 0" description="暂无报警设备信息"/>
               <el-table :data="alarmArmInfo.channelStates" border size="small" style="width: 100%" v-else>
-                <el-table-column prop="channelId" label="通道号" width="100"/>
-                <el-table-column prop="channelName" label="通道名称" width="150"/>
-                <el-table-column prop="armed" label="布防状态" width="120">
+                <el-table-column prop="channelId" label="通道号"/>
+                <el-table-column prop="channelName" label="通道名称"/>
+                <el-table-column prop="armed" label="布防状态">
                   <template #default="{ row }">
                     <el-tag :type="row.armed ? 'success' : 'warning'">{{ row.armed ? '已布防' : '未布防' }}</el-tag>
                   </template>
                 </el-table-column>
-                <el-table-column prop="armType" label="布防类型" width="120">
+                <el-table-column prop="armType" label="布防类型">
                   <template #default="{ row }">
                     {{ row.armTypeDesc || row.armType }}
                   </template>
@@ -1528,7 +1666,11 @@
 
         <!-- 摄像头属性标签页 -->
         <el-tab-pane label="摄像头属性" name="cameraInfo">
-          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+          <div class="tab-content-wrapper" v-loading="deviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><Camera /></el-icon>
+              <span>摄像头属性</span>
+            </div>
             <el-empty v-if="!cameraInfo.success" description="暂无摄像头属性信息"/>
             <div v-else>
               <el-empty v-if="!cameraInfo.cameraList || cameraInfo.cameraList.length === 0" description="暂无摄像头信息"/>
@@ -1561,7 +1703,11 @@
 
         <!-- RTSP URL标签页 -->
         <el-tab-pane label="RTSP URL" name="rtspUrlInfo">
-          <div v-loading="deviceInfoLoading" style="padding: 10px;">
+          <div class="tab-content-wrapper" v-loading="deviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><Link /></el-icon>
+              <span>RTSP URL</span>
+            </div>
             <el-empty v-if="!rtspUrlInfo.success" description="暂无RTSP URL信息"/>
             <div v-else>
               <el-empty v-if="!rtspUrlInfo.urlList || rtspUrlInfo.urlList.length === 0" description="暂无RTSP URL信息"/>
@@ -1663,9 +1809,419 @@
       </template>
     </el-dialog>
 
-    <SelectMapPosition ref="selectMapPositionRef" @onSubmit="selectMapPositionSubmit"/>
-    <ChannelCode ref="channelCodeRef" @handleOk="channelCodeOk"/>
-    <DeviceSnapshotDialog ref="snapshotDialogRef"/>
+    <!-- 海康设备信息弹窗 -->
+    <el-dialog title="海康设备信息" v-model="haikangDeviceInfoDialogVisible" width="850px" append-to-body class="glass-dialog device-info-dialog">
+      <el-tabs v-model="haikangDeviceInfoTabActive" type="border-card">
+        <!-- 设备信息标签页 -->
+        <el-tab-pane label="设备信息" name="deviceInfo">
+          <div class="device-info-dashboard" v-loading="haikangDeviceInfoLoading">
+            <el-empty v-if="!haikangDeviceInfo.success" description="暂无设备信息" />
+            <template v-else>
+              <div class="dashboard-header">
+                <div class="dashboard-title">
+                  <el-icon class="dashboard-icon"><Cpu /></el-icon>
+                  <span>设备基本信息</span>
+                </div>
+                <div class="dashboard-badge" v-if="haikangDeviceInfo.deviceName">
+                  <el-icon><CollectionTag /></el-icon>
+                  <span>{{ haikangDeviceInfo.deviceName }}</span>
+                </div>
+              </div>
+              <div class="info-cards-grid cols-3">
+                <div class="info-card primary" style="animation-delay: 0.04s">
+                  <div class="info-card-glow"></div>
+                  <div class="info-card-icon"><el-icon><OfficeBuilding /></el-icon></div>
+                  <div class="info-card-content">
+                    <div class="info-card-label">设备名称</div>
+                    <div class="info-card-value">{{ haikangDeviceInfo.deviceName || '-' }}</div>
+                  </div>
+                </div>
+                <div class="info-card success" style="animation-delay: 0.07s">
+                  <div class="info-card-glow"></div>
+                  <div class="info-card-icon"><el-icon><SetUp /></el-icon></div>
+                  <div class="info-card-content">
+                    <div class="info-card-label">设备类型</div>
+                    <div class="info-card-value">{{ haikangDeviceInfo.deviceType || '-' }}</div>
+                  </div>
+                </div>
+                <div class="info-card warning" style="animation-delay: 0.10s">
+                  <div class="info-card-glow"></div>
+                  <div class="info-card-icon"><el-icon><Medal /></el-icon></div>
+                  <div class="info-card-content">
+                    <div class="info-card-label">序列号</div>
+                    <div class="info-card-value">{{ haikangDeviceInfo.serialNumber || '-' }}</div>
+                  </div>
+                </div>
+                <div class="info-card info" style="animation-delay: 0.13s">
+                  <div class="info-card-glow"></div>
+                  <div class="info-card-icon"><el-icon><Place /></el-icon></div>
+                  <div class="info-card-content">
+                    <div class="info-card-label">IP地址</div>
+                    <div class="info-card-value">{{ haikangDeviceInfo.ipAddress || '-' }}</div>
+                  </div>
+                </div>
+                <div class="info-card danger" style="animation-delay: 0.16s">
+                  <div class="info-card-glow"></div>
+                  <div class="info-card-icon"><el-icon><VideoCamera /></el-icon></div>
+                  <div class="info-card-content">
+                    <div class="info-card-label">总通道数</div>
+                    <div class="info-card-value">{{ haikangDeviceInfo.channelNum || '-' }}</div>
+                  </div>
+                </div>
+                <div class="info-card teal" style="animation-delay: 0.19s">
+                  <div class="info-card-glow"></div>
+                  <div class="info-card-icon"><el-icon><VideoCamera /></el-icon></div>
+                  <div class="info-card-content">
+                    <div class="info-card-label">模拟通道数</div>
+                    <div class="info-card-value">{{ haikangDeviceInfo.analogChanNum || '-' }}</div>
+                  </div>
+                </div>
+                <div class="info-card purple" style="animation-delay: 0.22s">
+                  <div class="info-card-glow"></div>
+                  <div class="info-card-icon"><el-icon><Link /></el-icon></div>
+                  <div class="info-card-content">
+                    <div class="info-card-label">IP通道数</div>
+                    <div class="info-card-value">{{ haikangDeviceInfo.ipChanNum || '-' }}</div>
+                  </div>
+                </div>
+                <div class="info-card orange" style="animation-delay: 0.25s">
+                  <div class="info-card-glow"></div>
+                  <div class="info-card-icon"><el-icon><Monitor /></el-icon></div>
+                  <div class="info-card-content">
+                    <div class="info-card-label">DVR类型</div>
+                    <div class="info-card-value">{{ haikangDeviceInfo.dvrType || '-' }}</div>
+                  </div>
+                </div>
+                <div class="info-card pink" style="animation-delay: 0.28s">
+                  <div class="info-card-glow"></div>
+                  <div class="info-card-icon"><el-icon><CollectionTag /></el-icon></div>
+                  <div class="info-card-content">
+                    <div class="info-card-label">设备类型码</div>
+                    <div class="info-card-value">{{ haikangDeviceInfo.devType || '-' }}</div>
+                  </div>
+                </div>
+                <div class="info-card cyan" style="animation-delay: 0.31s">
+                  <div class="info-card-glow"></div>
+                  <div class="info-card-icon"><el-icon><InfoFilled /></el-icon></div>
+                  <div class="info-card-content">
+                    <div class="info-card-label">设备类别</div>
+                    <div class="info-card-value">{{ haikangDeviceInfo.devClass || '-' }}</div>
+                  </div>
+                </div>
+                <div class="info-card lime" style="animation-delay: 0.34s">
+                  <div class="info-card-glow"></div>
+                  <div class="info-card-icon"><el-icon><Bell /></el-icon></div>
+                  <div class="info-card-content">
+                    <div class="info-card-label">报警输入端口</div>
+                    <div class="info-card-value">{{ haikangDeviceInfo.alarmInPortNum || '-' }}</div>
+                  </div>
+                </div>
+                <div class="info-card indigo" style="animation-delay: 0.37s">
+                  <div class="info-card-glow"></div>
+                  <div class="info-card-icon"><el-icon><Bell /></el-icon></div>
+                  <div class="info-card-content">
+                    <div class="info-card-label">报警输出端口</div>
+                    <div class="info-card-value">{{ haikangDeviceInfo.alarmOutPortNum || '-' }}</div>
+                  </div>
+                </div>
+                <div class="info-card primary" style="animation-delay: 0.40s">
+                  <div class="info-card-glow"></div>
+                  <div class="info-card-icon"><el-icon><Histogram /></el-icon></div>
+                  <div class="info-card-content">
+                    <div class="info-card-label">硬盘数量</div>
+                    <div class="info-card-value">{{ haikangDeviceInfo.diskNum || '-' }}</div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="haikangDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleRefreshHaikangDeviceInfo" :loading="haikangDeviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 存储信息标签页 -->
+        <el-tab-pane label="存储信息" name="storageInfo">
+          <div class="tab-content-wrapper" v-loading="haikangDeviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><Histogram /></el-icon>
+              <span>存储设备信息</span>
+            </div>
+            <el-empty v-if="!haikangStorageInfo.diskList || haikangStorageInfo.diskList.length === 0" description="暂无存储设备信息"></el-empty>
+            <el-collapse v-else accordion>
+              <el-collapse-item v-for="(disk, index) in haikangStorageInfo.diskList" :key="index" :title="'硬盘 ' + (disk.diskNo || index + 1)">
+                <el-descriptions :column="2" border size="small">
+                  <el-descriptions-item label="硬盘编号">{{ disk.diskNo || '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="容量">{{ disk.capacity !== undefined ? disk.capacity + ' MB' : '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="可用空间">{{ disk.freeSpace !== undefined ? disk.freeSpace + ' MB' : '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="已用空间">{{ disk.usedSpace !== undefined ? disk.usedSpace + ' MB' : '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="状态">{{ disk.statusDesc || disk.status || '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="属性">{{ disk.attrDesc || disk.attr || '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="组编号">{{ disk.groupNo || '-' }}</el-descriptions-item>
+                </el-descriptions>
+              </el-collapse-item>
+            </el-collapse>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="haikangDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetHaikangStorageInfo" :loading="haikangDeviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- SD卡信息标签页 -->
+        <el-tab-pane label="SD卡信息" name="sdCardInfo">
+          <div class="tab-content-wrapper" v-loading="haikangDeviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><Monitor /></el-icon>
+              <span>SD卡信息</span>
+            </div>
+            <el-empty v-if="!haikangSdCardInfo.success" description="暂无SD卡信息"></el-empty>
+            <div v-else>
+              <el-descriptions :column="2" border style="margin-bottom: 20px;">
+                <el-descriptions-item label="SD卡数量" v-if="haikangSdCardInfo.sdCardCount !== undefined">{{ haikangSdCardInfo.sdCardCount }}</el-descriptions-item>
+              </el-descriptions>
+
+              <div v-if="haikangSdCardInfo.sdCardList && haikangSdCardInfo.sdCardList.length > 0">
+                <div class="panel-section-title">SD卡详细信息:</div>
+                <el-table :data="haikangSdCardInfo.sdCardList" border size="small" style="width: 100%" height="250">
+                  <el-table-column prop="cardNo" label="SD卡编号" width="100"></el-table-column>
+                  <el-table-column prop="capacity" label="总容量(MB)" width="120"></el-table-column>
+                  <el-table-column prop="freeSpace" label="剩余空间(MB)" width="140"></el-table-column>
+                  <el-table-column prop="usedSpace" label="已用空间(MB)" width="140"></el-table-column>
+                  <el-table-column prop="statusDesc" label="状态"></el-table-column>
+                  <el-table-column prop="attrDesc" label="属性"></el-table-column>
+                </el-table>
+              </div>
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="haikangDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetHaikangSdCardInfo" :loading="haikangDeviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 码流信息标签页 -->
+        <el-tab-pane label="码流信息" name="bitrateInfo">
+          <div class="tab-content-wrapper" v-loading="haikangDeviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><VideoCamera /></el-icon>
+              <span>码流信息</span>
+            </div>
+            <el-empty v-if="!haikangBitrateInfo.success || !haikangBitrateInfo.streamList || haikangBitrateInfo.streamList.length === 0" description="暂无码流信息"></el-empty>
+            <el-table :data="haikangBitrateInfo.streamList" border v-else style="width: 100%" height="250">
+              <el-table-column prop="streamName" label="码流名称" width="150"></el-table-column>
+              <el-table-column prop="streamTypeDesc" label="码流类型" width="120"></el-table-column>
+              <el-table-column prop="resolutionDesc" label="分辨率" width="120"></el-table-column>
+              <el-table-column prop="videoBitrate" label="视频码率" width="100"></el-table-column>
+              <el-table-column prop="videoFrameRateDesc" label="帧率" width="100"></el-table-column>
+              <el-table-column prop="videoEncTypeDesc" label="编码类型" width="120"></el-table-column>
+              <el-table-column prop="picQualityDesc" label="图片质量" width="120"></el-table-column>
+            </el-table>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="haikangDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetHaikangBitrateInfo" :loading="haikangDeviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 网络状态标签页 -->
+        <el-tab-pane label="网络状态" name="networkStatusInfo">
+          <div class="tab-content-wrapper" v-loading="haikangDeviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><Place /></el-icon>
+              <span>网络状态</span>
+            </div>
+            <el-empty v-if="!haikangNetworkStatusInfo.success" description="暂无网络状态信息"></el-empty>
+            <div v-else>
+              <el-descriptions :column="2" border style="margin-bottom: 20px;">
+                <el-descriptions-item label="客户端连接数" v-if="haikangNetworkStatusInfo.clientCount !== undefined">{{ haikangNetworkStatusInfo.clientCount }}</el-descriptions-item>
+                <el-descriptions-item label="当前码率" v-if="haikangNetworkStatusInfo.bitRate !== undefined">{{ haikangNetworkStatusInfo.bitRate }}</el-descriptions-item>
+                <el-descriptions-item label="总码率" v-if="haikangNetworkStatusInfo.allBitRate !== undefined">{{ haikangNetworkStatusInfo.allBitRate }}</el-descriptions-item>
+                <el-descriptions-item label="IP连接数" v-if="haikangNetworkStatusInfo.ipLinkNum !== undefined">{{ haikangNetworkStatusInfo.ipLinkNum }}</el-descriptions-item>
+              </el-descriptions>
+
+              <div v-if="haikangNetworkStatusInfo.clientList && haikangNetworkStatusInfo.clientList.length > 0">
+                <div class="panel-section-title">客户端连接详情:</div>
+                <el-table :data="haikangNetworkStatusInfo.clientList" border size="small" style="width: 100%" height="250">
+                  <el-table-column prop="clientNo" label="客户端编号" width="120"></el-table-column>
+                  <el-table-column prop="ip" label="IP地址"></el-table-column>
+                </el-table>
+              </div>
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="haikangDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetHaikangNetworkStatusInfo" :loading="haikangDeviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 软件版本标签页 -->
+        <el-tab-pane label="设备状态" name="softwareVersionInfo">
+          <div class="tab-content-wrapper" v-loading="haikangDeviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><InfoFilled /></el-icon>
+              <span>设备状态</span>
+            </div>
+            <el-empty v-if="!haikangSoftwareVersionInfo.success" description="暂无设备状态信息"></el-empty>
+            <el-descriptions :column="2" border v-else>
+              <el-descriptions-item label="设备状态">
+                <el-tag :type="haikangSoftwareVersionInfo.deviceStatic === 0 ? 'success' : 'warning'">{{ haikangSoftwareVersionInfo.deviceStaticDesc || '-' }}</el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item label="本地显示">
+                <el-tag :type="haikangSoftwareVersionInfo.localDisplay === 0 ? 'success' : 'warning'">{{ haikangSoftwareVersionInfo.localDisplayDesc || '-' }}</el-tag>
+              </el-descriptions-item>
+            </el-descriptions>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="haikangDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetHaikangSoftwareVersionInfo" :loading="haikangDeviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 录像状态标签页 -->
+        <el-tab-pane label="录像状态" name="recordStateInfo">
+          <div class="tab-content-wrapper" v-loading="haikangDeviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><VideoCamera /></el-icon>
+              <span>录像状态</span>
+            </div>
+            <el-empty v-if="!haikangRecordStateInfo.success || !haikangRecordStateInfo.channelRecordList || haikangRecordStateInfo.channelRecordList.length === 0" description="暂无录像状态信息"></el-empty>
+            <div v-else>
+              <el-table :data="haikangRecordStateInfo.channelRecordList" border size="small" style="width: 100%" height="250">
+                <el-table-column prop="channelId" label="通道号"></el-table-column>
+                <el-table-column prop="recordingDesc" label="录像状态"></el-table-column>
+                <el-table-column prop="signalDesc" label="信号状态"></el-table-column>
+                <el-table-column prop="hardwareDesc" label="硬件状态"></el-table-column>
+                <el-table-column prop="bitRate" label="码率"></el-table-column>
+              </el-table>
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="haikangDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetHaikangRecordStateInfo" :loading="haikangDeviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 电源状态标签页 -->
+        <el-tab-pane label="电源状态" name="powerStateInfo">
+          <div class="tab-content-wrapper" v-loading="haikangDeviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><SwitchButton /></el-icon>
+              <span>电源状态</span>
+            </div>
+            <el-empty v-if="!haikangPowerStateInfo.success" description="暂无电源状态信息"></el-empty>
+            <el-descriptions :column="2" border v-else>
+              <el-descriptions-item label="设备状态">
+                <el-tag :type="haikangPowerStateInfo.deviceStatic === 0 ? 'success' : 'warning'">{{ haikangPowerStateInfo.deviceStaticDesc || '-' }}</el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item label="电源状态" v-if="haikangPowerStateInfo.devicePowerStatus !== undefined">
+                <el-tag :type="haikangPowerStateInfo.devicePowerStatus === 0 ? 'success' : 'warning'">{{ haikangPowerStateInfo.devicePowerStatus === 0 ? '正常' : '异常' }}</el-tag>
+              </el-descriptions-item>
+            </el-descriptions>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="haikangDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetHaikangPowerStateInfo" :loading="haikangDeviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 报警布防标签页 -->
+        <el-tab-pane label="报警布防" name="alarmArmInfo">
+          <div class="tab-content-wrapper" v-loading="haikangDeviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><Bell /></el-icon>
+              <span>报警布防信息</span>
+            </div>
+            <el-empty v-if="!haikangAlarmArmInfo.success" description="暂无报警布防信息"></el-empty>
+            <div v-else>
+              <div v-if="haikangAlarmArmInfo.alarmInList && haikangAlarmArmInfo.alarmInList.length > 0" style="margin-bottom: 20px;">
+                <div class="panel-section-title">报警输入:</div>
+                <el-table :data="haikangAlarmArmInfo.alarmInList" border size="small" style="width: 100%" height="200">
+                  <el-table-column prop="alarmInNo" label="输入编号"></el-table-column>
+                  <el-table-column prop="alarmInStatus" label="输入状态"></el-table-column>
+                </el-table>
+              </div>
+
+              <div v-if="haikangAlarmArmInfo.alarmOutList && haikangAlarmArmInfo.alarmOutList.length > 0">
+                <div class="panel-section-title">报警输出:</div>
+                <el-table :data="haikangAlarmArmInfo.alarmOutList" border size="small" style="width: 100%" height="200">
+                  <el-table-column prop="alarmOutNo" label="输出编号"></el-table-column>
+                  <el-table-column prop="alarmOutStatus" label="输出状态"></el-table-column>
+                </el-table>
+              </div>
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="haikangDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetHaikangAlarmArmInfo" :loading="haikangDeviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 摄像头属性标签页 -->
+        <el-tab-pane label="摄像头属性" name="cameraInfo">
+          <div class="tab-content-wrapper" v-loading="haikangDeviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><Camera /></el-icon>
+              <span>摄像头属性</span>
+            </div>
+            <el-empty v-if="!haikangCameraInfo.success" description="暂无摄像头属性信息"></el-empty>
+            <div v-else>
+              <el-empty v-if="!haikangCameraInfo.cameraList || haikangCameraInfo.cameraList.length === 0" description="暂无摄像头信息"></el-empty>
+              <el-table :data="haikangCameraInfo.cameraList" border size="small" style="width: 100%" v-else height="300">
+                <el-table-column prop="channelId" label="通道号" width="100"></el-table-column>
+                <el-table-column prop="cameraName" label="摄像头名称" width="150"></el-table-column>
+                <el-table-column prop="cameraType" label="摄像头类型" width="120"></el-table-column>
+                <el-table-column prop="online" label="在线状态" width="100">
+                  <template #default="{ row }">
+                    <el-tag :type="row.online ? 'success' : 'warning'">{{ row.online ? '在线' : '离线' }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="status" label="状态" width="120">
+                  <template #default="{ row }">
+                    {{ row.statusDesc || row.status }}
+                  </template>
+                </el-table-column>
+                <el-table-column prop="manufacturer" label="厂商" width="120"></el-table-column>
+                <el-table-column prop="model" label="型号" width="150"></el-table-column>
+                <el-table-column prop="ipAddress" label="IP地址" width="150"></el-table-column>
+                <el-table-column prop="port" label="端口" width="80"></el-table-column>
+              </el-table>
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="haikangDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetHaikangCameraInfo" :loading="haikangDeviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- RTSP URL标签页 -->
+        <el-tab-pane label="RTSP URL" name="rtspUrlInfo">
+          <div class="tab-content-wrapper" v-loading="haikangDeviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><Link /></el-icon>
+              <span>RTSP URL</span>
+            </div>
+            <el-empty v-if="!haikangRtspUrlInfo.success" description="暂无RTSP URL信息"></el-empty>
+            <div v-else>
+              <div class="panel-section-title">RTSP URL:</div>
+              <div class="flex items-center gap-2">
+                <el-input v-model="haikangRtspUrlInfo.rtspUrl" disabled size="small" style="flex: 1;"></el-input>
+                <el-button type="primary" size="small" @click="handleCopy(haikangRtspUrlInfo.rtspUrl)">复制</el-button>
+              </div>
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="haikangDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetHaikangRtspUrlInfo" :loading="haikangDeviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+    </el-dialog>
+
+    <SelectMapPosition ref="selectMapPositionRef" @onSubmit="selectMapPositionSubmit"></SelectMapPosition>
+    <ChannelCode ref="channelCodeRef" @handleOk="channelCodeOk"></ChannelCode>
+    <DeviceSnapshotDialog ref="snapshotDialogRef"></DeviceSnapshotDialog>
   </div>
 </template>
 
@@ -1718,7 +2274,27 @@ import {
   getDaHuaNetworkStatusInfo, getDaHuaSoftwareVersionInfo, getDaHuaRecordStateInfo, getDaHuaPowerStateInfo,
   getDaHuaAlarmArmInfo, getDaHuaCameraInfo, getDaHuaRtspUrlInfo, downloadDaHuaRecord, downloadDaHuaRecordDirect
 } from "@/api/qs/dahua";
-import { queryHaiKangRecord, downloadHaikangRecordDirect } from "@/api/qs/haikang";
+import { 
+  queryHaiKangRecord, 
+  downloadHaikangRecordDirect, 
+  captureHaikangAndSave, 
+  getHaiKangDeviceInfo,
+  getHaiKangStorageInfo,
+  getHaiKangSDCardInfo,
+  getHaiKangBitrateInfo,
+  getHaiKangNetworkStatusInfo,
+  getHaiKangSoftwareVersionInfo,
+  getHaiKangRecordStateInfo,
+  getHaiKangPowerStateInfo,
+  getHaiKangAlarmArmInfo,
+  getHaiKangCameraInfo,
+  getHaiKangRtspUrlInfo,
+  getHaiKangSystemParam,
+  getHaiKangVideoParam,
+  getHaiKangDevTime,
+  setHaiKangDevTime,
+  rebootHaiKangDevice
+} from "@/api/qs/haikang";
 import { saveAs } from "file-saver";
 import {
   closeStreams,
@@ -1731,7 +2307,7 @@ import {
   startGb28181Play, stopGb28181Play,
   startJt1078Play, stopJt1078Play
 } from "@/api/qs/zlm";
-import {DocumentCopy, InfoFilled, Refresh, Sunny, Moon, SwitchButton, CircleClose, Position, Plus, Delete, WindPower, List, Grid, CircleCheck, Picture, VideoCamera, MapLocation, Monitor, More, ArrowDown, Clock, Camera} from '@element-plus/icons-vue'
+import {DocumentCopy, InfoFilled, Refresh, Sunny, Moon, SwitchButton, CircleClose, Position, Plus, Delete, WindPower, List, Grid, CircleCheck, Picture, VideoCamera, MapLocation, Monitor, More, ArrowDown, Clock, Camera, Cpu, Histogram, Bell, Lock, Key, Timer, Place, OfficeBuilding, CollectionTag, Link, Medal, SetUp} from '@element-plus/icons-vue'
 import StreamDropdown from "@/components/Channel/streamDropdown.vue";
 import MediaInfo from "@/components/Channel/mediaInfo.vue";
 import SelectMapPosition from '@/components/SelectMapPosition';
@@ -1834,6 +2410,7 @@ const timeSyncLoading = ref(false);
 const timeSyncForm = reactive({
   deviceId: null as number | null,
   deviceIp: '',
+  deviceType: '' as string,
   deviceTime: '',
   syncTime: '',
   syncType: false
@@ -3219,13 +3796,26 @@ const handleMoreAction = (command: string, row: QsDevice) => {
   }
 }
 
-// 大华设备抓图
+// 设备抓图
 const handleCapture = async (row: QsDevice) => {
   try {
     await proxy.$modal.confirm(`是否确认对设备"${row.deviceName}"进行抓图？`);
     
     const channelId = row.channel || 0;
-    const response = await captureDaHuaAndSave(row.id!, channelId, 'manual');
+    let response;
+    
+    // 根据设备类型调用不同的API
+    if (row.type === '7' || row.type === '8') {
+      // 海康设备
+      response = await captureHaikangAndSave(row.id!, channelId, 'manual');
+    } else if (row.type === '9') {
+      // 大华设备
+      response = await captureDaHuaAndSave(row.id!, channelId, 'manual');
+    } else {
+      proxy.$modal.msgError('不支持的设备类型');
+      return;
+    }
+    
     if (response.code === 200) {
       proxy.$modal.msgSuccess('抓图成功，已保存到数据库');
     } else {
@@ -3239,12 +3829,24 @@ const handleCapture = async (row: QsDevice) => {
   }
 }
 
-// 重启大华设备
+// 重启设备（支持海康/大华）
 const handleReboot = async (row: QsDevice) => {
   try {
     await proxy.$modal.confirm(`是否确认重启设备"${row.deviceName}"？`);
     
-    const response = await rebootDaHuaDevice(row.id!);
+    let response;
+    // 根据设备类型调用不同的API
+    if (row.type === '7' || row.type === '8') {
+      // 海康设备
+      response = await rebootHaiKangDevice(row.id!);
+    } else if (row.type === '9') {
+      // 大华设备
+      response = await rebootDaHuaDevice(row.id!);
+    } else {
+      proxy.$modal.msgError('不支持的设备类型');
+      return;
+    }
+    
     if (response.code === 200) {
       proxy.$modal.msgSuccess('重启命令已发送，设备正在重启...');
     } else {
@@ -3258,8 +3860,123 @@ const handleReboot = async (row: QsDevice) => {
   }
 }
 
+// 设备信息对话框中的重启按钮处理
+const handleDeviceInfoReboot = async () => {
+  if (!currentDeviceRow.value) {
+    proxy.$modal.msgError('设备信息未加载');
+    return;
+  }
+  await handleReboot(currentDeviceRow.value);
+}
+
+// 设备信息对话框中的校时按钮处理
+const handleDeviceInfoTimeSync = () => {
+  if (!currentDeviceRow.value) {
+    proxy.$modal.msgError('设备信息未加载');
+    return;
+  }
+  openTimeSyncDialog(currentDeviceRow.value);
+}
+
 // 当前下载的设备行
 let currentDownloadDevice: QsDevice | null = null;
+
+// 海康设备信息弹窗
+const haikangDeviceInfoDialogVisible = ref(false);
+const haikangDeviceInfoTabActive = ref('deviceInfo');
+const haikangDeviceInfoLoading = ref(false);
+
+// 海康设备信息数据
+const haikangDeviceInfo = reactive({
+  success: false,
+  deviceName: '',
+  deviceType: '',
+  serialNumber: '',
+  ipAddress: '',
+  channelNum: undefined as number | undefined,
+  analogChanNum: undefined as number | undefined,
+  ipChanNum: undefined as number | undefined,
+  dvrType: undefined as number | undefined,
+  devType: undefined as number | undefined,
+  devClass: undefined as number | undefined,
+  alarmInPortNum: undefined as number | undefined,
+  alarmOutPortNum: undefined as number | undefined,
+  diskNum: undefined as number | undefined
+});
+
+// 海康存储信息
+const haikangStorageInfo = reactive({
+  diskList: [],
+  diskCount: 0,
+  success: false
+});
+
+// 海康SD卡信息
+const haikangSdCardInfo = reactive({
+  success: false,
+  sdCardCount: undefined as number | undefined,
+  sdCardList: []
+});
+
+// 海康码流信息
+const haikangBitrateInfo = reactive({
+  success: false,
+  streamList: []
+});
+
+// 海康网络状态信息
+const haikangNetworkStatusInfo = reactive({
+  success: false,
+  clientList: [],
+  clientCount: undefined as number | undefined,
+  bitRate: undefined as number | undefined,
+  allBitRate: undefined as number | undefined,
+  ipLinkNum: undefined as number | undefined,
+  exceedMaxLink: undefined as number | undefined
+});
+
+// 海康软件版本信息
+const haikangSoftwareVersionInfo = reactive({
+  success: false,
+  deviceStatic: undefined as number | undefined,
+  deviceStaticDesc: '',
+  localDisplay: undefined as number | undefined,
+  localDisplayDesc: ''
+});
+
+// 海康录像状态信息
+const haikangRecordStateInfo = reactive({
+  success: false,
+  channelRecordList: []
+});
+
+// 海康电源状态信息
+const haikangPowerStateInfo = reactive({
+  success: false,
+  deviceStatic: undefined as number | undefined,
+  deviceStaticDesc: '',
+  devicePowerStatus: undefined as number | undefined,
+  localDisplay: undefined as number | undefined
+});
+
+// 海康报警布防信息
+const haikangAlarmArmInfo = reactive({
+  success: false,
+  alarmInList: [],
+  alarmOutList: []
+});
+
+// 海康摄像头属性信息
+const haikangCameraInfo = reactive({
+  success: false,
+  cameraList: []
+});
+
+// 海康RTSP URL信息
+const haikangRtspUrlInfo = reactive({
+  success: false,
+  rtspUrl: ''
+});
 
 // 打开录像下载对话框
 const openDownloadRecordDialog = (row: QsDevice) => {
@@ -3399,69 +4116,126 @@ const handleDownloadRecord = async () => {
 const openDeviceInfoDialog = (row: QsDevice) => {
   currentDeviceId.value = row.id;
   currentDeviceRow.value = row;
-  deviceInfoTabActive.value = 'deviceInfo';
-  Object.assign(deviceInfo, {
-    serialNumber: '',
-    alarmInPortNum: undefined,
-    alarmOutPortNum: undefined,
-    diskNum: undefined,
-    dvrType: undefined,
-    channelNum: undefined,
-    limitLoginTime: undefined,
-    leftLogTimes: undefined,
-    lockLeftTime: undefined
-  });
-  Object.assign(systemParam, {
-    videoStandard: undefined,
-    country: ''
-  });
-  Object.assign(videoParam, {
-    channelId: 0,
-    streamType: 0,
-    formatType: undefined,
-    videoEnable: undefined,
-    compression: undefined,
-    width: undefined,
-    height: undefined,
-    bitRateControl: undefined,
-    bitRate: undefined,
-    frameRate: undefined,
-    iframeInterval: undefined,
-    imageQuality: undefined
-  });
-  Object.assign(deviceVideoParam, {
-    channelId: 0,
-    brightness: undefined,
-    contrast: undefined,
-    saturation: undefined,
-    chroma: undefined,
-    sharpness: undefined,
-    hue: undefined,
-    gain: undefined,
-    blackWhiteMode: undefined
-  });
-  storageInfo.storageDevices = [];
-  Object.assign(systemResourceInfo, {
-    success: false,
-    cpuUsage: 0,
-    memoryUsage: 0
-  });
-  Object.assign(sdCardInfo, {
-    success: false,
-    exists: false
-  });
-  Object.assign(bitrateInfo, {
-    success: false,
-    channelBitrates: []
-  });
-  Object.assign(networkStatusInfo, {
-    success: false
-  });
-  Object.assign(softwareVersionInfo, {
-    success: false
-  });
-  deviceInfoDialogVisible.value = true;
-  handleRefreshDeviceInfo();
+  
+  const isHaikangDevice = row.type === '7' || row.type === '8';
+  const isDaHuaDevice = row.type === '9';
+  
+  if (isHaikangDevice) {
+    // 打开海康设备信息弹窗
+    haikangDeviceInfoTabActive.value = 'deviceInfo';
+    Object.assign(haikangDeviceInfo, {
+      serialNumber: '',
+      alarmInPortNum: undefined,
+      alarmOutPortNum: undefined,
+      diskNum: undefined,
+      dvrType: undefined,
+      channelNum: undefined,
+      limitLoginTime: undefined,
+      leftLogTimes: undefined,
+      lockLeftTime: undefined
+    });
+    Object.assign(haikangStorageInfo, {
+      diskList: [],
+      diskCount: 0,
+      success: false
+    });
+    Object.assign(haikangSdCardInfo, {
+      success: false,
+      exists: false
+    });
+    Object.assign(haikangBitrateInfo, {
+      success: false,
+      channelBitrates: []
+    });
+    Object.assign(haikangNetworkStatusInfo, {
+      success: false
+    });
+    Object.assign(haikangSoftwareVersionInfo, {
+      success: false
+    });
+    Object.assign(haikangRecordStateInfo, {
+      success: false
+    });
+    Object.assign(haikangPowerStateInfo, {
+      success: false
+    });
+    Object.assign(haikangAlarmArmInfo, {
+      success: false
+    });
+    Object.assign(haikangCameraInfo, {
+      success: false
+    });
+    Object.assign(haikangRtspUrlInfo, {
+      success: false
+    });
+    haikangDeviceInfoDialogVisible.value = true;
+    handleRefreshHaikangDeviceInfo();
+  } else {
+    // 打开大华设备信息弹窗
+    deviceInfoTabActive.value = 'deviceInfo';
+    Object.assign(deviceInfo, {
+      serialNumber: '',
+      alarmInPortNum: undefined,
+      alarmOutPortNum: undefined,
+      diskNum: undefined,
+      dvrType: undefined,
+      channelNum: undefined,
+      limitLoginTime: undefined,
+      leftLogTimes: undefined,
+      lockLeftTime: undefined
+    });
+    Object.assign(systemParam, {
+      videoStandard: undefined,
+      country: ''
+    });
+    Object.assign(videoParam, {
+      channelId: 0,
+      streamType: 0,
+      formatType: undefined,
+      videoEnable: undefined,
+      compression: undefined,
+      width: undefined,
+      height: undefined,
+      bitRateControl: undefined,
+      bitRate: undefined,
+      frameRate: undefined,
+      iframeInterval: undefined,
+      imageQuality: undefined
+    });
+    Object.assign(deviceVideoParam, {
+      channelId: 0,
+      brightness: undefined,
+      contrast: undefined,
+      saturation: undefined,
+      chroma: undefined,
+      sharpness: undefined,
+      hue: undefined,
+      gain: undefined,
+      blackWhiteMode: undefined
+    });
+    storageInfo.storageDevices = [];
+    Object.assign(systemResourceInfo, {
+      success: false,
+      cpuUsage: 0,
+      memoryUsage: 0
+    });
+    Object.assign(sdCardInfo, {
+      success: false,
+      exists: false
+    });
+    Object.assign(bitrateInfo, {
+      success: false,
+      channelBitrates: []
+    });
+    Object.assign(networkStatusInfo, {
+      success: false
+    });
+    Object.assign(softwareVersionInfo, {
+      success: false
+    });
+    deviceInfoDialogVisible.value = true;
+    handleRefreshDeviceInfo();
+  }
 }
 
 // 获取系统参数
@@ -3472,7 +4246,16 @@ const handleGetSystemParam = async () => {
   }
   try {
     deviceInfoLoading.value = true;
-    const res = await getDaHuaSystemParam(currentDeviceId.value);
+    const isHaikangDevice = currentDeviceRow.value.type === '7' || currentDeviceRow.value.type === '8';
+    const isDaHuaDevice = currentDeviceRow.value.type === '9';
+    let res;
+    
+    if (isHaikangDevice) {
+      res = await getHaiKangSystemParam(currentDeviceId.value);
+    } else if (isDaHuaDevice) {
+      res = await getDaHuaSystemParam(currentDeviceId.value);
+    }
+    
     if (res.data) {
       Object.assign(systemParam, res.data);
       proxy.$modal.msgSuccess('获取系统参数成功');
@@ -3493,7 +4276,16 @@ const handleGetVideoParam = async () => {
   }
   try {
     deviceInfoLoading.value = true;
-    const res = await getDaHuaVideoParam(currentDeviceId.value, videoParam.channelId, videoParam.streamType);
+    const isHaikangDevice = currentDeviceRow.value.type === '7' || currentDeviceRow.value.type === '8';
+    const isDaHuaDevice = currentDeviceRow.value.type === '9';
+    let res;
+    
+    if (isHaikangDevice) {
+      res = await getHaiKangVideoParam(currentDeviceId.value, videoParam.channelId, videoParam.streamType);
+    } else if (isDaHuaDevice) {
+      res = await getDaHuaVideoParam(currentDeviceId.value, videoParam.channelId, videoParam.streamType);
+    }
+    
     if (res.data) {
       Object.assign(videoParam, res.data);
       proxy.$modal.msgSuccess('获取视频参数成功');
@@ -3579,7 +4371,16 @@ const handleGetStorageInfo = async () => {
   }
   try {
     deviceInfoLoading.value = true;
-    const res = await getDaHuaStorageInfo(currentDeviceId.value);
+    const isHaikangDevice = currentDeviceRow.value.type === '7' || currentDeviceRow.value.type === '8';
+    const isDaHuaDevice = currentDeviceRow.value.type === '9';
+    let res;
+    
+    if (isHaikangDevice) {
+      res = await getHaiKangStorageInfo(currentDeviceId.value);
+    } else if (isDaHuaDevice) {
+      res = await getDaHuaStorageInfo(currentDeviceId.value);
+    }
+    
     if (res.data) {
       storageInfo.storageDevices = res.data.storageDevices || [];
       proxy.$modal.msgSuccess('获取存储信息成功');
@@ -3600,7 +4401,18 @@ const handleGetSystemResourceInfo = async () => {
   }
   try {
     deviceInfoLoading.value = true;
-    const res = await getDaHuaSystemResourceInfo(currentDeviceId.value);
+    const isHaikangDevice = currentDeviceRow.value.type === '7' || currentDeviceRow.value.type === '8';
+    const isDaHuaDevice = currentDeviceRow.value.type === '9';
+    let res;
+    
+    if (isHaikangDevice) {
+      // 海康系统资源信息暂未实现
+      proxy.$modal.msgInfo('海康系统资源信息暂未实现');
+      return;
+    } else if (isDaHuaDevice) {
+      res = await getDaHuaSystemResourceInfo(currentDeviceId.value);
+    }
+    
     if (res.data) {
       Object.assign(systemResourceInfo, res.data);
       proxy.$modal.msgSuccess('获取系统资源信息成功');
@@ -3642,7 +4454,16 @@ const handleGetSDCardInfo = async () => {
   }
   try {
     deviceInfoLoading.value = true;
-    const res = await getDaHuaSDCardInfo(currentDeviceId.value);
+    const isHaikangDevice = currentDeviceRow.value.type === '7' || currentDeviceRow.value.type === '8';
+    const isDaHuaDevice = currentDeviceRow.value.type === '9';
+    let res;
+    
+    if (isHaikangDevice) {
+      res = await getHaiKangSDCardInfo(currentDeviceId.value);
+    } else if (isDaHuaDevice) {
+      res = await getDaHuaSDCardInfo(currentDeviceId.value);
+    }
+    
     if (res.data) {
       Object.assign(sdCardInfo, res.data);
       proxy.$modal.msgSuccess('获取SD卡信息成功');
@@ -3663,7 +4484,16 @@ const handleGetBitrateInfo = async () => {
   }
   try {
     deviceInfoLoading.value = true;
-    const res = await getDaHuaBitrateInfo(currentDeviceId.value);
+    const isHaikangDevice = currentDeviceRow.value.type === '7' || currentDeviceRow.value.type === '8';
+    const isDaHuaDevice = currentDeviceRow.value.type === '9';
+    let res;
+    
+    if (isHaikangDevice) {
+      res = await getHaiKangBitrateInfo(currentDeviceId.value);
+    } else if (isDaHuaDevice) {
+      res = await getDaHuaBitrateInfo(currentDeviceId.value);
+    }
+    
     if (res.data) {
       Object.assign(bitrateInfo, res.data);
       proxy.$modal.msgSuccess('获取码流信息成功');
@@ -3684,7 +4514,16 @@ const handleGetNetworkStatusInfo = async () => {
   }
   try {
     deviceInfoLoading.value = true;
-    const res = await getDaHuaNetworkStatusInfo(currentDeviceId.value);
+    const isHaikangDevice = currentDeviceRow.value.type === '7' || currentDeviceRow.value.type === '8';
+    const isDaHuaDevice = currentDeviceRow.value.type === '9';
+    let res;
+    
+    if (isHaikangDevice) {
+      res = await getHaiKangNetworkStatusInfo(currentDeviceId.value);
+    } else if (isDaHuaDevice) {
+      res = await getDaHuaNetworkStatusInfo(currentDeviceId.value);
+    }
+    
     if (res.data) {
       Object.assign(networkStatusInfo, res.data);
       proxy.$modal.msgSuccess('获取网络状态信息成功');
@@ -3705,7 +4544,16 @@ const handleGetSoftwareVersionInfo = async () => {
   }
   try {
     deviceInfoLoading.value = true;
-    const res = await getDaHuaSoftwareVersionInfo(currentDeviceId.value);
+    const isHaikangDevice = currentDeviceRow.value.type === '7' || currentDeviceRow.value.type === '8';
+    const isDaHuaDevice = currentDeviceRow.value.type === '9';
+    let res;
+    
+    if (isHaikangDevice) {
+      res = await getHaiKangSoftwareVersionInfo(currentDeviceId.value);
+    } else if (isDaHuaDevice) {
+      res = await getDaHuaSoftwareVersionInfo(currentDeviceId.value);
+    }
+    
     if (res.data) {
       Object.assign(softwareVersionInfo, res.data);
       proxy.$modal.msgSuccess('获取软件版本信息成功');
@@ -3725,7 +4573,16 @@ const handleGetRecordStateInfo = async () => {
   }
   try {
     deviceInfoLoading.value = true;
-    const res = await getDaHuaRecordStateInfo(currentDeviceId.value);
+    const isHaikangDevice = currentDeviceRow.value.type === '7' || currentDeviceRow.value.type === '8';
+    const isDaHuaDevice = currentDeviceRow.value.type === '9';
+    let res;
+    
+    if (isHaikangDevice) {
+      res = await getHaiKangRecordStateInfo(currentDeviceId.value);
+    } else if (isDaHuaDevice) {
+      res = await getDaHuaRecordStateInfo(currentDeviceId.value);
+    }
+    
     if (res.data) {
       Object.assign(recordStateInfo, res.data);
       proxy.$modal.msgSuccess('获取录像状态信息成功');
@@ -3745,7 +4602,16 @@ const handleGetPowerStateInfo = async () => {
   }
   try {
     deviceInfoLoading.value = true;
-    const res = await getDaHuaPowerStateInfo(currentDeviceId.value);
+    const isHaikangDevice = currentDeviceRow.value.type === '7' || currentDeviceRow.value.type === '8';
+    const isDaHuaDevice = currentDeviceRow.value.type === '9';
+    let res;
+    
+    if (isHaikangDevice) {
+      res = await getHaiKangPowerStateInfo(currentDeviceId.value);
+    } else if (isDaHuaDevice) {
+      res = await getDaHuaPowerStateInfo(currentDeviceId.value);
+    }
+    
     if (res.data) {
       Object.assign(powerStateInfo, res.data);
       proxy.$modal.msgSuccess('获取电源状态信息成功');
@@ -3765,7 +4631,16 @@ const handleGetAlarmArmInfo = async () => {
   }
   try {
     deviceInfoLoading.value = true;
-    const res = await getDaHuaAlarmArmInfo(currentDeviceId.value);
+    const isHaikangDevice = currentDeviceRow.value.type === '7' || currentDeviceRow.value.type === '8';
+    const isDaHuaDevice = currentDeviceRow.value.type === '9';
+    let res;
+    
+    if (isHaikangDevice) {
+      res = await getHaiKangAlarmArmInfo(currentDeviceId.value);
+    } else if (isDaHuaDevice) {
+      res = await getDaHuaAlarmArmInfo(currentDeviceId.value);
+    }
+    
     if (res.data) {
       Object.assign(alarmArmInfo, res.data);
       proxy.$modal.msgSuccess('获取报警布防信息成功');
@@ -3785,7 +4660,16 @@ const handleGetCameraInfo = async () => {
   }
   try {
     deviceInfoLoading.value = true;
-    const res = await getDaHuaCameraInfo(currentDeviceId.value);
+    const isHaikangDevice = currentDeviceRow.value.type === '7' || currentDeviceRow.value.type === '8';
+    const isDaHuaDevice = currentDeviceRow.value.type === '9';
+    let res;
+    
+    if (isHaikangDevice) {
+      res = await getHaiKangCameraInfo(currentDeviceId.value);
+    } else if (isDaHuaDevice) {
+      res = await getDaHuaCameraInfo(currentDeviceId.value);
+    }
+    
     if (res.data) {
       Object.assign(cameraInfo, res.data);
       proxy.$modal.msgSuccess('获取摄像头属性信息成功');
@@ -3805,7 +4689,16 @@ const handleGetRtspUrlInfo = async () => {
   }
   try {
     deviceInfoLoading.value = true;
-    const res = await getDaHuaRtspUrlInfo(currentDeviceId.value);
+    const isHaikangDevice = currentDeviceRow.value.type === '7' || currentDeviceRow.value.type === '8';
+    const isDaHuaDevice = currentDeviceRow.value.type === '9';
+    let res;
+    
+    if (isHaikangDevice) {
+      res = await getHaiKangRtspUrlInfo(currentDeviceId.value);
+    } else if (isDaHuaDevice) {
+      res = await getDaHuaRtspUrlInfo(currentDeviceId.value);
+    }
+    
     if (res.data) {
       Object.assign(rtspUrlInfo, res.data);
       proxy.$modal.msgSuccess('获取RTSP URL信息成功');
@@ -3826,7 +4719,16 @@ const handleRefreshDeviceInfo = async () => {
   }
   try {
     deviceInfoLoading.value = true;
-    const res = await getDaHuaDeviceInfo(currentDeviceId.value);
+    const isHaikangDevice = currentDeviceRow.value.type === '7' || currentDeviceRow.value.type === '8';
+    const isDaHuaDevice = currentDeviceRow.value.type === '9';
+    let res;
+    
+    if (isHaikangDevice) {
+      res = await getHaiKangDeviceInfo(currentDeviceId.value);
+    } else if (isDaHuaDevice) {
+      res = await getDaHuaDeviceInfo(currentDeviceId.value);
+    }
+    
     if (res.data) {
       Object.assign(deviceInfo, res.data);
       proxy.$modal.msgSuccess('获取设备信息成功');
@@ -3839,25 +4741,268 @@ const handleRefreshDeviceInfo = async () => {
   }
 }
 
+// 海康设备信息 - 刷新设备信息
+const handleRefreshHaikangDeviceInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    haikangDeviceInfoLoading.value = true;
+    const res = await getHaiKangDeviceInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(haikangDeviceInfo, res.data);
+      proxy.$modal.msgSuccess('获取设备信息成功');
+    }
+  } catch (error) {
+    console.error('获取设备信息失败:', error);
+    proxy.$modal.msgError('获取设备信息失败');
+  } finally {
+    haikangDeviceInfoLoading.value = false;
+  }
+}
+
+// 海康设备信息 - 获取存储信息
+const handleGetHaikangStorageInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    haikangDeviceInfoLoading.value = true;
+    const res = await getHaiKangStorageInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(haikangStorageInfo, res.data);
+      proxy.$modal.msgSuccess('获取存储信息成功');
+    }
+  } catch (error) {
+    console.error('获取存储信息失败:', error);
+    proxy.$modal.msgError('获取存储信息失败');
+  } finally {
+    haikangDeviceInfoLoading.value = false;
+  }
+}
+
+// 海康设备信息 - 获取SD卡信息
+const handleGetHaikangSdCardInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    haikangDeviceInfoLoading.value = true;
+    const res = await getHaiKangSDCardInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(haikangSdCardInfo, res.data);
+      proxy.$modal.msgSuccess('获取SD卡信息成功');
+    }
+  } catch (error) {
+    console.error('获取SD卡信息失败:', error);
+    proxy.$modal.msgError('获取SD卡信息失败');
+  } finally {
+    haikangDeviceInfoLoading.value = false;
+  }
+}
+
+// 海康设备信息 - 获取码率信息
+const handleGetHaikangBitrateInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    haikangDeviceInfoLoading.value = true;
+    const res = await getHaiKangBitrateInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(haikangBitrateInfo, res.data);
+      proxy.$modal.msgSuccess('获取码率信息成功');
+    }
+  } catch (error) {
+    console.error('获取码率信息失败:', error);
+    proxy.$modal.msgError('获取码率信息失败');
+  } finally {
+    haikangDeviceInfoLoading.value = false;
+  }
+}
+
+// 海康设备信息 - 获取网络状态信息
+const handleGetHaikangNetworkStatusInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    haikangDeviceInfoLoading.value = true;
+    const res = await getHaiKangNetworkStatusInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(haikangNetworkStatusInfo, res.data);
+      proxy.$modal.msgSuccess('获取网络状态信息成功');
+    }
+  } catch (error) {
+    console.error('获取网络状态信息失败:', error);
+    proxy.$modal.msgError('获取网络状态信息失败');
+  } finally {
+    haikangDeviceInfoLoading.value = false;
+  }
+}
+
+// 海康设备信息 - 获取软件版本信息
+const handleGetHaikangSoftwareVersionInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    haikangDeviceInfoLoading.value = true;
+    const res = await getHaiKangSoftwareVersionInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(haikangSoftwareVersionInfo, res.data);
+      proxy.$modal.msgSuccess('获取软件版本信息成功');
+    }
+  } catch (error) {
+    console.error('获取软件版本信息失败:', error);
+    proxy.$modal.msgError('获取软件版本信息失败');
+  } finally {
+    haikangDeviceInfoLoading.value = false;
+  }
+}
+
+// 海康设备信息 - 获取录像状态信息
+const handleGetHaikangRecordStateInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    haikangDeviceInfoLoading.value = true;
+    const res = await getHaiKangRecordStateInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(haikangRecordStateInfo, res.data);
+      proxy.$modal.msgSuccess('获取录像状态信息成功');
+    }
+  } catch (error) {
+    console.error('获取录像状态信息失败:', error);
+    proxy.$modal.msgError('获取录像状态信息失败');
+  } finally {
+    haikangDeviceInfoLoading.value = false;
+  }
+}
+
+// 海康设备信息 - 获取电源状态信息
+const handleGetHaikangPowerStateInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    haikangDeviceInfoLoading.value = true;
+    const res = await getHaiKangPowerStateInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(haikangPowerStateInfo, res.data);
+      proxy.$modal.msgSuccess('获取电源状态信息成功');
+    }
+  } catch (error) {
+    console.error('获取电源状态信息失败:', error);
+    proxy.$modal.msgError('获取电源状态信息失败');
+  } finally {
+    haikangDeviceInfoLoading.value = false;
+  }
+}
+
+// 海康设备信息 - 获取报警布防信息
+const handleGetHaikangAlarmArmInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    haikangDeviceInfoLoading.value = true;
+    const res = await getHaiKangAlarmArmInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(haikangAlarmArmInfo, res.data);
+      proxy.$modal.msgSuccess('获取报警布防信息成功');
+    }
+  } catch (error) {
+    console.error('获取报警布防信息失败:', error);
+    proxy.$modal.msgError('获取报警布防信息失败');
+  } finally {
+    haikangDeviceInfoLoading.value = false;
+  }
+}
+
+// 海康设备信息 - 获取摄像头属性信息
+const handleGetHaikangCameraInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    haikangDeviceInfoLoading.value = true;
+    const res = await getHaiKangCameraInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(haikangCameraInfo, res.data);
+      proxy.$modal.msgSuccess('获取摄像头属性信息成功');
+    }
+  } catch (error) {
+    console.error('获取摄像头属性信息失败:', error);
+    proxy.$modal.msgError('获取摄像头属性信息失败');
+  } finally {
+    haikangDeviceInfoLoading.value = false;
+  }
+}
+
+// 海康设备信息 - 获取RTSP URL信息
+const handleGetHaikangRtspUrlInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    haikangDeviceInfoLoading.value = true;
+    const res = await getHaiKangRtspUrlInfo(currentDeviceId.value);
+    if (res.data) {
+      Object.assign(haikangRtspUrlInfo, res.data);
+      proxy.$modal.msgSuccess('获取RTSP URL信息成功');
+    }
+  } catch (error) {
+    console.error('获取RTSP URL信息失败:', error);
+    proxy.$modal.msgError('获取RTSP URL信息失败');
+  } finally {
+    haikangDeviceInfoLoading.value = false;
+  }
+}
+
 // 打开校时对话框
 const openTimeSyncDialog = (row: QsDevice) => {
   timeSyncForm.deviceId = row.id;
   timeSyncForm.deviceIp = row.ipAddress || '';
+  timeSyncForm.deviceType = row.type || '';
   timeSyncForm.deviceTime = '';
   timeSyncForm.syncTime = '';
   timeSyncForm.syncType = false;
   timeSyncDialogVisible.value = true;
 }
 
-// 获取设备时间
+// 获取设备时间（支持海康/大华）
 const handleGetTime = async () => {
-  if (!timeSyncForm.deviceIp) {
-    proxy.$modal.msgError('设备IP不能为空');
+  if (!timeSyncForm.deviceId) {
+    proxy.$modal.msgError('设备ID不能为空');
     return;
   }
   try {
     timeSyncLoading.value = true;
-    const res = await getDaHuaTime(timeSyncForm.deviceIp);
+    let res;
+    // 根据设备类型调用不同的API
+    if (timeSyncForm.deviceType === '7' || timeSyncForm.deviceType === '8') {
+      // 海康设备
+      res = await getHaiKangDevTime(timeSyncForm.deviceId);
+    } else if (timeSyncForm.deviceType === '9') {
+      // 大华设备
+      res = await getDaHuaTime(timeSyncForm.deviceIp);
+    } else {
+      proxy.$modal.msgError('不支持的设备类型');
+      return;
+    }
     timeSyncForm.deviceTime = res.data || '';
     proxy.$modal.msgSuccess('获取时间成功');
   } catch (error) {
@@ -3880,7 +5025,7 @@ const handleSetCurrentTime = () => {
   timeSyncForm.syncTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-// 执行时间同步
+// 执行时间同步（支持海康/大华）
 const handleTimeSync = async () => {
   if (!timeSyncForm.deviceId) {
     proxy.$modal.msgError('设备ID不能为空');
@@ -3892,9 +5037,24 @@ const handleTimeSync = async () => {
   }
   try {
     timeSyncLoading.value = true;
-    await setDaHuaTime(timeSyncForm.deviceId, timeSyncForm.syncTime, timeSyncForm.syncType);
-    proxy.$modal.msgSuccess('时间同步成功');
-    timeSyncDialogVisible.value = false;
+    let response;
+    // 根据设备类型调用不同的API
+    if (timeSyncForm.deviceType === '7' || timeSyncForm.deviceType === '8') {
+      // 海康设备（只支持本地时间同步到设备）
+      response = await setHaiKangDevTime(timeSyncForm.deviceId, timeSyncForm.syncTime);
+    } else if (timeSyncForm.deviceType === '9') {
+      // 大华设备
+      response = await setDaHuaTime(timeSyncForm.deviceId, timeSyncForm.syncTime, timeSyncForm.syncType);
+    } else {
+      proxy.$modal.msgError('不支持的设备类型');
+      return;
+    }
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('时间同步成功');
+      timeSyncDialogVisible.value = false;
+    } else {
+      proxy.$modal.msgError(response.msg || '时间同步失败');
+    }
   } catch (error) {
     console.error('时间同步失败:', error);
     proxy.$modal.msgError('时间同步失败');
@@ -6640,6 +7800,745 @@ html.dark {
   
   .config-section .section-title {
     border-bottom-color: rgba(255, 255, 255, 0.06);
+  }
+}
+
+/* ========== 设备信息仪表板高级样式 ========== */
+.device-info-dashboard {
+  padding: 4px;
+}
+
+/* 仪表板头部 */
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding: 0 4px;
+  animation: fadeInDown 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+.dashboard-title .dashboard-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--el-color-primary) 0%, var(--el-color-primary-light-3) 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(var(--el-color-primary-rgb), 0.3);
+  animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+.dashboard-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: var(--el-fill-color-lighter);
+  border: 1px solid var(--el-border-color-lighter);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--el-text-color-secondary);
+  transition: all 0.3s ease;
+}
+
+.dashboard-badge:hover {
+  border-color: var(--el-color-primary-light-5);
+  background: var(--el-color-primary-light-9);
+  color: var(--el-color-primary);
+  transform: translateY(-1px);
+}
+
+/* 卡片网格 */
+.info-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.info-cards-grid.cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 768px) {
+  .info-cards-grid,
+  .info-cards-grid.cols-3 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .info-cards-grid,
+  .info-cards-grid.cols-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 信息卡片 */
+.info-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: var(--el-bg-color-overlay);
+  border: 1px solid var(--el-border-color-lighter);
+  overflow: hidden;
+  animation: cardPopIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: default;
+}
+
+@keyframes cardPopIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.info-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+  border-color: transparent;
+}
+
+/* 光晕效果 */
+.info-card-glow {
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  filter: blur(24px);
+}
+
+.info-card:hover .info-card-glow {
+  opacity: 0.12;
+}
+
+/* 卡片图标 */
+.info-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #fff;
+}
+
+.info-card:hover .info-card-icon {
+  transform: scale(1.1) rotate(-4deg);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* 卡片内容 */
+.info-card-content {
+  flex: 1;
+  min-width: 0;
+  z-index: 1;
+}
+
+.info-card-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--el-text-color-secondary);
+  margin-bottom: 4px;
+  transition: color 0.3s ease;
+}
+
+.info-card:hover .info-card-label {
+  color: var(--el-text-color-primary);
+}
+
+.info-card-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.3s ease;
+}
+
+.info-card:hover .info-card-value {
+  transform: translateX(2px);
+}
+
+/* 主题色 - primary */
+.info-card.primary .info-card-icon {
+  background: linear-gradient(135deg, #409eff 0%, #79bbff 100%);
+  box-shadow: 0 4px 12px rgba(64, 158, 255, 0.3);
+}
+.info-card.primary .info-card-glow { background: #409eff; }
+.info-card.primary:hover { border-color: rgba(64, 158, 255, 0.3); }
+
+/* 主题色 - success */
+.info-card.success .info-card-icon {
+  background: linear-gradient(135deg, #67c23a 0%, #95d475 100%);
+  box-shadow: 0 4px 12px rgba(103, 194, 58, 0.3);
+}
+.info-card.success .info-card-glow { background: #67c23a; }
+.info-card.success:hover { border-color: rgba(103, 194, 58, 0.3); }
+
+/* 主题色 - warning */
+.info-card.warning .info-card-icon {
+  background: linear-gradient(135deg, #e6a23c 0%, #f3d19e 100%);
+  box-shadow: 0 4px 12px rgba(230, 162, 60, 0.3);
+}
+.info-card.warning .info-card-glow { background: #e6a23c; }
+.info-card.warning:hover { border-color: rgba(230, 162, 60, 0.3); }
+
+/* 主题色 - danger */
+.info-card.danger .info-card-icon {
+  background: linear-gradient(135deg, #f56c6c 0%, #fab6b6 100%);
+  box-shadow: 0 4px 12px rgba(245, 108, 108, 0.3);
+}
+.info-card.danger .info-card-glow { background: #f56c6c; }
+.info-card.danger:hover { border-color: rgba(245, 108, 108, 0.3); }
+
+/* 主题色 - info */
+.info-card.info .info-card-icon {
+  background: linear-gradient(135deg, #909399 0%, #c8c9cc 100%);
+  box-shadow: 0 4px 12px rgba(144, 147, 153, 0.3);
+}
+.info-card.info .info-card-glow { background: #909399; }
+.info-card.info:hover { border-color: rgba(144, 147, 153, 0.3); }
+
+/* 主题色 - purple */
+.info-card.purple .info-card-icon {
+  background: linear-gradient(135deg, #8e44ad 0%, #bb8fce 100%);
+  box-shadow: 0 4px 12px rgba(142, 68, 173, 0.3);
+}
+.info-card.purple .info-card-glow { background: #8e44ad; }
+.info-card.purple:hover { border-color: rgba(142, 68, 173, 0.3); }
+
+/* 主题色 - teal */
+.info-card.teal .info-card-icon {
+  background: linear-gradient(135deg, #1abc9c 0%, #76d7c4 100%);
+  box-shadow: 0 4px 12px rgba(26, 188, 156, 0.3);
+}
+.info-card.teal .info-card-glow { background: #1abc9c; }
+.info-card.teal:hover { border-color: rgba(26, 188, 156, 0.3); }
+
+/* 主题色 - orange */
+.info-card.orange .info-card-icon {
+  background: linear-gradient(135deg, #e67e22 0%, #f5b041 100%);
+  box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
+}
+.info-card.orange .info-card-glow { background: #e67e22; }
+.info-card.orange:hover { border-color: rgba(230, 126, 34, 0.3); }
+
+/* 主题色 - pink */
+.info-card.pink .info-card-icon {
+  background: linear-gradient(135deg, #e84393 0%, #fd79a8 100%);
+  box-shadow: 0 4px 12px rgba(232, 67, 147, 0.3);
+}
+.info-card.pink .info-card-glow { background: #e84393; }
+.info-card.pink:hover { border-color: rgba(232, 67, 147, 0.3); }
+
+/* 主题色 - cyan */
+.info-card.cyan .info-card-icon {
+  background: linear-gradient(135deg, #00bcd4 0%, #4dd0e1 100%);
+  box-shadow: 0 4px 12px rgba(0, 188, 212, 0.3);
+}
+.info-card.cyan .info-card-glow { background: #00bcd4; }
+.info-card.cyan:hover { border-color: rgba(0, 188, 212, 0.3); }
+
+/* 主题色 - lime */
+.info-card.lime .info-card-icon {
+  background: linear-gradient(135deg, #cddc39 0%, #dce775 100%);
+  box-shadow: 0 4px 12px rgba(205, 220, 57, 0.3);
+}
+.info-card.lime .info-card-glow { background: #cddc39; }
+.info-card.lime:hover { border-color: rgba(205, 220, 57, 0.3); }
+
+/* 主题色 - indigo */
+.info-card.indigo .info-card-icon {
+  background: linear-gradient(135deg, #3f51b5 0%, #7986cb 100%);
+  box-shadow: 0 4px 12px rgba(63, 81, 181, 0.3);
+}
+.info-card.indigo .info-card-glow { background: #3f51b5; }
+.info-card.indigo:hover { border-color: rgba(63, 81, 181, 0.3); }
+
+/* ========== 标签页内容面板统一样式 ========== */
+.tab-content-wrapper {
+  position: relative;
+  padding: 24px 20px 20px;
+  animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+  overflow: hidden;
+}
+
+.tab-content-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--el-color-primary), var(--el-color-primary-light-3), var(--el-color-success-light-3), var(--el-color-primary));
+  background-size: 200% 100%;
+  animation: gradientFlow 3s linear infinite;
+  border-radius: 2px 2px 0 0;
+}
+
+@keyframes gradientFlow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* 面板头部 */
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  animation: fadeInDown 0.45s ease both;
+}
+
+.panel-header .el-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--el-color-primary) 0%, var(--el-color-primary-light-3) 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 4px 10px rgba(var(--el-color-primary-rgb), 0.25);
+}
+
+.panel-header span {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+/* 分段标题 */
+.panel-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  margin-bottom: 14px;
+  padding-left: 10px;
+  position: relative;
+  animation: fadeInLeft 0.4s ease both;
+}
+
+.panel-section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 14px;
+  background: linear-gradient(180deg, var(--el-color-primary), var(--el-color-primary-light-5));
+  border-radius: 2px;
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 数据表单美化 */
+.data-form {
+  padding: 4px;
+}
+
+.data-form .el-form-item {
+  margin-bottom: 18px;
+  animation: formItemEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.data-form .el-form-item:nth-child(1) { animation-delay: 0.05s; }
+.data-form .el-form-item:nth-child(2) { animation-delay: 0.10s; }
+.data-form .el-form-item:nth-child(3) { animation-delay: 0.15s; }
+.data-form .el-form-item:nth-child(4) { animation-delay: 0.20s; }
+.data-form .el-form-item:nth-child(5) { animation-delay: 0.25s; }
+.data-form .el-form-item:nth-child(6) { animation-delay: 0.30s; }
+.data-form .el-form-item:nth-child(7) { animation-delay: 0.35s; }
+.data-form .el-form-item:nth-child(8) { animation-delay: 0.40s; }
+.data-form .el-form-item:nth-child(9) { animation-delay: 0.45s; }
+.data-form .el-form-item:nth-child(10) { animation-delay: 0.50s; }
+
+.data-form .el-form-item__label {
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+/* 设备信息对话框中的表格增强 */
+:deep(.glass-dialog.device-info-dialog .el-table) {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  animation: fadeInUp 0.5s ease both;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-table__header-wrapper th) {
+  background: linear-gradient(180deg, var(--el-fill-color-light) 0%, var(--el-fill-color) 100%) !important;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  padding: 14px 0;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-table__body-wrapper tr) {
+  transition: all 0.25s ease;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-table__body-wrapper tr:hover) {
+  background-color: var(--el-color-primary-light-9) !important;
+  transform: scale(1.002);
+}
+
+:deep(.glass-dialog.device-info-dialog .el-table__body-wrapper td) {
+  padding: 12px 0;
+  transition: all 0.2s ease;
+}
+
+/* 描述列表增强 */
+:deep(.glass-dialog.device-info-dialog .el-descriptions) {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  animation: fadeInUp 0.5s ease both;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-descriptions__label) {
+  background: linear-gradient(180deg, var(--el-fill-color-lighter) 0%, var(--el-fill-color) 100%);
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  padding: 14px 16px;
+  transition: all 0.3s ease;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-descriptions__body .el-descriptions__cell) {
+  padding: 14px 16px;
+  transition: all 0.2s ease;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-descriptions__row:hover .el-descriptions__cell) {
+  background-color: var(--el-color-primary-light-9);
+}
+
+/* 折叠面板增强 */
+:deep(.glass-dialog.device-info-dialog .el-collapse) {
+  border: none;
+  animation: fadeInUp 0.5s ease both;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-collapse-item) {
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+:deep(.glass-dialog.device-info-dialog .el-collapse-item:last-child) {
+  margin-bottom: 0;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-collapse-item:hover) {
+  border-color: var(--el-color-primary-light-5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+:deep(.glass-dialog.device-info-dialog .el-collapse-item__header) {
+  padding: 14px 18px;
+  background: linear-gradient(180deg, var(--el-fill-color-lighter) 0%, var(--el-fill-color) 100%);
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-collapse-item__wrap) {
+  background: var(--el-bg-color);
+  border: none;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-collapse-item__content) {
+  padding: 18px;
+}
+
+/* 输入框增强 */
+:deep(.glass-dialog.device-info-dialog .el-input__wrapper) {
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px var(--el-color-primary) inset, 0 0 10px rgba(var(--el-color-primary-rgb), 0.12);
+}
+
+/* 标签增强 */
+:deep(.glass-dialog.device-info-dialog .el-tag) {
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-weight: 500;
+  font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-tag:hover) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* 进度条增强 */
+:deep(.glass-dialog.device-info-dialog .el-progress-bar__outer) {
+  border-radius: 10px;
+  background: var(--el-fill-color-lighter);
+}
+
+:deep(.glass-dialog.device-info-dialog .el-progress-bar__inner) {
+  border-radius: 10px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 空状态增强 - 高级设计 */
+:deep(.glass-dialog.device-info-dialog .el-empty) {
+  padding: 60px 0 50px;
+  animation: emptyAppear 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes emptyAppear {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 背景装饰圆 */
+:deep(.glass-dialog.device-info-dialog .el-empty::before) {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -55%);
+  width: 140px;
+  height: 140px;
+  background: radial-gradient(circle, var(--el-color-primary-light-8) 0%, transparent 70%);
+  border-radius: 50%;
+  opacity: 0.5;
+  animation: emptyAura 4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-empty::after) {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -55%);
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, var(--el-color-primary-light-9) 0%, transparent 60%);
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: emptyAura 4s ease-in-out infinite 1s;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes emptyAura {
+  0%, 100% {
+    transform: translate(-50%, -55%) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(-50%, -55%) scale(1.3);
+    opacity: 0.2;
+  }
+}
+
+/* 图标增强 */
+:deep(.glass-dialog.device-info-dialog .el-empty__image) {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 6px 16px rgba(var(--el-color-primary-rgb), 0.2));
+  animation: emptyFloat 3s ease-in-out infinite;
+}
+
+/* 给SVG图标上色 */
+:deep(.glass-dialog.device-info-dialog .el-empty__image svg) {
+  fill: url(#emptyGradient) !important;
+}
+
+:deep(.glass-dialog.device-info-dialog .el-empty__image svg path) {
+  fill: var(--el-color-primary-light-3) !important;
+  opacity: 0.7;
+}
+
+@keyframes emptyFloat {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(-4px) rotate(-1deg);
+  }
+}
+
+/* 文字增强 */
+:deep(.glass-dialog.device-info-dialog .el-empty__description) {
+  position: relative;
+  z-index: 1;
+  margin-top: 24px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--el-text-color-secondary);
+  letter-spacing: 0.8px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+/* 底部装饰点 */
+:deep(.glass-dialog.device-info-dialog .el-empty__description::after) {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--el-color-primary-light-5), transparent);
+  border-radius: 2px;
+  margin: 16px auto 0;
+  animation: emptyLine 2s ease-in-out infinite;
+}
+
+@keyframes emptyLine {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scaleX(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scaleX(1.3);
+  }
+}
+
+/* 警告提示增强 */
+:deep(.glass-dialog.device-info-dialog .el-alert) {
+  border-radius: 12px;
+  animation: shakeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes shakeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* 深色模式适配 */
+html.dark {
+  .info-card {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+  
+  .info-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.25);
+  }
+  
+  .dashboard-badge {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.06);
+  }
+  
+  .dashboard-badge:hover {
+    background: rgba(var(--el-color-primary-rgb), 0.12);
+  }
+
+  .panel-header {
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+  }
+
+  .panel-section-title::before {
+    background: linear-gradient(180deg, var(--el-color-primary-light-3), var(--el-color-primary-light-5));
+  }
+
+  :deep(.glass-dialog.device-info-dialog .el-descriptions__label) {
+    background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%);
+  }
+
+  :deep(.glass-dialog.device-info-dialog .el-collapse-item__header) {
+    background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%);
+  }
+
+  :deep(.glass-dialog.device-info-dialog .el-table__header-wrapper th) {
+    background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%) !important;
   }
 }
 </style>
