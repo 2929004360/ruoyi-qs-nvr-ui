@@ -107,3 +107,163 @@ export function downloadHaikangIsupRecordDirect(data: HaikangIsupRecordDownloadR
         timeout: 300000
     })
 }
+
+/**
+ * 获取海康ISUP设备信息
+ * @param deviceId 设备ID
+ */
+export function getHaiKangIsupDeviceInfo(deviceId: number): Promise<AjaxResult<any>> {
+    return request({
+        url: `/haikangIsup/device/getHaiKangIsupDeviceInfo/${deviceId}`,
+        method: 'get'
+    })
+}
+
+/**
+ * 获取海康ISUP存储信息
+ * @param deviceId 设备ID
+ */
+export function getHaiKangIsupStorageInfo(deviceId: number): Promise<AjaxResult<any>> {
+    return request({
+        url: `/haikangIsup/device/getHaiKangIsupStorageInfo/${deviceId}`,
+        method: 'get'
+    })
+}
+
+/**
+ * 获取海康ISUP SD卡信息
+ * @param deviceId 设备ID
+ */
+export function getHaiKangIsupSDCardInfo(deviceId: number): Promise<AjaxResult<any>> {
+    return request({
+        url: `/haikangIsup/device/getHaiKangIsupSDCardInfo/${deviceId}`,
+        method: 'get'
+    })
+}
+
+/**
+ * 获取海康ISUP码率信息
+ * @param deviceId 设备ID
+ */
+export function getHaiKangIsupBitrateInfo(deviceId: number): Promise<AjaxResult<any>> {
+    return request({
+        url: `/haikangIsup/device/getHaiKangIsupBitrateInfo/${deviceId}`,
+        method: 'get'
+    })
+}
+
+/**
+ * 获取海康ISUP网络状态信息
+ * @param deviceId 设备ID
+ */
+export function getHaiKangIsupNetworkStatusInfo(deviceId: number): Promise<AjaxResult<any>> {
+    return request({
+        url: `/haikangIsup/device/getHaiKangIsupNetworkStatusInfo/${deviceId}`,
+        method: 'get'
+    })
+}
+
+/**
+ * 获取海康ISUP软件版本信息
+ * @param deviceId 设备ID
+ */
+export function getHaiKangIsupSoftwareVersionInfo(deviceId: number): Promise<AjaxResult<any>> {
+    return request({
+        url: `/haikangIsup/device/getHaiKangIsupSoftwareVersionInfo/${deviceId}`,
+        method: 'get'
+    })
+}
+
+/**
+ * 获取海康ISUP电源状态信息
+ * @param deviceId 设备ID
+ */
+export function getHaiKangIsupPowerStateInfo(deviceId: number): Promise<AjaxResult<any>> {
+    return request({
+        url: `/haikangIsup/device/getHaiKangIsupPowerStateInfo/${deviceId}`,
+        method: 'get'
+    })
+}
+
+/**
+ * 获取海康ISUP摄像头属性信息
+ * @param deviceId 设备ID
+ */
+export function getHaiKangIsupCameraInfo(deviceId: number): Promise<AjaxResult<any>> {
+    return request({
+        url: `/haikangIsup/device/getHaiKangIsupCameraInfo/${deviceId}`,
+        method: 'get'
+    })
+}
+
+/**
+ * 获取海康ISUP系统参数
+ * @param deviceId 设备ID
+ */
+export function getHaiKangIsupSystemParam(deviceId: number): Promise<AjaxResult<any>> {
+    return request({
+        url: `/haikangIsup/device/getHaiKangIsupSystemParam/${deviceId}`,
+        method: 'get'
+    })
+}
+
+/**
+ * 获取海康ISUP视频参数
+ * @param deviceId 设备ID
+ * @param channelId 通道ID
+ * @param streamType 流类型
+ */
+export function getHaiKangIsupVideoParam(deviceId: number, channelId: number, streamType?: string): Promise<AjaxResult<any>> {
+    return request({
+        url: `/haikangIsup/device/getHaiKangIsupVideoParam/${deviceId}/${channelId}`,
+        method: 'get',
+        params: { streamType }
+    })
+}
+
+/**
+ * 获取海康系统状态信息
+ * @param deviceId 设备ID
+ */
+export function getHaiKangIsupSystemStatus(deviceId: number): Promise<AjaxResult<any>> {
+    return request({
+        url: `/haikangIsup/device/getHaiKangIsupSystemStatus/${deviceId}`,
+        method: 'get'
+    });
+}
+
+/**
+ * 获取海康设备信息（XML格式）
+ * @param deviceId 设备ID
+ */
+export function getHaiKangIsupDeviceInfoXml(deviceId: number): Promise<AjaxResult<any>> {
+    return request({
+        url: `/haikangIsup/device/getHaiKangIsupDeviceInfoXml/${deviceId}`,
+        method: 'get'
+    });
+}
+
+/**
+ * 海康设备远程升级请求参数
+ */
+export interface HaiKangIsupUpgradeRequest {
+    deviceId: number;
+    ftpServerIp: string;
+    ftpServerPort?: number;
+    ftpAccount?: string;
+    ftpPassword?: string;
+    fileName: string;
+    channel?: number;
+}
+
+/**
+ * 海康设备远程升级
+ * @param request 升级请求参数
+ */
+export function upgradeHaiKangIsupDevice(data: HaiKangIsupUpgradeRequest): Promise<AjaxResult<any>> {
+    return request({
+        url: '/haikangIsup/device/upgradeHaiKangIsupDevice',
+        method: 'post',
+        data: data
+    });
+}
