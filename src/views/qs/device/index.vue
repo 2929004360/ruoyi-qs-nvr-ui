@@ -226,15 +226,15 @@
                   <el-dropdown-item command="edit" icon="Edit">编辑</el-dropdown-item>
                   <el-dropdown-item command="viewSnapshots" icon="Picture">查看抓图</el-dropdown-item>
                   <el-dropdown-item command="delete" icon="Delete" class="is-danger">删除</el-dropdown-item>
-                  <!-- 设备校时（海康/大华） -->
+                  <!-- 设备校时（海康/大华/海康ISUP） -->
                   <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
-                  <!-- 设备信息（大华/海康） -->
+                  <!-- 设备信息（大华/海康/海康ISUP） -->
                   <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
                   <!-- 海康设备抓图 -->
                   <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8'" :disabled="scope.row.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
                   <!-- 大华设备抓图 -->
                   <el-dropdown-item v-if="scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
-                  <!-- 设备重启（海康/大华） -->
+                  <!-- 设备重启（海康/大华/海康ISUP） -->
                   <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
                   <!-- 录像下载 -->
                   <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="downloadRecord" icon="Download">录像下载</el-dropdown-item>
@@ -375,15 +375,15 @@
                       <el-dropdown-item command="edit" icon="Edit">编辑</el-dropdown-item>
                       <el-dropdown-item command="viewSnapshots" icon="Picture">查看抓图</el-dropdown-item>
                       <el-dropdown-item command="delete" icon="Delete" class="is-danger">删除</el-dropdown-item>
-                      <!-- 设备校时（海康/大华） -->
+                      <!-- 设备校时（海康/大华/海康ISUP） -->
                       <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
-                      <!-- 设备信息（大华/海康） -->
+                      <!-- 设备信息（大华/海康/海康ISUP） -->
                       <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
                       <!-- 海康设备抓图 -->
                       <el-dropdown-item v-if="item.type === '7' || item.type === '8'" :disabled="item.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
                       <!-- 大华设备抓图 -->
                       <el-dropdown-item v-if="item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
-                      <!-- 设备重启（海康/大华） -->
+                      <!-- 设备重启（海康/大华/海康ISUP） -->
                       <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
                       <!-- 录像下载 -->
                       <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="downloadRecord" icon="Download">录像下载</el-dropdown-item>
@@ -1734,8 +1734,8 @@
       </el-tabs>
     </el-dialog>
 
-    <!-- 大华设备录像下载对话框 -->
-    <el-dialog title="大华设备录像下载" v-model="downloadRecordDialogVisible" width="650px" append-to-body class="glass-dialog download-record-dialog">
+    <!-- 设备录像下载对话框 -->
+    <el-dialog :title="getDownloadDialogTitle()" v-model="downloadRecordDialogVisible" width="650px" append-to-body class="glass-dialog download-record-dialog">
       <el-form :model="downloadRecordForm" label-width="100px" v-loading="downloadRecordLoading">
         <el-form-item label="设备名称">
           <el-input v-model="downloadRecordForm.deviceName" disabled />
@@ -2248,7 +2248,14 @@ import {
   controlLight,
   controlWiper
 } from "@/api/qs/device"
-import {listHaiKangIsupDevice} from "@/api/qs/haikang-isup";
+import {
+  listHaiKangIsupDevice,
+  rebootHaiKangIsupDevice,
+  getHaiKangIsupDevTime,
+  setHaiKangIsupDevTime,
+  captureHaiKangIsupAndSave,
+  downloadHaikangIsupRecordDirect
+} from "@/api/qs/haikang-isup";
 import {HaikangIsupDevice, PullConfig, RTPServerParam, WSDiscoveryDevice, WSOnvifDevice} from "@/types/api";
 import {
   DaHuaDevice,
@@ -3805,9 +3812,12 @@ const handleCapture = async (row: QsDevice) => {
     let response;
     
     // 根据设备类型调用不同的API
-    if (row.type === '7' || row.type === '8') {
+    if (row.type === '7') {
       // 海康设备
       response = await captureHaikangAndSave(row.id!, channelId, 'manual');
+    } else if (row.type === '8') {
+      // 海康ISUP设备
+      response = await captureHaiKangIsupAndSave(row.id!, channelId, 'manual');
     } else if (row.type === '9') {
       // 大华设备
       response = await captureDaHuaAndSave(row.id!, channelId, 'manual');
@@ -3829,16 +3839,19 @@ const handleCapture = async (row: QsDevice) => {
   }
 }
 
-// 重启设备（支持海康/大华）
+// 重启设备（支持海康/大华/海康ISUP）
 const handleReboot = async (row: QsDevice) => {
   try {
     await proxy.$modal.confirm(`是否确认重启设备"${row.deviceName}"？`);
     
     let response;
     // 根据设备类型调用不同的API
-    if (row.type === '7' || row.type === '8') {
+    if (row.type === '7') {
       // 海康设备
       response = await rebootHaiKangDevice(row.id!);
+    } else if (row.type === '8') {
+      // 海康ISUP设备
+      response = await rebootHaiKangIsupDevice(row.id!);
     } else if (row.type === '9') {
       // 大华设备
       response = await rebootDaHuaDevice(row.id!);
@@ -3978,6 +3991,22 @@ const haikangRtspUrlInfo = reactive({
   rtspUrl: ''
 });
 
+// 获取下载对话框标题
+const getDownloadDialogTitle = () => {
+  if (!currentDownloadDevice) {
+    return '设备录像下载';
+  }
+  const deviceType = String(currentDownloadDevice.type);
+  if (deviceType === '9') {
+    return '大华设备录像下载';
+  } else if (deviceType === '7') {
+    return '海康SDK设备录像下载';
+  } else if (deviceType === '8') {
+    return '海康ISUP设备录像下载';
+  }
+  return '设备录像下载';
+};
+
 // 打开录像下载对话框
 const openDownloadRecordDialog = (row: QsDevice) => {
   currentDownloadDevice = row;
@@ -4080,7 +4109,13 @@ const handleDownloadRecord = async () => {
         recordFileType: downloadRecordForm.recordFileType
       };
       
-      blob = await downloadHaikangRecordDirect(request);
+      if (deviceType === '8') {
+        // 海康ISUP设备
+        blob = await downloadHaikangIsupRecordDirect(request);
+      } else {
+        // 海康SDK设备
+        blob = await downloadHaikangRecordDirect(request);
+      }
       extension = '.mp4';
     } else {
       proxy.$modal.msgError('仅支持大华和海康设备录像下载');
@@ -4983,7 +5018,7 @@ const openTimeSyncDialog = (row: QsDevice) => {
   timeSyncDialogVisible.value = true;
 }
 
-// 获取设备时间（支持海康/大华）
+// 获取设备时间（支持海康/大华/海康ISUP）
 const handleGetTime = async () => {
   if (!timeSyncForm.deviceId) {
     proxy.$modal.msgError('设备ID不能为空');
@@ -4993,9 +5028,12 @@ const handleGetTime = async () => {
     timeSyncLoading.value = true;
     let res;
     // 根据设备类型调用不同的API
-    if (timeSyncForm.deviceType === '7' || timeSyncForm.deviceType === '8') {
+    if (timeSyncForm.deviceType === '7') {
       // 海康设备
       res = await getHaiKangDevTime(timeSyncForm.deviceId);
+    } else if (timeSyncForm.deviceType === '8') {
+      // 海康ISUP设备
+      res = await getHaiKangIsupDevTime(timeSyncForm.deviceId);
     } else if (timeSyncForm.deviceType === '9') {
       // 大华设备
       res = await getDaHuaTime(timeSyncForm.deviceIp);
@@ -5025,7 +5063,7 @@ const handleSetCurrentTime = () => {
   timeSyncForm.syncTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-// 执行时间同步（支持海康/大华）
+// 执行时间同步（支持海康/大华/海康ISUP）
 const handleTimeSync = async () => {
   if (!timeSyncForm.deviceId) {
     proxy.$modal.msgError('设备ID不能为空');
@@ -5039,9 +5077,12 @@ const handleTimeSync = async () => {
     timeSyncLoading.value = true;
     let response;
     // 根据设备类型调用不同的API
-    if (timeSyncForm.deviceType === '7' || timeSyncForm.deviceType === '8') {
+    if (timeSyncForm.deviceType === '7') {
       // 海康设备（只支持本地时间同步到设备）
       response = await setHaiKangDevTime(timeSyncForm.deviceId, timeSyncForm.syncTime);
+    } else if (timeSyncForm.deviceType === '8') {
+      // 海康ISUP设备
+      response = await setHaiKangIsupDevTime(timeSyncForm.deviceId, timeSyncForm.syncTime);
     } else if (timeSyncForm.deviceType === '9') {
       // 大华设备
       response = await setDaHuaTime(timeSyncForm.deviceId, timeSyncForm.syncTime, timeSyncForm.syncType);
