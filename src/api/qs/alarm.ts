@@ -44,3 +44,14 @@ export function exportAlarm(query: AlarmQueryParams): Promise<AjaxResult> {
         params: query
     })
 }
+
+// 批量处理设备告警
+export function batchHandleAlarm(data: QsDeviceAlarm): Promise<AjaxResult> {
+    console.log('=== 调用批量处理告警 API ===')
+    console.log('发送的数据:', data)
+    return request({
+        url: '/qs/alarm/batchHandle',
+        method: 'put',
+        data: data
+    })
+}

@@ -77,6 +77,17 @@
       <el-row :gutter="10" class="mb8 toolbar-row action-buttons">
         <el-col :span="1.5">
           <el-button
+            type="primary"
+            plain
+            icon="Check"
+            :disabled="multiple"
+            @click="handleBatchHandle"
+            class="action-btn handle-btn"
+          >批量处理
+          </el-button>
+        </el-col>
+        <el-col :span="1.5">
+          <el-button
             type="danger"
             plain
             icon="Delete"
@@ -215,13 +226,16 @@
 
 <script setup lang="ts" name="DeviceAlarm">
 import { getCurrentInstance, onMounted, reactive, ref, toRefs } from 'vue'
-import { delAlarm, listAlarm, exportAlarm, updateAlarm } from '@/api/qs/alarm'
+import { delAlarm, listAlarm, exportAlarm, updateAlarm, batchHandleAlarm } from '@/api/qs/alarm'
 import type { QsDeviceAlarm, AlarmQueryParams } from '@/types/api/qs/alarm'
+import useUserStore from '@/store/modules/user'
 
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Download, Search, Delete, Refresh, Check } from '@element-plus/icons-vue'
 
-const { proxy } = getCurrentInstance() as any
+const instance = getCurrentInstance()
+const proxy = instance?.proxy as any
+const userStore = useUserStore()
 
 const dateRange = ref<string[]>([])
 const alarmList = ref<QsDeviceAlarm[]>([])
@@ -250,7 +264,8 @@ const { queryParams, loading, showSearch, ids, single, multiple, total } = toRef
 
 function getList() {
   loading.value = true
-  listAlarm(proxy.addDateRange(queryParams.value, dateRange.value)).then(response => {
+  const params = proxy ? proxy.addDateRange(queryParams.value, dateRange.value) : queryParams.value
+  listAlarm(params).then(response => {
     alarmList.value = response.rows
     total.value = response.total
     loading.value = false
@@ -264,7 +279,9 @@ function handleQuery() {
 
 function resetQuery() {
   dateRange.value = []
-  proxy.resetForm("queryRef")
+  if (proxy) {
+    proxy.resetForm("queryRef")
+  }
   handleQuery()
 }
 
@@ -275,42 +292,133 @@ function handleSelectionChange(selection: QsDeviceAlarm[]) {
 }
 
 function handleHandle(row: QsDeviceAlarm) {
-  proxy.$modal.confirm('是否确认处理该告警?').then(function () {
+  const doHandle = () => {
     const updateData: QsDeviceAlarm = {
       id: row.id,
       handled: 1,
-      handler: proxy.$store.state.user.name,
+      handler: userStore.name,
       handleTime: new Date().toISOString()
     }
     return updateAlarm(updateData)
-  }).then(() => {
-    getList()
-    proxy.$modal.msgSuccess("处理成功")
-  }).catch(() => {})
+  }
+  
+  if (proxy) {
+    proxy.$modal.confirm('是否确认处理该告警?').then(() => {
+      return doHandle()
+    }).then(() => {
+      getList()
+      proxy.$modal.msgSuccess("处理成功")
+    }).catch(() => {})
+  } else {
+    ElMessageBox.confirm('是否确认处理该告警?', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      return doHandle()
+    }).then(() => {
+      getList()
+      ElMessage.success("处理成功")
+    }).catch(() => {})
+  }
 }
 
 function handleDeleteOne(row: QsDeviceAlarm) {
-  proxy.$modal.confirm('是否确认删除告警记录?').then(function () {
-    return delAlarm(row.id!)
-  }).then(() => {
-    getList()
-    proxy.$modal.msgSuccess("删除成功")
-  }).catch(() => {})
+  const doDelete = () => delAlarm(row.id!)
+  
+  if (proxy) {
+    proxy.$modal.confirm('是否确认删除告警记录?').then(() => {
+      return doDelete()
+    }).then(() => {
+      getList()
+      proxy.$modal.msgSuccess("删除成功")
+    }).catch(() => {})
+  } else {
+    ElMessageBox.confirm('是否确认删除告警记录?', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      return doDelete()
+    }).then(() => {
+      getList()
+      ElMessage.success("删除成功")
+    }).catch(() => {})
+  }
 }
 
 function handleDelete() {
-  proxy.$modal.confirm('是否确认删除选中的告警记录?').then(function () {
-    return delAlarm(ids.value)
-  }).then(() => {
-    getList()
-    proxy.$modal.msgSuccess("删除成功")
-  }).catch(() => {})
+  const doDelete = () => delAlarm(ids.value)
+  
+  if (proxy) {
+    proxy.$modal.confirm('是否确认删除选中的告警记录?').then(() => {
+      return doDelete()
+    }).then(() => {
+      getList()
+      proxy.$modal.msgSuccess("删除成功")
+    }).catch(() => {})
+  } else {
+    ElMessageBox.confirm('是否确认删除选中的告警记录?', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      return doDelete()
+    }).then(() => {
+      getList()
+      ElMessage.success("删除成功")
+    }).catch(() => {})
+  }
+}
+
+function handleBatchHandle() {
+  console.log('=== 批量处理被调用 ===')
+  console.log('选中的 ids:', ids.value)
+  
+  if (!ids.value || ids.value.length === 0) {
+    ElMessage.warning('请先选择要处理的告警记录')
+    return
+  }
+  
+  const doBatchHandle = () => {
+    const data: any = {
+      ids: ids.value.map(id => Number(id)),
+      handler: userStore.name,
+      handleTime: new Date().toISOString()
+    }
+    console.log('发送的批量处理数据:', data)
+    return batchHandleAlarm(data)
+  }
+  
+  if (proxy) {
+    proxy.$modal.confirm(`是否确认处理选中的 ${ids.value.length} 条告警记录?`).then(() => {
+      return doBatchHandle()
+    }).then(() => {
+      getList()
+      proxy.$modal.msgSuccess("批量处理成功")
+    }).catch(() => {})
+  } else {
+    ElMessageBox.confirm(`是否确认处理选中的 ${ids.value.length} 条告警记录?`, '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }).then(() => {
+      return doBatchHandle()
+    }).then(() => {
+      getList()
+      ElMessage.success("批量处理成功")
+    }).catch(() => {})
+  }
 }
 
 function handleExport() {
-  proxy.download("qs/alarm/export", {
-    ...queryParams.value
-  }, `alarm_${new Date().getTime()}.xlsx`)
+  if (proxy) {
+    proxy.download("qs/alarm/export", {
+      ...queryParams.value
+    }, `alarm_${new Date().getTime()}.xlsx`)
+  } else {
+    ElMessage.warning("导出功能暂不可用")
+  }
 }
 
 onMounted(() => {
@@ -438,6 +546,10 @@ onMounted(() => {
     opacity: 0.5;
     cursor: not-allowed;
   }
+}
+
+.handle-btn:not(:disabled):hover {
+  box-shadow: 0 6px 16px var(--el-color-primary-light-7);
 }
 
 .delete-btn:not(:disabled):hover {

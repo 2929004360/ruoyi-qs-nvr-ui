@@ -4,6 +4,7 @@
       <el-icon :size="18"><Search /></el-icon>
     </div>
     <el-dialog
+      title="菜单搜索"
       v-model="show"
       width="600"
       @close="close"
