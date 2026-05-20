@@ -126,6 +126,11 @@
           </template>
         </el-table-column>
         <el-table-column label="通道号" align="center" prop="channel"/>
+        <el-table-column label="告警图片" align="center" prop="imageUrl">
+          <template #default="scope">
+            <image-preview v-if="scope.row.imageUrl" :src="scope.row.imageUrl" :width="80" :height="50"/>
+          </template>
+        </el-table-column>
         <el-table-column label="告警类型" align="center" prop="alarmType">
           <template #default="scope">
             <el-tag v-if="scope.row.alarmType === 'motion'" type="danger">动态检测</el-tag>

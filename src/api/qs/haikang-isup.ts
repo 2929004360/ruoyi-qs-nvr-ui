@@ -210,12 +210,11 @@ export function getHaiKangIsupSystemParam(deviceId: number): Promise<AjaxResult<
 /**
  * 获取海康ISUP视频参数
  * @param deviceId 设备ID
- * @param channelId 通道ID
  * @param streamType 流类型
  */
-export function getHaiKangIsupVideoParam(deviceId: number, channelId: number, streamType?: string): Promise<AjaxResult<any>> {
+export function getHaiKangIsupVideoParam(deviceId: number, streamType?: string): Promise<AjaxResult<any>> {
     return request({
-        url: `/haikangIsup/device/getHaiKangIsupVideoParam/${deviceId}/${channelId}`,
+        url: `/haikangIsup/device/getHaiKangIsupVideoParam/${deviceId}`,
         method: 'get',
         params: { streamType }
     })
@@ -261,9 +260,45 @@ export interface HaiKangIsupUpgradeRequest {
  * @param request 升级请求参数
  */
 export function upgradeHaiKangIsupDevice(data: HaiKangIsupUpgradeRequest): Promise<AjaxResult<any>> {
-    return request({
-        url: '/haikangIsup/device/upgradeHaiKangIsupDevice',
-        method: 'post',
-        data: data
-    });
+  return request({
+    url: '/haikangIsup/device/upgradeHaiKangIsupDevice',
+    method: 'post',
+    data: data
+  });
 }
+
+/**
+ * 获取海康ISUP设备配置信息
+ * @param deviceId 设备ID
+ */
+export function getHaiKangIsupDeviceConfig(deviceId: number): Promise<AjaxResult<any>> {
+  return request({
+    url: `/haikangIsup/device/getHaiKangIsupDeviceConfig/${deviceId}`,
+    method: 'get'
+  });
+}
+
+/**
+ * 设置海康ISUP设备配置信息
+ * @param deviceId 设备ID
+ * @param config 配置信息
+ */
+export function setHaiKangIsupDeviceConfig(deviceId: number, config: any): Promise<AjaxResult<any>> {
+  return request({
+    url: `/haikangIsup/device/setHaiKangIsupDeviceConfig/${deviceId}`,
+    method: 'post',
+    data: config
+  });
+}
+
+/**
+ * 获取海康ISUP版本信息
+ * @param deviceId 设备ID
+ */
+export function getHaiKangIsupVersionInfo(deviceId: number): Promise<AjaxResult<any>> {
+  return request({
+    url: `/haikangIsup/device/getHaiKangIsupVersionInfo/${deviceId}`,
+    method: 'get'
+  });
+}
+

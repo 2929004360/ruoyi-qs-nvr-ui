@@ -2506,6 +2506,78 @@
           </div>
         </el-tab-pane>
         
+        <!-- 设备配置标签页 -->
+        <el-tab-pane label="设备配置" name="deviceConfig" @tab-click="handleGetHaikangIsupDeviceConfig">
+          <div class="tab-content-wrapper" v-loading="haikangIsupDeviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><SetUp /></el-icon>
+              <span>设备配置</span>
+            </div>
+            <el-empty v-if="!haikangIsupDeviceConfig.success" description="暂无设备配置信息" />
+            <div v-else style="margin-top: 20px;">
+              <!-- 基本信息（只读） -->
+              <div style="margin-bottom: 20px;">
+                <div class="panel-section-title">基本信息</div>
+                <el-descriptions :column="2" border size="small">
+                  <el-descriptions-item label="设备型号">{{ haikangIsupDeviceConfig.model || '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="序列号">{{ haikangIsupDeviceConfig.serialNumber || '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="MAC地址">{{ haikangIsupDeviceConfig.macAddress || '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="设备类型">{{ haikangIsupDeviceConfig.deviceType || '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="制造商">{{ haikangIsupDeviceConfig.manufacturer || '-' }}</el-descriptions-item>
+                  <el-descriptions-item label="固件版本">{{ haikangIsupDeviceConfig.firmwareVersion || '-' }}</el-descriptions-item>
+                </el-descriptions>
+              </div>
+              
+              <!-- 可编辑配置 -->
+              <div style="margin-bottom: 20px;">
+                <div class="panel-section-title">设备配置</div>
+                <el-form :model="haikangIsupDeviceConfig" label-width="120px">
+                  <el-form-item label="设备名称">
+                    <el-input v-model="haikangIsupDeviceConfig.deviceName" placeholder="请输入设备名称" />
+                  </el-form-item>
+                  <el-form-item label="设备描述">
+                    <el-input v-model="haikangIsupDeviceConfig.deviceDescription" type="textarea" :rows="2" placeholder="请输入设备描述" />
+                  </el-form-item>
+                  <el-form-item label="设备位置">
+                    <el-input v-model="haikangIsupDeviceConfig.deviceLocation" placeholder="请输入设备位置" />
+                  </el-form-item>
+                  <el-form-item label="系统联系人">
+                    <el-input v-model="haikangIsupDeviceConfig.systemContact" placeholder="请输入系统联系人" />
+                  </el-form-item>
+                </el-form>
+              </div>
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="haikangIsupDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button @click="handleGetHaikangIsupDeviceConfig" :loading="haikangIsupDeviceInfoLoading" icon="Refresh">刷新</el-button>
+            <el-button type="primary" @click="handleSetHaikangIsupDeviceConfig" :loading="haikangIsupDeviceInfoLoading" icon="Edit">保存配置</el-button>
+          </div>
+        </el-tab-pane>
+
+        <!-- 版本信息标签页 -->
+        <el-tab-pane label="版本信息" name="versionInfo" @tab-click="handleGetHaikangIsupVersionInfo">
+          <div class="tab-content-wrapper" v-loading="haikangIsupDeviceInfoLoading">
+            <div class="panel-header">
+              <el-icon><InfoFilled /></el-icon>
+              <span>版本信息</span>
+            </div>
+            <el-empty v-if="!haikangIsupVersionInfo.success" description="暂无版本信息" />
+            <el-descriptions v-else :column="1" border>
+              <el-descriptions-item label="软件版本">{{ haikangIsupVersionInfo.softwareVersion || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="编码版本">{{ haikangIsupVersionInfo.encodeVersion || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="面板版本">{{ haikangIsupVersionInfo.panelVersion || '-' }}</el-descriptions-item>
+              <el-descriptions-item label="硬件版本">{{ haikangIsupVersionInfo.hardwareVersion || '-' }}</el-descriptions-item>
+            </el-descriptions>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="haikangIsupDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetHaikangIsupVersionInfo" :loading="haikangIsupDeviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+
+
+
         <!-- 系统状态标签页 -->
         <el-tab-pane label="系统状态" name="systemStatus" @tab-click="handleGetHaikangIsupSystemStatus">
           <div class="tab-content-wrapper" v-loading="haikangIsupDeviceInfoLoading">
@@ -2632,6 +2704,11 @@
 import {onUnmounted, watch, nextTick, reactive, ref, getCurrentInstance, toRefs} from "vue";
 import useClipboard from "vue-clipboard3";
 import { ElLoading } from "element-plus";
+import {
+  getHaiKangIsupDeviceConfig,
+  setHaiKangIsupDeviceConfig,
+  getHaiKangIsupVersionInfo
+} from "@/api/qs/haikang-isup";
 import EasyPlayer from "@/components/EasyPlayer";
 import type {DeviceQueryParams, QsDevice} from "@/types/api/qs/device"
 import {
@@ -4499,19 +4576,44 @@ const haikangIsupSystemStatusInfo = reactive({
 const haikangIsupUpgradeDialogVisible = ref(false);
 const haikangIsupUpgradeLoading = ref(false);
 const haikangIsupUpgradeForm = reactive({
-    deviceId: null as number | null,
-    ftpServerIp: '',
-    ftpServerPort: 21,
-    ftpAccount: '',
-    ftpPassword: '',
-    fileName: '',
-    channel: 0
+  deviceId: null as number | null,
+  ftpServerIp: '',
+  ftpServerPort: 21,
+  ftpAccount: '',
+  ftpPassword: '',
+  fileName: '',
+  channel: 0
 });
 const haikangIsupUpgradeResult = reactive({
-    success: false,
-    message: '',
-    upgradeResult: '',
-    beforeInfo: {} as any
+  success: false,
+  message: '',
+  upgradeResult: '',
+  beforeInfo: {} as any
+});
+
+// 海康ISUP设备配置
+const haikangIsupDeviceConfig = reactive({
+  success: false,
+  deviceName: '',
+  deviceDescription: '',
+  deviceLocation: '',
+  systemContact: '',
+  model: '',
+  serialNumber: '',
+  macAddress: '',
+  firmwareVersion: '',
+  hardwareVersion: '',
+  manufacturer: '',
+  deviceType: ''
+});
+
+// 海康ISUP版本信息
+const haikangIsupVersionInfo = reactive({
+  success: false,
+  softwareVersion: '',
+  encodeVersion: '',
+  panelVersion: '',
+  hardwareVersion: ''
 });
 
 
@@ -4769,6 +4871,27 @@ const openDeviceInfoDialog = (row: QsDevice) => {
     });
     Object.assign(haikangIsupCameraInfo, {
       success: false
+    });
+    Object.assign(haikangIsupDeviceConfig, {
+      success: false,
+      deviceName: '',
+      deviceDescription: '',
+      deviceLocation: '',
+      systemContact: '',
+      model: '',
+      serialNumber: '',
+      macAddress: '',
+      firmwareVersion: '',
+      hardwareVersion: '',
+      manufacturer: '',
+      deviceType: ''
+    });
+    Object.assign(haikangIsupVersionInfo, {
+      success: false,
+      softwareVersion: '',
+      encodeVersion: '',
+      panelVersion: '',
+      hardwareVersion: ''
     });
     haikangIsupDeviceInfoDialogVisible.value = true;
     handleRefreshHaikangIsupDeviceInfo();
@@ -5790,6 +5913,82 @@ const handleGetHaikangIsupSystemStatus = async () => {
   } catch (error) {
     console.error('获取系统状态信息失败:', error);
     proxy.$modal.msgError('获取系统状态信息失败');
+  } finally {
+    haikangIsupDeviceInfoLoading.value = false;
+  }
+}
+
+// 获取海康ISUP设备配置
+const handleGetHaikangIsupDeviceConfig = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    haikangIsupDeviceInfoLoading.value = true;
+    const res = await getHaiKangIsupDeviceConfig(currentDeviceId.value);
+    console.log('设备配置返回结果:', res);
+    if (res.data) {
+      if (res.data.data) {
+        Object.assign(haikangIsupDeviceConfig, res.data.data);
+      } else {
+        Object.assign(haikangIsupDeviceConfig, res.data);
+      }
+      haikangIsupDeviceConfig.success = true;
+      proxy.$modal.msgSuccess('获取设备配置成功');
+    }
+  } catch (error) {
+    console.error('获取设备配置失败:', error);
+    proxy.$modal.msgError('获取设备配置失败');
+  } finally {
+    haikangIsupDeviceInfoLoading.value = false;
+  }
+}
+
+// 设置海康ISUP设备配置
+const handleSetHaikangIsupDeviceConfig = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    haikangIsupDeviceInfoLoading.value = true;
+    const res = await setHaiKangIsupDeviceConfig(currentDeviceId.value, haikangIsupDeviceConfig);
+    if (res.code === 200) {
+      proxy.$modal.msgSuccess('保存设备配置成功');
+    } else {
+      proxy.$modal.msgError('保存设备配置失败');
+    }
+  } catch (error) {
+    console.error('保存设备配置失败:', error);
+    proxy.$modal.msgError('保存设备配置失败');
+  } finally {
+    haikangIsupDeviceInfoLoading.value = false;
+  }
+}
+
+// 获取海康ISUP版本信息
+const handleGetHaikangIsupVersionInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    haikangIsupDeviceInfoLoading.value = true;
+    const res = await getHaiKangIsupVersionInfo(currentDeviceId.value);
+    console.log('版本信息返回结果:', res);
+    if (res.data) {
+      if (res.data.data) {
+        Object.assign(haikangIsupVersionInfo, res.data.data);
+      } else {
+        Object.assign(haikangIsupVersionInfo, res.data);
+      }
+      haikangIsupVersionInfo.success = true;
+      proxy.$modal.msgSuccess('获取版本信息成功');
+    }
+  } catch (error) {
+    console.error('获取版本信息失败:', error);
+    proxy.$modal.msgError('获取版本信息失败');
   } finally {
     haikangIsupDeviceInfoLoading.value = false;
   }
