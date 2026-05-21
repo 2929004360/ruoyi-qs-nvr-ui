@@ -255,6 +255,8 @@
                   <el-dropdown-item v-if="scope.row.type === '12'" :disabled="scope.row.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
                   <!-- GB28181录像控制 -->
                   <el-dropdown-item v-if="scope.row.type === '12'" :disabled="scope.row.deviceStatus !== 'ON'" command="recordControl" icon="VideoCamera">录像控制</el-dropdown-item>
+                  <!-- 设备配置查询 -->
+                  <el-dropdown-item v-if="scope.row.type === '12'" :disabled="scope.row.deviceStatus !== 'ON'" command="deviceConfig" icon="Setting">设备配置</el-dropdown-item>
                   <!-- 录像下载 -->
                   <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="downloadRecord" icon="Download">录像下载</el-dropdown-item>
                 </el-dropdown-menu>
@@ -422,8 +424,10 @@
                       <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
                       <el-dropdown-item v-if="item.type === '12'" :disabled="item.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
                       <!-- GB28181录像控制 -->
-                      <el-dropdown-item v-if="item.type === '12'" :disabled="item.deviceStatus !== 'ON'" command="recordControl" icon="VideoCamera">录像控制</el-dropdown-item>
-                      <!-- 录像下载 -->
+                  <el-dropdown-item v-if="item.type === '12'" :disabled="item.deviceStatus !== 'ON'" command="recordControl" icon="VideoCamera">录像控制</el-dropdown-item>
+                  <!-- 设备配置查询 -->
+                  <el-dropdown-item v-if="item.type === '12'" :disabled="item.deviceStatus !== 'ON'" command="deviceConfig" icon="Setting">设备配置</el-dropdown-item>
+                  <!-- 录像下载 -->
                       <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="downloadRecord" icon="Download">录像下载</el-dropdown-item>
                     </el-dropdown-menu>
                   </template>
@@ -1771,6 +1775,104 @@
           </div>
         </el-tab-pane>
       </el-tabs>
+    </el-dialog>
+
+    <!-- 设备配置对话框 -->
+    <el-dialog title="设备配置管理" v-model="deviceConfigDialogVisible" width="1000px" append-to-body class="glass-dialog device-config-dialog">
+      <div class="device-config-header">
+        <el-alert title="当前设备" type="info" :closable="false" show-icon style="margin-bottom: 16px;">
+          <template #default>
+            <div class="device-info-row">
+              <span class="device-info-item"><strong>设备名称：</strong>{{ currentConfigDevice?.deviceName || '-' }}</span>
+              <span class="device-info-item"><strong>国标ID：</strong>{{ currentConfigDevice?.gbDeviceId || '-' }}</span>
+              <span class="device-info-item"><strong>IP地址：</strong>{{ currentConfigDevice?.ipAddress || '-' }}</span>
+            </div>
+          </template>
+        </el-alert>
+        <el-form label-width="90px" class="query-form">
+          <el-row :gutter="12" align="middle">
+            <el-col :span="16">
+              <el-form-item label="配置类型">
+                <el-select v-model="selectedConfigTypes" multiple placeholder="请选择配置类型" style="width: 100%" collapse-tags collapse-tags-tooltip>
+                  <el-option label="基本参数" value="BasicParam"/>
+                  <el-option label="视频参数范围" value="VideoParamOpt"/>
+                  <el-option label="SVAC编码配置" value="SVACEncodeConfig"/>
+                  <el-option label="SVAC解码配置" value="SVACDecodeConfig"/>
+                  <el-option label="视频参数属性配置" value="VideoParamAttribute"/>
+                  <el-option label="录像计划" value="VideoRecordPlan"/>
+                  <el-option label="报警录像" value="VideoAlarmRecord"/>
+                  <el-option label="视频画面遮挡" value="PictureMask"/>
+                  <el-option label="画面翻转" value="FrameMirror"/>
+                  <el-option label="报警上报开关" value="AlarmReport"/>
+                  <el-option label="前端OSD设置" value="OSDConfig"/>
+                  <el-option label="图像抓拍配置" value="Snapshot"/>
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="8">
+              <el-form-item label=" ">
+                <div class="query-actions">
+                  <el-button
+                    type="primary"
+                    icon="Search"
+                    @click="handleQueryDeviceConfig"
+                    :loading="deviceConfigLoading"
+                  >
+                    查询配置
+                  </el-button>
+                  <el-button
+                    link
+                    type="info"
+                    icon="RefreshRight"
+                    :disabled="!selectedConfigTypes.length"
+                    @click="selectedConfigTypes = []"
+                  >
+                    清空
+                  </el-button>
+                </div>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+      </div>
+
+      <div v-loading="deviceConfigLoading" class="config-content">
+        <el-empty v-if="!deviceConfigData || Object.keys(deviceConfigData).length === 0" description="暂无配置数据，请先查询"/>
+        <el-collapse v-else v-model="activeConfigPanels" class="config-collapse">
+          <el-collapse-item v-for="(value, key) in deviceConfigData" :key="key" :name="key">
+            <template #title>
+              <div class="collapse-title">
+                <el-icon class="title-icon"><Setting /></el-icon>
+                <span class="title-text">{{ getConfigTypeName(key) }}</span>
+                <el-tag type="success" size="small" style="margin-left: 8px;">{{ Object.keys(value).length }} 项</el-tag>
+              </div>
+            </template>
+            <div class="config-card">
+              <el-form :model="deviceConfigData[key]" label-width="140px" class="config-form">
+                <el-row :gutter="16">
+                  <template v-for="(itemValue, itemKey) in value" :key="itemKey">
+                    <el-col :span="12">
+                      <el-form-item :label="getConfigFieldName(key, itemKey)">
+                        <el-input v-model="deviceConfigData[key][itemKey]" clearable />
+                      </el-form-item>
+                    </el-col>
+                  </template>
+                </el-row>
+              </el-form>
+              <div class="config-actions">
+                <el-button type="primary" size="default" @click="handleUpdateSingleConfig(key)" :loading="updateConfigLoading[key]" icon="Check">保存配置</el-button>
+              </div>
+            </div>
+          </el-collapse-item>
+        </el-collapse>
+      </div>
+
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="deviceConfigDialogVisible = false" icon="Close">关闭</el-button>
+          <el-button type="success" @click="handleUpdateAllConfig" :loading="updateAllConfigLoading" :disabled="!deviceConfigData || Object.keys(deviceConfigData).length === 0" icon="DocumentChecked">保存全部</el-button>
+        </div>
+      </template>
     </el-dialog>
 
     <!-- 设备录像下载对话框 -->
@@ -3159,14 +3261,14 @@ import {
   startGb28181Play, stopGb28181Play,
   startJt1078Play, stopJt1078Play
 } from "@/api/qs/zlm";
-import {DocumentCopy, InfoFilled, Refresh, Sunny, Moon, SwitchButton, CircleClose, Position, Plus, Delete, WindPower, List, Grid, CircleCheck, Picture, VideoCamera, MapLocation, Monitor, More, ArrowDown, Clock, Camera, Cpu, Histogram, Bell, Lock, Key, Timer, Place, OfficeBuilding, CollectionTag, Link, Medal, SetUp, Box, Connection, Odometer, Files, TrendCharts, Tools, Lightning, Warning, Loading} from '@element-plus/icons-vue'
+import {DocumentCopy, InfoFilled, Refresh, Sunny, Moon, SwitchButton, CircleClose, Position, Plus, Delete, WindPower, List, Grid, CircleCheck, Picture, VideoCamera, MapLocation, Monitor, More, ArrowDown, Clock, Camera, Cpu, Histogram, Bell, Lock, Key, Timer, Place, OfficeBuilding, CollectionTag, Link, Medal, SetUp, Box, Connection, Odometer, Files, TrendCharts, Tools, Lightning, Warning, Loading, Search, Setting} from '@element-plus/icons-vue'
 import StreamDropdown from "@/components/Channel/streamDropdown.vue";
 import MediaInfo from "@/components/Channel/mediaInfo.vue";
 import SelectMapPosition from '@/components/SelectMapPosition';
 import ChannelCode from '@/views/components/common/channelCode.vue';
 import DeviceSnapshotDialog from '@/components/DeviceSnapshotDialog/index.vue';
 import {getOnvifDeviceList, onvifLogin} from "@/api/qs/onvif";
-import {getAllDevices, getChannelsByDeviceId, refreshDevice, rebootGb28181Device, recordCmd, queryDeviceStatus, queryDeviceInfo, subscribeCatalog, unsubscribeCatalog} from "@/api/qs/gb28181";
+import {getAllDevices, getChannelsByDeviceId, refreshDevice, rebootGb28181Device, recordCmd, queryDeviceStatus, queryDeviceInfo, subscribeCatalog, unsubscribeCatalog, queryDeviceConfig, updateDeviceConfig} from "@/api/qs/gb28181";
 import type {Gb28181Device, Gb28181Channel} from "@/types/api/qs/gb28181";
 import {getAllDevice} from "@/api/qs/jt1078";
 import type {Jt1078Device} from "@/types/api/qs/jt1078";
@@ -3361,6 +3463,109 @@ const rtspUrlInfo = reactive<DaHuaRtspUrlInfo>({
   success: false,
   rtspUrls: []
 });
+// 设备配置
+const deviceConfigDialogVisible = ref(false);
+const deviceConfigLoading = ref(false);
+const deviceConfigData = ref<any>({});
+const selectedConfigTypes = ref<string[]>([]);
+const currentConfigDevice = ref<QsDevice | null>(null);
+const activeConfigPanels = ref<string[]>([]);
+const updateConfigLoading = ref<Record<string, boolean>>({});
+const updateAllConfigLoading = ref(false);
+// 配置类型名称映射
+const configTypeNameMap: Record<string, string> = {
+  'BasicParam': '基本参数',
+  'VideoParamOpt': '视频参数范围',
+  'SVACEncodeConfig': 'SVAC编码配置',
+  'SVACDecodeConfig': 'SVAC解码配置',
+  'VideoParamAttribute': '视频参数属性配置',
+  'VideoRecordPlan': '录像计划',
+  'VideoAlarmRecord': '报警录像',
+  'PictureMask': '视频画面遮挡',
+  'FrameMirror': '画面翻转',
+  'AlarmReport': '报警上报开关',
+  'OSDConfig': '前端OSD设置',
+  'Snapshot': '图像抓拍配置'
+};
+// 配置字段中文名称映射
+const configFieldNameMap: Record<string, Record<string, string>> = {
+  'BasicParam': {
+    'DeviceID': '设备ID',
+    'Name': '设备名称',
+    'Manufacturer': '制造商',
+    'Model': '设备型号',
+    'Firmware': '固件版本',
+    'SerialNumber': '序列号',
+    'Hardware': '硬件版本',
+    'Software': '软件版本',
+    'IPAddress': 'IP地址',
+    'Port': '端口号',
+    'HeartBeatInterval': '心跳间隔',
+    'HeartBeatCount': '心跳次数',
+    'PositionCapability': '定位能力',
+    'Expiration': '注册有效期'
+  },
+  'VideoParamOpt': {
+    'DeviceID': '设备ID',
+    'Resolution': '分辨率',
+    'FrameRate': '帧率',
+    'BitRate': '码率',
+    'BitRateType': '码率类型',
+    'Quality': '画质',
+    'SVQ': '空间编码',
+    'TVQ': '时间编码',
+    'GovLength': 'I帧间隔',
+    'Profile': '编码级别',
+    'SVACProfile': 'SVAC编码级别'
+  },
+  'VideoParamAttribute': {
+    'DeviceID': '设备ID',
+    'MaxStream': '最大码流数',
+    'InputNum': '输入数量',
+    'AEC': '回声消除',
+    'AGC': '自动增益',
+    'ABF': '自动背景滤除'
+  },
+  'AlarmReport': {
+    'DeviceID': '设备ID',
+    'MobileSubscription': '移动侦测订阅',
+    'AlarmSubscription': '报警事件订阅'
+  },
+  'VideoRecordPlan': {
+    'DeviceID': '设备ID',
+    'RecordPlan': '录像计划'
+  },
+  'OSDConfig': {
+    'DeviceID': '设备ID',
+    'OSD': 'OSD叠加配置'
+  },
+  'SVACEncodeConfig': {
+    'DeviceID': '设备ID',
+    'SVACCode': 'SVAC编码模式',
+    'SVACCompression': 'SVAC压缩级别',
+    'SVACProfile': 'SVAC编码级别'
+  },
+  'SVACDecodeConfig': {
+    'DeviceID': '设备ID',
+    'SVACDecode': 'SVAC解码模式'
+  },
+  'VideoAlarmRecord': {
+    'DeviceID': '设备ID',
+    'AlarmRecord': '报警录像配置'
+  },
+  'PictureMask': {
+    'DeviceID': '设备ID',
+    'PictureMask': '遮挡区域配置'
+  },
+  'FrameMirror': {
+    'DeviceID': '设备ID',
+    'FrameMirror': '镜像翻转配置'
+  },
+  'Snapshot': {
+    'DeviceID': '设备ID',
+    'Snapshot': '抓拍配置'
+  }
+};
 // 大华设备录像下载
 const downloadRecordDialogVisible = ref(false);
 const downloadRecordLoading = ref(false);
@@ -4639,6 +4844,114 @@ const handleUnsubscribeCatalog = async (row: QsDevice) => {
   }
 };
 
+// 打开设备配置对话框
+const openDeviceConfigDialog = (row: QsDevice) => {
+  currentConfigDevice.value = row;
+  deviceConfigData.value = {};
+  selectedConfigTypes.value = [];
+  deviceConfigDialogVisible.value = true;
+};
+
+// 获取配置类型名称
+const getConfigTypeName = (key: string): string => {
+  return configTypeNameMap[key] || key;
+};
+
+// 获取配置字段名称
+const getConfigFieldName = (configType: string, fieldKey: string): string => {
+  const fieldMap = configFieldNameMap[configType];
+  return fieldMap ? (fieldMap[fieldKey] || fieldKey) : fieldKey;
+};
+
+// 查询设备配置
+const handleQueryDeviceConfig = async () => {
+  if (!currentConfigDevice.value?.gbDeviceId) {
+    proxy.$modal.msgError('设备未配置国标设备ID');
+    return;
+  }
+  if (selectedConfigTypes.value.length === 0) {
+    proxy.$modal.msgWarning('请至少选择一个配置类型');
+    return;
+  }
+
+  try {
+    deviceConfigLoading.value = true;
+    const configTypeStr = selectedConfigTypes.value.join('/');
+    const response = await queryDeviceConfig(currentConfigDevice.value.gbDeviceId, configTypeStr);
+
+    if (response.code === 200 && response.data) {
+      deviceConfigData.value = response.data;
+      proxy.$modal.msgSuccess('查询成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '查询失败');
+    }
+  } catch (error) {
+    console.error('查询设备配置失败:', error);
+    proxy.$modal.msgError('查询设备配置失败');
+  } finally {
+    deviceConfigLoading.value = false;
+  }
+};
+
+// 更新单个配置
+const handleUpdateSingleConfig = async (configType: string) => {
+  if (!currentConfigDevice.value?.gbDeviceId) {
+    proxy.$modal.msgError('设备未配置国标设备ID');
+    return;
+  }
+
+  try {
+    updateConfigLoading.value[configType] = true;
+    // 构建配置对象
+    const configParam: any = {
+      cmdType: 'DeviceControl'
+    };
+    // 添加对应的配置项
+    configParam[configType] = deviceConfigData.value[configType];
+    const response = await updateDeviceConfig(currentConfigDevice.value.gbDeviceId, configParam);
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess(`更新${getConfigTypeName(configType)}成功`);
+    } else {
+      proxy.$modal.msgError(response.msg || '更新失败');
+    }
+  } catch (error) {
+    console.error('更新设备配置失败:', error);
+    proxy.$modal.msgError('更新设备配置失败');
+  } finally {
+    updateConfigLoading.value[configType] = false;
+  }
+};
+
+// 更新全部配置
+const handleUpdateAllConfig = async () => {
+  if (!currentConfigDevice.value?.gbDeviceId) {
+    proxy.$modal.msgError('设备未配置国标设备ID');
+    return;
+  }
+
+  try {
+    updateAllConfigLoading.value = true;
+    // 构建配置对象
+    const configParam: any = {
+      cmdType: 'DeviceControl',
+      ...deviceConfigData.value
+    };
+    const response = await updateDeviceConfig(currentConfigDevice.value.gbDeviceId, configParam);
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('更新全部配置成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '更新失败');
+    }
+  } catch (error) {
+    console.error('更新全部配置失败:', error);
+    proxy.$modal.msgError('更新全部配置失败');
+  } finally {
+    updateAllConfigLoading.value = false;
+  }
+};
+
 // 更多操作处理
 const handleMoreAction = (command: string, row: QsDevice) => {
   switch (command) {
@@ -4701,6 +5014,13 @@ const handleMoreAction = (command: string, row: QsDevice) => {
       break;
     case 'unsubscribeCatalog':
       handleUnsubscribeCatalog(row);
+      break;
+    case 'deviceConfig':
+      if (row.deviceStatus !== 'ON') {
+        proxy.$modal.msgWarning('设备离线，无法查询设备配置');
+        return;
+      }
+      openDeviceConfigDialog(row);
       break;
   }
 }
@@ -10564,6 +10884,225 @@ html.dark {
   font-size: 13px;
   color: #909399;
   font-weight: 400;
+}
+
+/* 设备配置对话框样式 */
+.device-config-dialog {
+  :deep(.el-dialog__body) {
+    padding: 20px 24px;
+  }
+}
+
+.device-config-header {
+  margin-bottom: 20px;
+}
+
+.device-info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+}
+
+.device-info-item {
+  font-size: 14px;
+  color: var(--el-text-color-regular);
+}
+
+.query-form {
+  position: relative;
+  margin-bottom: 0;
+  padding: 14px 20px 14px 18px !important;
+  background: var(--el-bg-color) !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--el-border-color-lighter) !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06) !important;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 12px;
+    bottom: 12px;
+    width: 3px;
+    background: linear-gradient(to bottom, var(--el-color-primary), var(--el-color-primary-light-5));
+    border-radius: 0 3px 3px 0;
+  }
+
+  :deep(.el-form-item) {
+    margin-bottom: 0;
+  }
+
+  :deep(.el-form-item__label) {
+    font-weight: 500;
+    color: var(--el-text-color-primary);
+    padding-right: 10px;
+  }
+
+  .query-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  :deep(.el-button--primary) {
+    height: 34px;
+    padding: 0 18px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 6px;
+    transition: all 0.25s ease;
+    flex-shrink: 0;
+
+    &:not(:disabled):hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(64, 158, 255, 0.4);
+    }
+
+    &:not(:disabled):active {
+      transform: translateY(0);
+    }
+
+    .el-icon {
+      font-size: 14px;
+      margin-right: 4px;
+    }
+  }
+
+  :deep(.el-button.is-link) {
+    height: 34px;
+    padding: 0 8px;
+    font-size: 13px;
+    font-weight: 400;
+    flex-shrink: 0;
+
+    &:not(.is-disabled):hover {
+      color: var(--el-color-danger);
+    }
+  }
+
+  :deep(.el-select) {
+    width: 100%;
+
+    .el-input__wrapper {
+      height: 34px;
+      border-radius: 6px;
+      box-shadow: 0 0 0 1px var(--el-border-color) inset;
+      transition: all 0.2s ease;
+
+      &:hover {
+        box-shadow: 0 0 0 1px var(--el-border-color-hover) inset;
+      }
+
+      &.is-focus {
+        box-shadow: 0 0 0 1px var(--el-color-primary) inset !important;
+      }
+    }
+
+    .el-input__inner {
+      font-size: 13px;
+    }
+  }
+}
+
+.config-content {
+  max-height: 520px;
+  overflow-y: auto;
+  padding: 4px;
+  background: var(--el-fill-color-lighter);
+  border-radius: 8px;
+}
+
+.config-collapse {
+  :deep(.el-collapse-item__header) {
+    background: var(--el-bg-color);
+    border-radius: 6px;
+    margin-bottom: 8px;
+    padding-left: 16px;
+    padding-right: 16px;
+    border: 1px solid var(--el-border-color-lighter);
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: var(--el-fill-color-light);
+      border-color: var(--el-border-color);
+    }
+  }
+
+  :deep(.el-collapse-item__wrap) {
+    border: none;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    background: transparent;
+  }
+
+  :deep(.el-collapse-item__content) {
+    padding: 0;
+  }
+}
+
+.collapse-title {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.title-icon {
+  color: var(--el-color-primary);
+  font-size: 18px;
+  margin-right: 8px;
+}
+
+.title-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+.config-card {
+  background: var(--el-bg-color);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 8px;
+  border: 1px solid var(--el-border-color-lighter);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.config-form {
+  margin-bottom: 16px;
+}
+
+.config-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 12px;
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+/* 滚动条美化 */
+.config-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.config-content::-webkit-scrollbar-track {
+  background: var(--el-fill-color-lighter);
+  border-radius: 3px;
+}
+
+.config-content::-webkit-scrollbar-thumb {
+  background: var(--el-border-color);
+  border-radius: 3px;
+
+  &:hover {
+    background: var(--el-text-color-secondary);
+  }
 }
 </style>
 
