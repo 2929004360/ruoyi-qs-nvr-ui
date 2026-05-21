@@ -46,3 +46,67 @@ export function queryDeviceRecord(
     timeout: 30000
   })
 }
+
+/**
+ * 刷新设备状态和通道
+ * @param gbDeviceId 国标设备ID
+ */
+export function refreshDevice(gbDeviceId: string): Promise<AjaxResult<any>> {
+  return request({
+    url: `/gb28181/device/refresh/${gbDeviceId}`,
+    method: 'post'
+  })
+}
+
+/**
+ * 远程重启设备
+ * @param gbDeviceId 国标设备ID
+ */
+export function rebootGb28181Device(gbDeviceId: string): Promise<AjaxResult<any>> {
+  return request({
+    url: `/gb28181/device/reboot/${gbDeviceId}`,
+    method: 'post'
+  })
+}
+
+/**
+ * 录像控制
+ * @param gbDeviceId 国标设备ID
+ * @param channelId 通道国标编号
+ * @param recordCmd 录像命令：0-停止录像，1-开始录像，2-定时录像
+ * @param streamNumber 码流类型：0-主码流，1-子码流1，2-子码流2，以此类推，缺省为0
+ */
+export function recordCmd(gbDeviceId: string, channelId: string, recordCmd: string, streamNumber?: number): Promise<AjaxResult<any>> {
+  return request({
+    url: '/gb28181/device/record/cmd',
+    method: 'post',
+    params: {
+      gbDeviceId,
+      channelId,
+      recordCmd,
+      streamNumber
+    }
+  })
+}
+
+/**
+ * 查询设备状态
+ * @param deviceId 设备ID
+ */
+export function queryDeviceStatus(deviceId: string): Promise<AjaxResult<any>> {
+  return request({
+    url: `/gb28181/device/status/${deviceId}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 查询设备信息
+ * @param deviceId 设备ID
+ */
+export function queryDeviceInfo(deviceId: string): Promise<AjaxResult<any>> {
+  return request({
+    url: `/gb28181/device/info/${deviceId}`,
+    method: 'get'
+  })
+}

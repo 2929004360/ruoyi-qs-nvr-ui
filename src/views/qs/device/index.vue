@@ -191,7 +191,7 @@
             </el-tooltip>
             <el-tooltip content="云端录像">
               <el-button
-                type="success"
+                type="primary"
                 text
                 bg
                 size="small"
@@ -201,12 +201,25 @@
             </el-tooltip>
             <el-tooltip content="设备录像" v-if="!['1', '2', '3', '4', '6', '13'].includes(scope.row.type)">
               <el-button
-                type="info"
+                type="primary"
                 text
                 bg
                 size="small"
                 icon="Monitor"
                 @click="handleDeviceRecord(scope.row)"
+              />
+            </el-tooltip>
+            
+            <!-- 刷新设备状态和通道（GB28181） -->
+            <el-tooltip content="刷新" v-if="scope.row.type === '12'">
+              <el-button
+                type="success"
+                text
+                bg
+                size="small"
+                icon="Refresh"
+                :loading="scope.row.refreshing"
+                @click="handleRefreshDevice(scope.row)"
               />
             </el-tooltip>
             
@@ -228,14 +241,17 @@
                   <el-dropdown-item command="delete" icon="Delete" class="is-danger">删除</el-dropdown-item>
                   <!-- 设备校时（海康/大华/海康ISUP） -->
                   <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
-                  <!-- 设备信息（大华/海康/海康ISUP） -->
-                  <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
+                  <!-- 设备信息（大华/海康/海康ISUP/GB28181） -->
+                  <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9' || scope.row.type === '12'" :disabled="scope.row.deviceStatus !== 'ON'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
                   <!-- 海康设备抓图 -->
                   <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8'" :disabled="scope.row.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
                   <!-- 大华设备抓图 -->
                   <el-dropdown-item v-if="scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
                   <!-- 设备重启（海康/大华/海康ISUP） -->
                   <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
+                  <el-dropdown-item v-if="scope.row.type === '12'" :disabled="scope.row.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
+                  <!-- GB28181录像控制 -->
+                  <el-dropdown-item v-if="scope.row.type === '12'" :disabled="scope.row.deviceStatus !== 'ON'" command="recordControl" icon="VideoCamera">录像控制</el-dropdown-item>
                   <!-- 录像下载 -->
                   <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="downloadRecord" icon="Download">录像下载</el-dropdown-item>
                 </el-dropdown-menu>
@@ -361,6 +377,19 @@
                   />
                 </el-tooltip>
                 
+                <!-- 刷新设备状态和通道（GB28181） -->
+                <el-tooltip content="刷新" v-if="item.type === '12'">
+                  <el-button
+                    type="success"
+                    text
+                    bg
+                    size="small"
+                    icon="Refresh"
+                    :loading="item.refreshing"
+                    @click="handleRefreshDevice(item)"
+                  />
+                </el-tooltip>
+                
                 <!-- 更多操作下拉菜单 -->
                 <el-dropdown @command="(command) => handleMoreAction(command, item)" trigger="click" style="margin-left: 12px;">
                   <el-button
@@ -377,14 +406,17 @@
                       <el-dropdown-item command="delete" icon="Delete" class="is-danger">删除</el-dropdown-item>
                       <!-- 设备校时（海康/大华/海康ISUP） -->
                       <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
-                      <!-- 设备信息（大华/海康/海康ISUP） -->
-                      <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
+                      <!-- 设备信息（大华/海康/海康ISUP/GB28181） -->
+                      <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9' || item.type === '12'" :disabled="item.deviceStatus !== 'ON'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
                       <!-- 海康设备抓图 -->
                       <el-dropdown-item v-if="item.type === '7' || item.type === '8'" :disabled="item.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
                       <!-- 大华设备抓图 -->
                       <el-dropdown-item v-if="item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
                       <!-- 设备重启（海康/大华/海康ISUP） -->
                       <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
+                      <el-dropdown-item v-if="item.type === '12'" :disabled="item.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
+                      <!-- GB28181录像控制 -->
+                      <el-dropdown-item v-if="item.type === '12'" :disabled="item.deviceStatus !== 'ON'" command="recordControl" icon="VideoCamera">录像控制</el-dropdown-item>
                       <!-- 录像下载 -->
                       <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="downloadRecord" icon="Download">录像下载</el-dropdown-item>
                     </el-dropdown-menu>
@@ -2697,6 +2729,320 @@
     <SelectMapPosition ref="selectMapPositionRef" @onSubmit="selectMapPositionSubmit"></SelectMapPosition>
     <ChannelCode ref="channelCodeRef" @handleOk="channelCodeOk"></ChannelCode>
     <DeviceSnapshotDialog ref="snapshotDialogRef"></DeviceSnapshotDialog>
+
+    <!-- GB28181设备刷新进度对话框 -->
+    <el-dialog
+      v-model="refreshProgressDialogVisible"
+      width="400px"
+      title="设备刷新"
+      append-to-body
+      :close-on-click-modal="false"
+      :close-on-press-escape="false"
+      class="refresh-progress-dialog"
+      :show-close="false"
+    >
+      <div class="refresh-progress-center">
+        <div class="refresh-header">
+          <div class="refresh-icon-wrapper">
+            <el-icon class="refresh-icon" :class="{ spinning: refreshProgress < 100 }"><Refresh /></el-icon>
+          </div>
+          <h3 class="refresh-title">{{ refreshProgress < 100 ? '设备刷新中' : '刷新完成' }}</h3>
+        </div>
+        
+        <div class="progress-circle-wrapper">
+          <el-progress
+            type="circle"
+            :percentage="refreshProgress"
+            :stroke-width="10"
+            :width="180"
+            :color="refreshProgressColor"
+            :format="() => ''"
+          />
+          <div class="progress-percent">
+            <span class="percent-num">{{ refreshProgress }}</span>
+            <span class="percent-unit">%</span>
+          </div>
+        </div>
+        
+        <div class="refresh-steps">
+          <div class="step-item" :class="{ active: true, completed: refreshProgress >= 30 }">
+            <el-icon class="step-icon">
+              <component :is="refreshProgress >= 30 ? 'CircleCheck' : 'Connection'" />
+            </el-icon>
+            <span class="step-text">设备连接</span>
+          </div>
+          <div class="step-divider"></div>
+          <div class="step-item" :class="{ active: refreshProgress >= 30, completed: refreshProgress >= 70 }">
+            <el-icon class="step-icon">
+              <component :is="refreshProgress >= 70 ? 'CircleCheck' : 'Monitor'" />
+            </el-icon>
+            <span class="step-text">状态同步</span>
+          </div>
+          <div class="step-divider"></div>
+          <div class="step-item" :class="{ active: refreshProgress >= 70, completed: refreshProgress >= 100 }">
+            <el-icon class="step-icon">
+              <component :is="refreshProgress >= 100 ? 'CircleCheck' : 'CollectionTag'" />
+            </el-icon>
+            <span class="step-text">通道刷新</span>
+          </div>
+        </div>
+        
+        <div class="refresh-tip" v-if="refreshProgress < 100">
+          <p class="tip-content">正在与设备通信，请稍候...</p>
+        </div>
+      </div>
+    </el-dialog>
+
+    <!-- GB28181录像控制对话框 -->
+    <el-dialog
+      v-model="recordDialogVisible"
+      width="500px"
+      title="录像控制"
+      append-to-body
+    >
+      <el-form :model="recordDialogForm" label-width="100px">
+        <el-form-item label="通道ID">
+          <el-input v-model="recordDialogForm.channelId" disabled />
+        </el-form-item>
+        <el-form-item label="录像命令">
+          <el-select v-model="recordDialogForm.recordCmd" placeholder="请选择录像命令">
+            <el-option label="停止录像" value="0" />
+            <el-option label="开始录像" value="1" />
+            <el-option label="定时录像" value="2" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="码流类型">
+          <el-select v-model="recordDialogForm.streamNumber" placeholder="请选择码流类型">
+            <el-option label="主码流" :value="0" />
+            <el-option label="子码流1" :value="1" />
+            <el-option label="子码流2" :value="2" />
+            <el-option label="子码流3" :value="3" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="recordDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="submitRecordControl">确定</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- GB28181设备信息对话框 -->
+    <el-dialog title="GB28181设备信息" v-model="gb28181DeviceInfoDialogVisible" width="850px" append-to-body class="glass-dialog device-info-dialog">
+      <el-tabs v-model="gb28181DeviceInfoTabActive" type="border-card" @tab-change="handleTabChange">
+        <!-- 设备信息标签页 -->
+        <el-tab-pane label="设备信息" name="deviceInfo">
+          <div class="device-info-dashboard" v-loading="gb28181DeviceInfoLoading">
+            <div class="dashboard-header">
+              <div class="dashboard-title">
+                <el-icon class="dashboard-icon"><Cpu /></el-icon>
+                <span>设备基本信息</span>
+              </div>
+              <div class="dashboard-badge" v-if="gb28181DeviceInfo.sn">
+                <el-icon><CollectionTag /></el-icon>
+                <span>{{ gb28181DeviceInfo.sn }}</span>
+              </div>
+            </div>
+            <div class="info-cards-grid">
+              <div class="info-card primary" style="animation-delay: 0.04s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><Medal /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">设备ID</div>
+                  <div class="info-card-value">{{ gb28181DeviceInfo.deviceId || '-' }}</div>
+                </div>
+              </div>
+              <div class="info-card success" style="animation-delay: 0.08s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><VideoCamera /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">设备名称</div>
+                  <div class="info-card-value">{{ gb28181DeviceInfo.deviceName || '-' }}</div>
+                </div>
+              </div>
+              <div class="info-card info" style="animation-delay: 0.12s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><OfficeBuilding /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">制造商</div>
+                  <div class="info-card-value">{{ gb28181DeviceInfo.manufacturer || '-' }}</div>
+                </div>
+              </div>
+              <div class="info-card warning" style="animation-delay: 0.16s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><SetUp /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">设备型号</div>
+                  <div class="info-card-value">{{ gb28181DeviceInfo.model || '-' }}</div>
+                </div>
+              </div>
+              <div class="info-card danger" style="animation-delay: 0.2s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><Odometer /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">固件版本</div>
+                  <div class="info-card-value">{{ gb28181DeviceInfo.firmware || '-' }}</div>
+                </div>
+              </div>
+              <div class="info-card teal" style="animation-delay: 0.24s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><Monitor /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">设备类型</div>
+                  <div class="info-card-value">{{ gb28181DeviceInfo.deviceType || '-' }}</div>
+                </div>
+              </div>
+              <div class="info-card purple" style="animation-delay: 0.28s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><CollectionTag /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">通道数</div>
+                  <div class="info-card-value">
+                    {{ (gb28181DeviceInfo.channel !== null ? gb28181DeviceInfo.channel : gb28181DeviceInfo.maxCamera) || '-' }}
+                  </div>
+                </div>
+              </div>
+              <div class="info-card orange" style="animation-delay: 0.32s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><Warning /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">最大报警数</div>
+                  <div class="info-card-value">{{ gb28181DeviceInfo.maxAlarm !== null ? gb28181DeviceInfo.maxAlarm : '-' }}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 扩展信息 -->
+            <div v-if="gb28181DeviceInfo.extraInfo && gb28181DeviceInfo.extraInfo.length > 0" style="margin-top: 20px;">
+              <h4 style="margin-bottom: 10px;">扩展信息</h4>
+              <div v-for="(info, index) in gb28181DeviceInfo.extraInfo" :key="index" class="extra-info-item">
+                {{ info }}
+              </div>
+            </div>
+          </div>
+        </el-tab-pane>
+        <!-- 设备状态标签页 -->
+        <el-tab-pane label="设备状态" name="deviceStatus">
+          <div class="device-info-dashboard" v-loading="gb28181DeviceInfoLoading">
+            <div class="dashboard-header">
+              <div class="dashboard-title">
+                <el-icon class="dashboard-icon"><Cpu /></el-icon>
+                <span>设备状态信息</span>
+              </div>
+              <div class="dashboard-badge" v-if="gb28181DeviceStatus.sn">
+                <el-icon><CollectionTag /></el-icon>
+                <span>{{ gb28181DeviceStatus.sn }}</span>
+              </div>
+            </div>
+            <div class="info-cards-grid">
+              <div class="info-card primary" style="animation-delay: 0.04s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><Medal /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">设备ID</div>
+                  <div class="info-card-value">{{ gb28181DeviceStatus.deviceId || '-' }}</div>
+                </div>
+              </div>
+              <div class="info-card success" style="animation-delay: 0.08s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><VideoCamera /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">在线状态</div>
+                  <div class="info-card-value">
+                    <el-tag v-if="gb28181DeviceStatus.online === 'ONLINE'" type="success">在线</el-tag>
+                    <el-tag v-else-if="gb28181DeviceStatus.online === 'OFFLINE'" type="danger">离线</el-tag>
+                    <span v-else>{{ gb28181DeviceStatus.online || '-' }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="info-card info" style="animation-delay: 0.12s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><Position /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">设备状态</div>
+                  <div class="info-card-value">
+                    <el-tag v-if="gb28181DeviceStatus.status === 'OK'" type="success">正常</el-tag>
+                    <el-tag v-else-if="gb28181DeviceStatus.status" type="danger">异常</el-tag>
+                    <span v-else>{{ gb28181DeviceStatus.status || '-' }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="info-card warning" style="animation-delay: 0.16s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><Clock /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">设备时间</div>
+                  <div class="info-card-value">{{ gb28181DeviceStatus.deviceTime || '-' }}</div>
+                </div>
+              </div>
+              <div class="info-card danger" style="animation-delay: 0.2s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><Link /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">编码状态</div>
+                  <div class="info-card-value">
+                    <el-tag v-if="gb28181DeviceStatus.encode === 'ON'" type="success">开启</el-tag>
+                    <el-tag v-else-if="gb28181DeviceStatus.encode === 'OFF'" type="info">关闭</el-tag>
+                    <span v-else>{{ gb28181DeviceStatus.encode || '-' }}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="info-card teal" style="animation-delay: 0.24s">
+                <div class="info-card-glow"></div>
+                <div class="info-card-icon"><el-icon><CollectionTag /></el-icon></div>
+                <div class="info-card-content">
+                  <div class="info-card-label">录像状态</div>
+                  <div class="info-card-value">
+                    <el-tag v-if="gb28181DeviceStatus.record === 'ON'" type="success">录像中</el-tag>
+                    <el-tag v-else-if="gb28181DeviceStatus.record === 'OFF'" type="info">未录像</el-tag>
+                    <span v-else>{{ gb28181DeviceStatus.record || '-' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 异常原因 -->
+            <div v-if="gb28181DeviceStatus.reason" style="margin-top: 20px;">
+              <el-alert
+                title="异常原因"
+                type="warning"
+                :closable="false"
+                :description="gb28181DeviceStatus.reason"
+              />
+            </div>
+            
+            <!-- 报警状态列表 -->
+            <div v-if="gb28181DeviceStatus.alarmStatus && gb28181DeviceStatus.alarmStatus.length > 0" style="margin-top: 20px;">
+              <h4 style="margin-bottom: 10px;">报警设备状态</h4>
+              <el-table :data="gb28181DeviceStatus.alarmStatus" border style="width: 100%;">
+                <el-table-column prop="deviceId" label="设备ID" />
+                <el-table-column prop="dutyStatus" label="状态">
+                  <template #default="scope">
+                    <el-tag v-if="scope.row.dutyStatus === 'ONDUTY'" type="success">在位</el-tag>
+                    <el-tag v-else-if="scope.row.dutyStatus === 'OFFDUTY'" type="info">离岗</el-tag>
+                    <el-tag v-else-if="scope.row.dutyStatus === 'ALARM'" type="danger">报警</el-tag>
+                    <span v-else>{{ scope.row.dutyStatus }}</span>
+                  </template>
+                </el-table-column>
+              </el-table>
+            </div>
+
+            <!-- 扩展信息 -->
+            <div v-if="gb28181DeviceStatus.extraInfo && gb28181DeviceStatus.extraInfo.length > 0" style="margin-top: 20px;">
+              <h4 style="margin-bottom: 10px;">扩展信息</h4>
+              <div v-for="(info, index) in gb28181DeviceStatus.extraInfo" :key="index" class="extra-info-item">
+                {{ info }}
+              </div>
+            </div>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+      <div class="dialog-footer" style="margin-top: 20px;">
+        <el-button @click="gb28181DeviceInfoDialogVisible = false">关闭</el-button>
+        <el-button type="primary" @click="handleRefreshCurrentTab" :loading="gb28181DeviceInfoLoading" icon="Refresh">刷新</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -2807,14 +3153,14 @@ import {
   startGb28181Play, stopGb28181Play,
   startJt1078Play, stopJt1078Play
 } from "@/api/qs/zlm";
-import {DocumentCopy, InfoFilled, Refresh, Sunny, Moon, SwitchButton, CircleClose, Position, Plus, Delete, WindPower, List, Grid, CircleCheck, Picture, VideoCamera, MapLocation, Monitor, More, ArrowDown, Clock, Camera, Cpu, Histogram, Bell, Lock, Key, Timer, Place, OfficeBuilding, CollectionTag, Link, Medal, SetUp, Box, Connection, Odometer, Files, TrendCharts, Tools, Lightning, Warning} from '@element-plus/icons-vue'
+import {DocumentCopy, InfoFilled, Refresh, Sunny, Moon, SwitchButton, CircleClose, Position, Plus, Delete, WindPower, List, Grid, CircleCheck, Picture, VideoCamera, MapLocation, Monitor, More, ArrowDown, Clock, Camera, Cpu, Histogram, Bell, Lock, Key, Timer, Place, OfficeBuilding, CollectionTag, Link, Medal, SetUp, Box, Connection, Odometer, Files, TrendCharts, Tools, Lightning, Warning, Loading} from '@element-plus/icons-vue'
 import StreamDropdown from "@/components/Channel/streamDropdown.vue";
 import MediaInfo from "@/components/Channel/mediaInfo.vue";
 import SelectMapPosition from '@/components/SelectMapPosition';
 import ChannelCode from '@/views/components/common/channelCode.vue';
 import DeviceSnapshotDialog from '@/components/DeviceSnapshotDialog/index.vue';
 import {getOnvifDeviceList, onvifLogin} from "@/api/qs/onvif";
-import {getAllDevices, getChannelsByDeviceId} from "@/api/qs/gb28181";
+import {getAllDevices, getChannelsByDeviceId, refreshDevice, rebootGb28181Device, recordCmd, queryDeviceStatus, queryDeviceInfo} from "@/api/qs/gb28181";
 import type {Gb28181Device, Gb28181Channel} from "@/types/api/qs/gb28181";
 import {getAllDevice} from "@/api/qs/jt1078";
 import type {Jt1078Device} from "@/types/api/qs/jt1078";
@@ -2853,6 +3199,11 @@ const streamUris = ref<string>([])
 const gb28181DeviceList = ref<Gb28181Device[]>([])
 const gb28181ChannelList = ref<Gb28181Channel[]>([])
 const jt1078DeviceList = ref<Jt1078Device[]>([])
+
+// GB28181设备刷新进度
+const refreshProgressDialogVisible = ref(false)
+const refreshProgress = ref(0)
+const refreshProgressColor = 'var(--el-color-primary)'
 
 // 播放
 const easyPlayerOpen = ref(false)
@@ -3194,7 +3545,7 @@ function handleUpdate(row: QsDevice) {
 
     // 大华主动上线
     if (form.value.type === '9' && form.value.onlineType === '2') {
-      listDaHusDevice().then((res) => {
+      listDaHuaDevice().then((res) => {
         res.data.forEach((item) => {
           item.deviceId = "device_" + item.deviceId
         })
@@ -3496,7 +3847,7 @@ const haikangIsupDeviceCodeChange = (e: string) => {
  */
 const onlineTypeChange = (e: string) => {
   if (e === '2') {
-    listDaHusDevice().then((res: any) => {
+    listDaHuaDevice().then((res: any) => {
       res.data.forEach((item) => {
         item.deviceId = "device_" + item.deviceId
         if (item.deviceCode === form.value.deviceCode) {
@@ -4258,6 +4609,9 @@ const handleMoreAction = (command: string, row: QsDevice) => {
     case 'delete':
       handleDelete(row);
       break;
+    case 'refresh':
+      handleRefreshDevice(row);
+      break;
     case 'timeSync':
       if (row.deviceStatus !== 'ON') {
         proxy.$modal.msgWarning('设备离线，无法校时');
@@ -4286,6 +4640,13 @@ const handleMoreAction = (command: string, row: QsDevice) => {
       }
       handleReboot(row);
       break;
+    case 'recordControl':
+      if (row.deviceStatus !== 'ON') {
+        proxy.$modal.msgWarning('设备离线，无法进行录像控制');
+        return;
+      }
+      handleRecordControl(row);
+      break;
     case 'downloadRecord':
       if (row.deviceStatus !== 'ON') {
         proxy.$modal.msgWarning('设备离线，无法下载录像');
@@ -4293,6 +4654,60 @@ const handleMoreAction = (command: string, row: QsDevice) => {
       }
       openDownloadRecordDialog(row);
       break;
+  }
+}
+
+// 刷新设备状态和通道（GB28181）
+const handleRefreshDevice = async (row: QsDevice) => {
+  if (!row.gbDeviceId) {
+    proxy.$modal.msgError('设备未配置国标设备ID');
+    return;
+  }
+
+  try {
+    // 设置刷新状态
+    row.refreshing = true;
+    refreshProgress.value = 0;
+    refreshProgressDialogVisible.value = true;
+
+    // 模拟进度条跳动
+    const progressInterval = setInterval(() => {
+      if (refreshProgress.value < 90) {
+        refreshProgress.value += Math.floor(Math.random() * 10) + 1;
+      }
+    }, 300);
+
+    // 调用刷新接口
+    const response = await refreshDevice(row.gbDeviceId);
+
+    // 清除进度条定时器
+    clearInterval(progressInterval);
+
+    if (response.code === 200) {
+      // 设置为100%
+      refreshProgress.value = 100;
+
+      // 延迟关闭对话框，让用户看到100%
+      setTimeout(() => {
+        refreshProgressDialogVisible.value = false;
+        proxy.$modal.msgSuccess('刷新成功');
+        // 重新获取国标设备列表，更新通道信息
+        getAllDevices().then((res) => {
+          gb28181DeviceList.value = res.data;
+        });
+        // 刷新设备列表
+        getList();
+      }, 2000);
+    } else {
+      refreshProgressDialogVisible.value = false;
+      proxy.$modal.msgError(response.msg || '刷新失败');
+    }
+  } catch (error) {
+    console.error('刷新失败:', error);
+    refreshProgressDialogVisible.value = false;
+    proxy.$modal.msgError('刷新失败');
+  } finally {
+    row.refreshing = false;
   }
 }
 
@@ -4332,7 +4747,7 @@ const handleCapture = async (row: QsDevice) => {
   }
 }
 
-// 重启设备（支持海康/大华/海康ISUP）
+// 重启设备（支持海康/大华/海康ISUP/GB28181）
 const handleReboot = async (row: QsDevice) => {
   try {
     await proxy.$modal.confirm(`是否确认重启设备"${row.deviceName}"？`);
@@ -4348,6 +4763,13 @@ const handleReboot = async (row: QsDevice) => {
     } else if (row.type === '9') {
       // 大华设备
       response = await rebootDaHuaDevice(row.id!);
+    } else if (row.type === '12') {
+      // GB28181 设备
+      if (!row.gbDeviceId) {
+        proxy.$modal.msgError('设备未配置国标设备ID');
+        return;
+      }
+      response = await rebootGb28181Device(row.gbDeviceId);
     } else {
       proxy.$modal.msgError('不支持的设备类型');
       return;
@@ -4365,6 +4787,183 @@ const handleReboot = async (row: QsDevice) => {
     }
   }
 }
+
+// 录像控制对话框
+const recordDialogVisible = ref(false);
+const recordDialogForm = ref({
+  device: null as QsDevice | null,
+  channelId: '',
+  recordCmd: '1',
+  streamNumber: 0
+});
+const gbChannelsList = ref<Gb28181Channel[]>([]);
+
+// GB28181设备信息对话框
+const gb28181DeviceInfoDialogVisible = ref(false);
+const gb28181DeviceInfoTabActive = ref('deviceInfo');
+const gb28181DeviceInfoLoading = ref(false);
+const gb28181DeviceInfo = ref({
+  deviceId: '',
+  cmdType: '',
+  sn: '',
+  deviceName: '',
+  result: '',
+  manufacturer: '',
+  model: '',
+  firmware: '',
+  channel: null as number | null,
+  extraInfo: [] as string[]
+});
+const gb28181DeviceStatus = ref({
+  deviceId: '',
+  cmdType: '',
+  sn: '',
+  result: '',
+  online: '',
+  status: '',
+  reason: '',
+  encode: '',
+  record: '',
+  deviceTime: '',
+  alarmStatus: [] as Array<{ deviceId: string; dutyStatus: string }>,
+  extraInfo: [] as string[]
+});
+
+
+// 查询设备信息数据
+const queryDeviceInfoData = async () => {
+  if (!currentDeviceRow.value?.gbDeviceId) {
+    proxy.$modal.msgError('设备未配置国标设备ID');
+    return;
+  }
+  gb28181DeviceInfoLoading.value = true;
+  try {
+    const response = await queryDeviceInfo(currentDeviceRow.value.gbDeviceId);
+    if (response.code === 200 && response.data) {
+      gb28181DeviceInfo.value = {
+        deviceId: response.data.deviceId || '',
+        cmdType: response.data.cmdType || '',
+        sn: response.data.sn || '',
+        deviceName: response.data.deviceName || '',
+        result: response.data.result || '',
+        manufacturer: response.data.manufacturer || '',
+        model: response.data.model || '',
+        firmware: response.data.firmware || '',
+        channel: response.data.channel || null,
+        extraInfo: response.data.extraInfo || []
+      };
+    } else {
+      proxy.$modal.msgError(response.msg || '查询设备信息失败');
+    }
+  } catch (error) {
+    console.error('查询设备信息失败:', error);
+    proxy.$modal.msgError('查询设备信息失败');
+  } finally {
+    gb28181DeviceInfoLoading.value = false;
+  }
+};
+
+// 查询设备状态数据
+const queryDeviceStatusData = async () => {
+  if (!currentDeviceRow.value?.gbDeviceId) {
+    proxy.$modal.msgError('设备未配置国标设备ID');
+    return;
+  }
+  gb28181DeviceInfoLoading.value = true;
+  try {
+    const response = await queryDeviceStatus(currentDeviceRow.value.gbDeviceId);
+    if (response.code === 200 && response.data) {
+      gb28181DeviceStatus.value = {
+        deviceId: response.data.deviceId || '',
+        cmdType: response.data.cmdType || '',
+        sn: response.data.sn || '',
+        result: response.data.result || '',
+        online: response.data.online || '',
+        status: response.data.status || '',
+        reason: response.data.reason || '',
+        encode: response.data.encode || '',
+        record: response.data.record || '',
+        deviceTime: response.data.deviceTime || '',
+        alarmStatus: response.data.alarmStatus || [],
+        extraInfo: response.data.extraInfo || []
+      };
+    } else {
+      proxy.$modal.msgError(response.msg || '查询设备状态失败');
+    }
+  } catch (error) {
+    console.error('查询设备状态失败:', error);
+    proxy.$modal.msgError('查询设备状态失败');
+  } finally {
+    gb28181DeviceInfoLoading.value = false;
+  }
+};
+
+// 标签页切换处理
+const handleTabChange = (tabName: string) => {
+  if (tabName === 'deviceInfo') {
+    queryDeviceInfoData();
+  } else if (tabName === 'deviceStatus') {
+    queryDeviceStatusData();
+  }
+};
+
+// 刷新当前标签页
+const handleRefreshCurrentTab = () => {
+  if (gb28181DeviceInfoTabActive.value === 'deviceInfo') {
+    queryDeviceInfoData();
+  } else if (gb28181DeviceInfoTabActive.value === 'deviceStatus') {
+    queryDeviceStatusData();
+  }
+};
+
+// 打开录像控制对话框
+const handleRecordControl = async (row: QsDevice) => {
+  if (row.type !== '12') {
+    proxy.$modal.msgError('仅支持GB28181设备的录像控制');
+    return;
+  }
+  if (!row.gbDeviceId) {
+    proxy.$modal.msgError('设备未配置国标设备ID');
+    return;
+  }
+  if (!row.gbChannelId) {
+    proxy.$modal.msgError('设备未配置国标通道ID');
+    return;
+  }
+  // 直接使用设备中已保存的 gbChannelId
+  recordDialogForm.value = {
+    device: row,
+    channelId: row.gbChannelId,
+    recordCmd: '1',
+    streamNumber: 0
+  };
+  recordDialogVisible.value = true;
+};
+
+// 提交录像控制
+const submitRecordControl = async () => {
+  if (!recordDialogForm.value.device || !recordDialogForm.value.channelId) {
+    proxy.$modal.msgError('请选择设备和通道');
+    return;
+  }
+  try {
+    const response = await recordCmd(
+      recordDialogForm.value.device.gbDeviceId!,
+      recordDialogForm.value.channelId,
+      recordDialogForm.value.recordCmd,
+      recordDialogForm.value.streamNumber
+    );
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('录像控制命令已发送');
+      recordDialogVisible.value = false;
+    } else {
+      proxy.$modal.msgError(response.msg || '录像控制失败');
+    }
+  } catch (error) {
+    console.error('录像控制失败:', error);
+    proxy.$modal.msgError('录像控制失败');
+  }
+};
 
 // 设备信息对话框中的重启按钮处理
 const handleDeviceInfoReboot = async () => {
@@ -4782,6 +5381,7 @@ const openDeviceInfoDialog = (row: QsDevice) => {
   const isHaikangSdkDevice = row.type === '7';
   const isHaikangIsupDevice = row.type === '8';
   const isDaHuaDevice = row.type === '9';
+  const isGB28181Device = row.type === '12';
   
   if (isHaikangSdkDevice) {
     // 打开海康SDK设备信息弹窗
@@ -4895,7 +5495,7 @@ const openDeviceInfoDialog = (row: QsDevice) => {
     });
     haikangIsupDeviceInfoDialogVisible.value = true;
     handleRefreshHaikangIsupDeviceInfo();
-  } else {
+  } else if (isDaHuaDevice) {
     // 打开大华设备信息弹窗
     deviceInfoTabActive.value = 'deviceInfo';
     Object.assign(deviceInfo, {
@@ -4960,6 +5560,37 @@ const openDeviceInfoDialog = (row: QsDevice) => {
     });
     deviceInfoDialogVisible.value = true;
     handleRefreshDeviceInfo();
+  } else if (isGB28181Device) {
+    // 打开GB28181设备信息弹窗
+    gb28181DeviceInfoTabActive.value = 'deviceInfo';
+    Object.assign(gb28181DeviceInfo, {
+      deviceId: '',
+      cmdType: '',
+      sn: '',
+      deviceName: '',
+      result: '',
+      manufacturer: '',
+      model: '',
+      firmware: '',
+      channel: null,
+      extraInfo: []
+    });
+    Object.assign(gb28181DeviceStatus, {
+      deviceId: '',
+      cmdType: '',
+      sn: '',
+      result: '',
+      online: '',
+      status: '',
+      reason: '',
+      encode: '',
+      record: '',
+      deviceTime: '',
+      alarmStatus: [],
+      extraInfo: []
+    });
+    gb28181DeviceInfoDialogVisible.value = true;
+    queryDeviceInfoData();
   }
 }
 
@@ -6204,6 +6835,110 @@ watch(easyPlayerOpen, (newVal) => {
 
 .device-dropdown-menu .el-dropdown-menu__item .el-icon {
   font-size: 16px !important;
+}
+
+/* 刷新进度对话框样式 */
+.refresh-progress-dialog {
+  .el-dialog__header {
+    padding: 20px 24px 10px;
+    border-bottom: 1px solid var(--el-border-color-lighter);
+    margin: 0 !important;
+  }
+
+  .dialog-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .header-icon {
+    animation: rotateIcon 3s linear infinite;
+  }
+
+  .header-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--el-text-color-primary);
+  }
+
+  .el-dialog__body {
+    padding: 24px;
+  }
+
+  .refresh-progress-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .progress-wrapper {
+    display: flex;
+    justify-content: center;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .progress-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .progress-text {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: var(--el-text-color-regular);
+    margin: 0;
+  }
+
+  .text-icon {
+    animation: spin 1.5s linear infinite;
+    color: var(--el-color-primary);
+  }
+
+  .progress-percentage {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--el-color-primary);
+    margin: 0;
+    text-shadow: 0 2px 8px rgba(64, 158, 255, 0.2);
+  }
+
+  .progress-tip {
+    font-size: 13px;
+    color: var(--el-text-color-secondary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    &.success {
+      color: var(--el-color-success);
+    }
+
+    .success-icon {
+      color: var(--el-color-success);
+      font-size: 16px;
+    }
+  }
+}
+
+@keyframes rotateIcon {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
 }
 </style>
 
@@ -9623,6 +10358,164 @@ html.dark {
   :deep(.glass-dialog.device-info-dialog .el-table__header-wrapper th) {
     background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%) !important;
   }
+}
+
+/* === GB28181设备刷新进度对话框 - 居中版本 === */
+:deep(.refresh-progress-dialog .el-dialog__body) {
+  padding: 0;
+}
+
+.refresh-progress-center {
+  padding: 36px 24px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fff;
+  border-radius: 12px;
+}
+
+.refresh-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.refresh-icon-wrapper {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  background: var(--el-color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(var(--el-color-primary-rgb), 0.25);
+}
+
+.refresh-icon {
+  color: #fff;
+  font-size: 22px;
+}
+
+.refresh-icon.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.refresh-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.progress-circle-wrapper {
+  position: relative;
+  margin-bottom: 28px;
+}
+
+.progress-circle-wrapper :deep(.el-progress-circle__path) {
+  transition: stroke-dashoffset 0.3s ease;
+}
+
+.progress-percent {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.percent-num {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--el-color-primary);
+}
+
+.percent-unit {
+  font-size: 18px;
+  font-weight: 600;
+  color: #909399;
+}
+
+.refresh-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.4;
+  transition: all 0.3s ease;
+}
+
+.step-item.active {
+  opacity: 1;
+}
+
+.step-item.completed {
+  opacity: 1;
+}
+
+.step-icon {
+  font-size: 20px;
+  color: #c0c4cc;
+  transition: all 0.3s ease;
+}
+
+.step-item.active .step-icon,
+.step-item.completed .step-icon {
+  color: var(--el-color-primary);
+}
+
+.step-item.completed .step-icon {
+  color: #67c23a;
+}
+
+.step-text {
+  font-size: 12px;
+  color: #909399;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.step-item.active .step-text,
+.step-item.completed .step-text {
+  color: #606266;
+}
+
+.step-divider {
+  width: 32px;
+  height: 2px;
+  background: #e4e7ed;
+  border-radius: 1px;
+  transition: all 0.3s ease;
+}
+
+.refresh-tip {
+  text-align: center;
+  padding-top: 4px;
+}
+
+.tip-content {
+  margin: 0;
+  font-size: 13px;
+  color: #909399;
+  font-weight: 400;
 }
 </style>
 
