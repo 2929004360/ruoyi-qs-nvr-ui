@@ -110,3 +110,25 @@ export function queryDeviceInfo(deviceId: string): Promise<AjaxResult<any>> {
     method: 'get'
   })
 }
+
+/**
+ * 订阅设备目录
+ * @param qsDeviceId QsDevice主键ID
+ */
+export function subscribeCatalog(qsDeviceId: number): Promise<AjaxResult<any>> {
+  return request({
+    url: `/gb28181/device/subscribe/catalog/${qsDeviceId}`,
+    method: 'get'
+  })
+}
+
+/**
+ * 取消订阅设备目录
+ * @param qsDeviceId QsDevice主键ID
+ */
+export function unsubscribeCatalog(qsDeviceId: number): Promise<AjaxResult<any>> {
+  return request({
+    url: `/gb28181/device/unsubscribe/catalog/${qsDeviceId}`,
+    method: 'get'
+  })
+}

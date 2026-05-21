@@ -111,6 +111,12 @@ export interface QsDevice extends BaseEntity {
   jtPlateNo?: string;
   /** JT1078-车牌颜色 */
   jtPlateColor?: string;
+  /** 目录订阅状态 0=未订阅 1=已订阅 */
+  subscribeCatalogStatus?: number;
+  /** 报警订阅状态 0=未订阅 1=已订阅 */
+  subscribeAlarmStatus?: number;
+  /** 订阅时间 */
+  subscribeTime?: string;
 }
 
 /**

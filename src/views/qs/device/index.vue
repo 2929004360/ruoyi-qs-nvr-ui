@@ -239,6 +239,9 @@
                   <el-dropdown-item command="edit" icon="Edit">编辑</el-dropdown-item>
                   <el-dropdown-item command="viewSnapshots" icon="Picture">查看抓图</el-dropdown-item>
                   <el-dropdown-item command="delete" icon="Delete" class="is-danger">删除</el-dropdown-item>
+                  <!-- 目录订阅/取消订阅（GB28181） -->
+                  <el-dropdown-item v-if="scope.row.type === '12' && scope.row.subscribeCatalogStatus !== 1" :disabled="scope.row.deviceStatus !== 'ON'" command="subscribeCatalog" icon="Connection">目录订阅</el-dropdown-item>
+                  <el-dropdown-item v-if="scope.row.type === '12' && scope.row.subscribeCatalogStatus === 1" :disabled="scope.row.deviceStatus !== 'ON'" command="unsubscribeCatalog" icon="SwitchButton">取消目录订阅</el-dropdown-item>
                   <!-- 设备校时（海康/大华/海康ISUP） -->
                   <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
                   <!-- 设备信息（大华/海康/海康ISUP/GB28181） -->
@@ -404,6 +407,9 @@
                       <el-dropdown-item command="edit" icon="Edit">编辑</el-dropdown-item>
                       <el-dropdown-item command="viewSnapshots" icon="Picture">查看抓图</el-dropdown-item>
                       <el-dropdown-item command="delete" icon="Delete" class="is-danger">删除</el-dropdown-item>
+                      <!-- 目录订阅/取消订阅（GB28181） -->
+                      <el-dropdown-item v-if="item.type === '12' && item.subscribeCatalogStatus !== 1" :disabled="item.deviceStatus !== 'ON'" command="subscribeCatalog" icon="Connection">目录订阅</el-dropdown-item>
+                      <el-dropdown-item v-if="item.type === '12' && item.subscribeCatalogStatus === 1" :disabled="item.deviceStatus !== 'ON'" command="unsubscribeCatalog" icon="SwitchButton">取消目录订阅</el-dropdown-item>
                       <!-- 设备校时（海康/大华/海康ISUP） -->
                       <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
                       <!-- 设备信息（大华/海康/海康ISUP/GB28181） -->
@@ -684,7 +690,7 @@
                     <el-switch v-model="form.enableMp4" active-value="1" inactive-value="0" />
                   </el-form-item>
                 </el-col>
-                <el-col :span="8" v-if="form.type !== '12' && form.type !== '14'">
+                <el-col :span="8">
                   <el-form-item label="无人观看" prop="enableDisableNoneReader">
                     <el-switch v-model="form.enableDisableNoneReader" active-value="1" inactive-value="0" />
                   </el-form-item>
@@ -2829,7 +2835,7 @@
     </el-dialog>
 
     <!-- GB28181设备信息对话框 -->
-    <el-dialog title="GB28181设备信息" v-model="gb28181DeviceInfoDialogVisible" width="850px" append-to-body class="glass-dialog device-info-dialog">
+    <el-dialog title="设备信息" v-model="gb28181DeviceInfoDialogVisible" width="850px" append-to-body class="glass-dialog device-info-dialog">
       <el-tabs v-model="gb28181DeviceInfoTabActive" type="border-card" @tab-change="handleTabChange">
         <!-- 设备信息标签页 -->
         <el-tab-pane label="设备信息" name="deviceInfo">
@@ -3160,7 +3166,7 @@ import SelectMapPosition from '@/components/SelectMapPosition';
 import ChannelCode from '@/views/components/common/channelCode.vue';
 import DeviceSnapshotDialog from '@/components/DeviceSnapshotDialog/index.vue';
 import {getOnvifDeviceList, onvifLogin} from "@/api/qs/onvif";
-import {getAllDevices, getChannelsByDeviceId, refreshDevice, rebootGb28181Device, recordCmd, queryDeviceStatus, queryDeviceInfo} from "@/api/qs/gb28181";
+import {getAllDevices, getChannelsByDeviceId, refreshDevice, rebootGb28181Device, recordCmd, queryDeviceStatus, queryDeviceInfo, subscribeCatalog, unsubscribeCatalog} from "@/api/qs/gb28181";
 import type {Gb28181Device, Gb28181Channel} from "@/types/api/qs/gb28181";
 import {getAllDevice} from "@/api/qs/jt1078";
 import type {Jt1078Device} from "@/types/api/qs/jt1078";
@@ -4597,6 +4603,42 @@ const handleWiperControl = async (value) => {
 
 // ==================== 大华设备校时 ====================
 
+// 目录订阅
+const handleSubscribeCatalog = async (row: QsDevice) => {
+  if (row.deviceStatus !== 'ON') {
+    proxy.$modal.msgWarning('设备离线，无法订阅目录');
+    return;
+  }
+
+  try {
+    await subscribeCatalog(row.id!);
+    proxy.$modal.msgSuccess('目录订阅成功');
+    // 订阅成功后更新本地状态
+    row.subscribeCatalogStatus = 1;
+  } catch (error) {
+    console.error('目录订阅失败:', error);
+    proxy.$modal.msgError('目录订阅失败');
+  }
+};
+
+// 取消目录订阅
+const handleUnsubscribeCatalog = async (row: QsDevice) => {
+  if (row.deviceStatus !== 'ON') {
+    proxy.$modal.msgWarning('设备离线，无法取消订阅目录');
+    return;
+  }
+
+  try {
+    await unsubscribeCatalog(row.id!);
+    proxy.$modal.msgSuccess('取消目录订阅成功');
+    // 取消订阅后更新本地状态
+    row.subscribeCatalogStatus = 0;
+  } catch (error) {
+    console.error('取消目录订阅失败:', error);
+    proxy.$modal.msgError('取消目录订阅失败');
+  }
+};
+
 // 更多操作处理
 const handleMoreAction = (command: string, row: QsDevice) => {
   switch (command) {
@@ -4653,6 +4695,12 @@ const handleMoreAction = (command: string, row: QsDevice) => {
         return;
       }
       openDownloadRecordDialog(row);
+      break;
+    case 'subscribeCatalog':
+      handleSubscribeCatalog(row);
+      break;
+    case 'unsubscribeCatalog':
+      handleUnsubscribeCatalog(row);
       break;
   }
 }
