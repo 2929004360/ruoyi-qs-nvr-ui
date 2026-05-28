@@ -1027,6 +1027,96 @@
                     </el-button>
                   </div>
                 </el-tab-pane>
+                
+                <!-- 看守位控制 -->
+                <el-tab-pane label="看守位">
+                  <div class="control-panel">
+                    <el-form :model="homePositionForm" label-width="100px" style="margin-top: 20px;">
+                      <el-form-item label="预置点编号">
+                        <el-input-number v-model="homePositionForm.presetId" :min="1" :max="255" style="width: 100%;" />
+                      </el-form-item>
+                      <el-form-item label="停留时间(秒)">
+                        <el-input-number v-model="homePositionForm.dwellTime" :min="0" style="width: 100%;" />
+                      </el-form-item>
+                    </el-form>
+                    <div class="button-group" style="margin-top: 20px;">
+                      <el-button type="primary" @click="handleQueryHomePosition" icon="Refresh">
+                        查询
+                      </el-button>
+                      <el-button type="success" @click="handleSetHomePosition" icon="Check">
+                        设置
+                      </el-button>
+                      <el-button type="warning" @click="handleHomePositionControl" icon="SwitchButton">
+                        调用
+                      </el-button>
+                    </div>
+                  </div>
+                </el-tab-pane>
+                
+                <!-- 巡航轨迹管理 -->
+                <el-tab-pane label="巡航轨迹">
+                  <div class="control-panel">
+                    <el-form :model="cruiseTrackForm" label-width="100px" style="margin-top: 20px;">
+                      <el-form-item label="轨迹编号">
+                        <el-input-number v-model="cruiseTrackForm.trackId" :min="0" style="width: 100%;" />
+                      </el-form-item>
+                    </el-form>
+                    <div class="button-group" style="margin-top: 20px;">
+                      <el-button type="primary" @click="handleQueryCruiseTrackList" icon="Refresh">
+                        查询列表
+                      </el-button>
+                      <el-button type="success" @click="handleQueryCruiseTrack" icon="Search">
+                        查询详情
+                      </el-button>
+                      <el-button type="warning" @click="handleStartCruise" icon="VideoPlay">
+                        开始巡航
+                      </el-button>
+                      <el-button type="danger" @click="handleStopCruise" icon="VideoPause">
+                        停止巡航
+                      </el-button>
+                    </div>
+                    <div v-if="cruiseTrackList.length > 0" style="margin-top: 20px;">
+                      <div class="panel-section-title">巡航轨迹列表:</div>
+                      <el-table :data="cruiseTrackList" border size="small" style="width: 100%;">
+                        <el-table-column prop="id" label="编号" width="100" />
+                        <el-table-column prop="name" label="名称" />
+                      </el-table>
+                    </div>
+                  </div>
+                </el-tab-pane>
+                
+                <!-- PTZ精准控制 -->
+                <el-tab-pane label="精准控制">
+                  <div class="control-panel">
+                    <el-form :model="ptzPreciseForm" label-width="100px" style="margin-top: 20px;">
+                      <el-form-item label="水平位置(0-359)">
+                        <el-input-number v-model="ptzPreciseForm.pan" :min="0" :max="359" style="width: 100%;" />
+                      </el-form-item>
+                      <el-form-item label="垂直位置(0-359)">
+                        <el-input-number v-model="ptzPreciseForm.tilt" :min="0" :max="359" style="width: 100%;" />
+                      </el-form-item>
+                      <el-form-item label="变倍(0-15)">
+                        <el-input-number v-model="ptzPreciseForm.zoom" :min="0" :max="15" style="width: 100%;" />
+                      </el-form-item>
+                    </el-form>
+                    <div class="button-group" style="margin-top: 20px;">
+                      <el-button type="primary" @click="handleQueryPTZPosition" icon="Refresh">
+                        查询位置
+                      </el-button>
+                      <el-button type="success" @click="handlePtzPreciseControl" icon="Connection">
+                        执行控制
+                      </el-button>
+                    </div>
+                    <div v-if="ptzPosition.pan !== undefined" style="margin-top: 20px;">
+                      <div class="panel-section-title">当前PTZ位置:</div>
+                      <el-descriptions :column="3" border size="small">
+                        <el-descriptions-item label="水平位置">{{ ptzPosition.pan }}</el-descriptions-item>
+                        <el-descriptions-item label="垂直位置">{{ ptzPosition.tilt }}</el-descriptions-item>
+                        <el-descriptions-item label="变倍">{{ ptzPosition.zoom }}</el-descriptions-item>
+                      </el-descriptions>
+                    </div>
+                  </div>
+                </el-tab-pane>
               </el-tabs>
             </div>
             <!-- 对于不支持云台的设备，显示提示信息 -->
@@ -3145,10 +3235,50 @@
             </div>
           </div>
         </el-tab-pane>
+        <!-- 存储卡管理标签页 -->
+        <el-tab-pane label="存储卡管理" name="sdCard">
+          <div class="device-info-dashboard" v-loading="gb28181DeviceInfoLoading">
+            <div class="dashboard-header">
+              <div class="dashboard-title">
+                <el-icon class="dashboard-icon"><SetUp /></el-icon>
+                <span>存储卡管理</span>
+              </div>
+            </div>
+            
+            <el-form :model="gb28181SdCardForm" label-width="120px" class="data-form" style="margin-top: 20px; padding: 20px;">
+              <el-form-item label="SD卡编号">
+                <el-input-number v-model="gb28181SdCardForm.sdCardId" :min="0" style="width: 100%;" />
+                <div style="font-size: 12px; color: #909399; margin-top: 5px;">0 表示所有存储卡</div>
+              </el-form-item>
+            </el-form>
+            
+            <div v-if="gb28181SdCardInfo && Object.keys(gb28181SdCardInfo).length > 0" style="margin-top: 20px; padding: 0 20px;">
+              <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">存储卡状态:</div>
+              <el-descriptions :column="2" border size="small">
+                <el-descriptions-item label="状态" v-if="gb28181SdCardInfo.status !== undefined">
+                  <el-tag :type="gb28181SdCardInfo.status === 1 ? 'success' : 'info'">
+                    {{ gb28181SdCardInfo.statusDesc || (gb28181SdCardInfo.status === 1 ? '正常' : '异常') }}
+                  </el-tag>
+                </el-descriptions-item>
+                <el-descriptions-item label="总容量" v-if="gb28181SdCardInfo.totalSpace !== undefined">
+                  {{ gb28181SdCardInfo.totalSpace }}
+                </el-descriptions-item>
+                <el-descriptions-item label="可用空间" v-if="gb28181SdCardInfo.freeSpace !== undefined">
+                  {{ gb28181SdCardInfo.freeSpace }}
+                </el-descriptions-item>
+                <el-descriptions-item label="已用空间" v-if="gb28181SdCardInfo.usedSpace !== undefined">
+                  {{ gb28181SdCardInfo.usedSpace }}
+                </el-descriptions-item>
+              </el-descriptions>
+            </div>
+          </div>
+        </el-tab-pane>
       </el-tabs>
       <div class="dialog-footer" style="margin-top: 20px;">
         <el-button @click="gb28181DeviceInfoDialogVisible = false">关闭</el-button>
         <el-button type="primary" @click="handleRefreshCurrentTab" :loading="gb28181DeviceInfoLoading" icon="Refresh">刷新</el-button>
+        <el-button type="primary" v-if="gb28181DeviceInfoTabActive === 'sdCard'" @click="handleQueryGb28181SdCardStatus" :loading="gb28181DeviceInfoLoading" icon="Refresh">查询状态</el-button>
+        <el-button type="danger" v-if="gb28181DeviceInfoTabActive === 'sdCard'" @click="handleFormatGb28181SdCard" :loading="gb28181DeviceInfoLoading" icon="Tools">格式化</el-button>
       </div>
     </el-dialog>
   </div>
@@ -3261,14 +3391,14 @@ import {
   startGb28181Play, stopGb28181Play,
   startJt1078Play, stopJt1078Play
 } from "@/api/qs/zlm";
-import {DocumentCopy, InfoFilled, Refresh, Sunny, Moon, SwitchButton, CircleClose, Position, Plus, Delete, WindPower, List, Grid, CircleCheck, Picture, VideoCamera, MapLocation, Monitor, More, ArrowDown, Clock, Camera, Cpu, Histogram, Bell, Lock, Key, Timer, Place, OfficeBuilding, CollectionTag, Link, Medal, SetUp, Box, Connection, Odometer, Files, TrendCharts, Tools, Lightning, Warning, Loading, Search, Setting} from '@element-plus/icons-vue'
+import {DocumentCopy, InfoFilled, Refresh, Sunny, Moon, SwitchButton, CircleClose, Position, Plus, Delete, WindPower, List, Grid, CircleCheck, Picture, VideoCamera, MapLocation, Monitor, More, ArrowDown, Clock, Camera, Cpu, Histogram, Bell, Lock, Key, Timer, Place, OfficeBuilding, CollectionTag, Link, Medal, SetUp, Box, Connection, Odometer, Files, TrendCharts, Tools, Lightning, Warning, Loading, Search, Setting, VideoPlay, VideoPause} from '@element-plus/icons-vue'
 import StreamDropdown from "@/components/Channel/streamDropdown.vue";
 import MediaInfo from "@/components/Channel/mediaInfo.vue";
 import SelectMapPosition from '@/components/SelectMapPosition';
 import ChannelCode from '@/views/components/common/channelCode.vue';
 import DeviceSnapshotDialog from '@/components/DeviceSnapshotDialog/index.vue';
 import {getOnvifDeviceList, onvifLogin} from "@/api/qs/onvif";
-import {getAllDevices, getChannelsByDeviceId, refreshDevice, rebootGb28181Device, recordCmd, queryDeviceStatus, queryDeviceInfo, subscribeCatalog, unsubscribeCatalog, queryDeviceConfig, updateDeviceConfig} from "@/api/qs/gb28181";
+import {getAllDevices, getChannelsByDeviceId, refreshDevice, rebootGb28181Device, recordCmd, queryDeviceStatus, queryDeviceInfo, subscribeCatalog, unsubscribeCatalog, queryDeviceConfig, updateDeviceConfig, queryHomePosition, updateHomePosition, queryCruiseTrackList, queryCruiseTrack, queryPTZPosition, homePositionControl, ptzPreciseControl, startCruise, stopCruise, querySDCardStatus, formatSDCardControl} from "@/api/qs/gb28181";
 import type {Gb28181Device, Gb28181Channel} from "@/types/api/qs/gb28181";
 import {getAllDevice} from "@/api/qs/jt1078";
 import type {Jt1078Device} from "@/types/api/qs/jt1078";
@@ -3363,6 +3493,30 @@ const presetRules = {
 const lightOn = ref(false);
 const wiperOn = ref(false);
 
+// GB28181高级功能
+const homePositionForm = reactive({
+  presetId: 1,
+  dwellTime: 10
+});
+
+const cruiseTrackForm = reactive({
+  trackId: 0
+});
+
+const cruiseTrackList = ref([]);
+
+const ptzPreciseForm = reactive({
+  pan: 0,
+  tilt: 0,
+  zoom: 0
+});
+
+const ptzPosition = reactive({
+  pan: undefined as number | undefined,
+  tilt: undefined as number | undefined,
+  zoom: undefined as number | undefined
+});
+
 // 大华设备校时
 const timeSyncDialogVisible = ref(false);
 const timeSyncLoading = ref(false);
@@ -3431,6 +3585,11 @@ const sdCardInfo = reactive<DaHuaSDCardInfo>({
   success: false,
   exists: false
 });
+// GB28181 存储卡管理相关数据
+const gb28181SdCardForm = reactive({
+  sdCardId: 0
+});
+const gb28181SdCardInfo = reactive({});
 const bitrateInfo = reactive<DaHuaBitrateInfo>({
   success: false,
   channelBitrates: []
@@ -4806,6 +4965,227 @@ const handleWiperControl = async (value) => {
   }
 }
 
+// ==================== GB28181高级功能 ====================
+
+// 查询看守位
+const handleQueryHomePosition = async () => {
+  if (!deviceRow.value || !deviceRow.value.gbDeviceId) {
+    proxy.$modal.msgError('请先选择设备');
+    return;
+  }
+  try {
+    const res = await queryHomePosition(deviceRow.value.gbDeviceId, deviceRow.value.gbChannelId);
+    if (res.data) {
+      homePositionForm.presetId = res.data.presetId || 1;
+      homePositionForm.dwellTime = res.data.dwellTime || 10;
+      proxy.$modal.msgSuccess('查询看守位成功');
+    }
+  } catch (error) {
+    console.error('查询看守位失败:', error);
+    proxy.$modal.msgError('查询看守位失败');
+  }
+}
+
+// 设置看守位
+const handleSetHomePosition = async () => {
+  if (!deviceRow.value || !deviceRow.value.gbDeviceId) {
+    proxy.$modal.msgError('请先选择设备');
+    return;
+  }
+  try {
+    await updateHomePosition(deviceRow.value.gbDeviceId, deviceRow.value.gbChannelId, {
+      homePosition: {
+        presetId: homePositionForm.presetId,
+        dwellTime: homePositionForm.dwellTime
+      }
+    });
+    proxy.$modal.msgSuccess('设置看守位成功');
+  } catch (error) {
+    console.error('设置看守位失败:', error);
+    proxy.$modal.msgError('设置看守位失败');
+  }
+}
+
+// 调用看守位
+const handleHomePositionControl = async () => {
+  if (!deviceRow.value || !deviceRow.value.gbDeviceId) {
+    proxy.$modal.msgError('请先选择设备');
+    return;
+  }
+  try {
+    await homePositionControl(deviceRow.value.gbDeviceId, deviceRow.value.gbChannelId);
+    proxy.$modal.msgSuccess('调用看守位成功');
+  } catch (error) {
+    console.error('调用看守位失败:', error);
+    proxy.$modal.msgError('调用看守位失败');
+  }
+}
+
+// 查询巡航轨迹列表
+const handleQueryCruiseTrackList = async () => {
+  if (!deviceRow.value || !deviceRow.value.gbDeviceId) {
+    proxy.$modal.msgError('请先选择设备');
+    return;
+  }
+  try {
+    const res = await queryCruiseTrackList(deviceRow.value.gbDeviceId, deviceRow.value.gbChannelId);
+    if (res.data) {
+      cruiseTrackList.value = res.data;
+      proxy.$modal.msgSuccess('查询巡航轨迹列表成功');
+    }
+  } catch (error) {
+    console.error('查询巡航轨迹列表失败:', error);
+    proxy.$modal.msgError('查询巡航轨迹列表失败');
+  }
+}
+
+// 查询巡航轨迹详情
+const handleQueryCruiseTrack = async () => {
+  if (!deviceRow.value || !deviceRow.value.gbDeviceId) {
+    proxy.$modal.msgError('请先选择设备');
+    return;
+  }
+  if (cruiseTrackForm.trackId === null || cruiseTrackForm.trackId === undefined) {
+    proxy.$modal.msgWarning('请选择轨迹编号');
+    return;
+  }
+  try {
+    const res = await queryCruiseTrack(deviceRow.value.gbDeviceId, deviceRow.value.gbChannelId, cruiseTrackForm.trackId);
+    if (res.data) {
+      proxy.$modal.msgSuccess('查询巡航轨迹详情成功');
+    }
+  } catch (error) {
+    console.error('查询巡航轨迹详情失败:', error);
+    proxy.$modal.msgError('查询巡航轨迹详情失败');
+  }
+}
+
+// 查询PTZ位置
+const handleQueryPTZPosition = async () => {
+  if (!deviceRow.value || !deviceRow.value.gbDeviceId) {
+    proxy.$modal.msgError('请先选择设备');
+    return;
+  }
+  try {
+    const res = await queryPTZPosition(deviceRow.value.gbDeviceId, deviceRow.value.gbChannelId);
+    if (res.data) {
+      ptzPosition.pan = res.data.pan;
+      ptzPosition.tilt = res.data.tilt;
+      ptzPosition.zoom = res.data.zoom;
+      proxy.$modal.msgSuccess('查询PTZ位置成功');
+    }
+  } catch (error) {
+    console.error('查询PTZ位置失败:', error);
+    proxy.$modal.msgError('查询PTZ位置失败');
+  }
+}
+
+// PTZ精准控制
+const handlePtzPreciseControl = async () => {
+  if (!deviceRow.value || !deviceRow.value.gbDeviceId) {
+    proxy.$modal.msgError('请先选择设备');
+    return;
+  }
+  try {
+    await ptzPreciseControl(deviceRow.value.gbDeviceId, deviceRow.value.gbChannelId, {
+      pan: ptzPreciseForm.pan,
+      tilt: ptzPreciseForm.tilt,
+      zoom: ptzPreciseForm.zoom
+    });
+    proxy.$modal.msgSuccess('PTZ精准控制成功');
+  } catch (error) {
+    console.error('PTZ精准控制失败:', error);
+    proxy.$modal.msgError('PTZ精准控制失败');
+  }
+}
+
+// 开始巡航
+const handleStartCruise = async () => {
+  if (!deviceRow.value || !deviceRow.value.gbDeviceId) {
+    proxy.$modal.msgError('请先选择设备');
+    return;
+  }
+  try {
+    await startCruise(deviceRow.value.gbDeviceId, deviceRow.value.gbChannelId, cruiseTrackForm.trackId);
+    proxy.$modal.msgSuccess('开始巡航成功');
+  } catch (error) {
+    console.error('开始巡航失败:', error);
+    proxy.$modal.msgError('开始巡航失败');
+  }
+}
+
+// 停止巡航
+const handleStopCruise = async () => {
+  if (!deviceRow.value || !deviceRow.value.gbDeviceId) {
+    proxy.$modal.msgError('请先选择设备');
+    return;
+  }
+  try {
+    await stopCruise(deviceRow.value.gbDeviceId, deviceRow.value.gbChannelId, cruiseTrackForm.trackId);
+    proxy.$modal.msgSuccess('停止巡航成功');
+  } catch (error) {
+    console.error('停止巡航失败:', error);
+    proxy.$modal.msgError('停止巡航失败');
+  }
+}
+
+// 查询 GB28181 存储卡状态
+const handleQueryGb28181SdCardStatus = async () => {
+  if (!currentDeviceRow.value?.gbDeviceId) {
+    proxy.$modal.msgError('设备未配置国标设备ID');
+    return;
+  }
+  try {
+    const response = await querySDCardStatus(currentDeviceRow.value.gbDeviceId, currentDeviceRow.value.gbChannelId);
+    if (response.code === 200) {
+      Object.assign(gb28181SdCardInfo, response.data || {});
+      proxy.$modal.msgSuccess('查询存储卡状态成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '查询失败');
+    }
+  } catch (error) {
+    console.error('查询存储卡状态失败:', error);
+    proxy.$modal.msgError('查询存储卡状态失败');
+  }
+}
+
+// 格式化 GB28181 存储卡
+const handleFormatGb28181SdCard = async () => {
+  if (!currentDeviceRow.value?.gbDeviceId) {
+    proxy.$modal.msgError('设备未配置国标设备ID');
+    return;
+  }
+  
+  try {
+    await ElMessageBox.confirm(
+      '确定要格式化存储卡吗？此操作将清除所有数据！',
+      '警告',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    );
+    
+    const response = await formatSDCardControl(
+      currentDeviceRow.value.gbDeviceId, 
+      currentDeviceRow.value.gbChannelId, 
+      gb28181SdCardForm.sdCardId
+    );
+    
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('格式化存储卡成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '格式化失败');
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('格式化存储卡失败:', error);
+      proxy.$modal.msgError('格式化存储卡失败');
+    }
+  }
+}
+
 // ==================== 大华设备校时 ====================
 
 // 目录订阅
@@ -5272,6 +5652,8 @@ const handleTabChange = (tabName: string) => {
     queryDeviceInfoData();
   } else if (tabName === 'deviceStatus') {
     queryDeviceStatusData();
+  } else if (tabName === 'sdCard') {
+    handleQueryGb28181SdCardStatus();
   }
 };
 
@@ -5281,6 +5663,8 @@ const handleRefreshCurrentTab = () => {
     queryDeviceInfoData();
   } else if (gb28181DeviceInfoTabActive.value === 'deviceStatus') {
     queryDeviceStatusData();
+  } else if (gb28181DeviceInfoTabActive.value === 'sdCard') {
+    handleQueryGb28181SdCardStatus();
   }
 };
 
@@ -5957,6 +6341,10 @@ const openDeviceInfoDialog = (row: QsDevice) => {
       alarmStatus: [],
       extraInfo: []
     });
+    Object.assign(gb28181SdCardForm, {
+      sdCardId: 0
+    });
+    Object.assign(gb28181SdCardInfo, {});
     gb28181DeviceInfoDialogVisible.value = true;
     queryDeviceInfoData();
   }

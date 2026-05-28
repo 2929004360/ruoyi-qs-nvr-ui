@@ -249,6 +249,36 @@ export function querySDCardStatus(deviceId: string, channelId?: string): Promise
 }
 
 /**
+ * 开始巡航
+ * @param deviceId 设备ID
+ * @param channelId 通道ID（可选）
+ * @param cruiseId 巡航组号
+ */
+export function startCruise(deviceId: string, channelId?: string, cruiseId?: number): Promise<AjaxResult<any>> {
+    return request({
+        url: `/gb28181/device/cruise/start/${deviceId}`,
+        method: 'get',
+        params: { channelId, cruiseId },
+        timeout: 30000
+    })
+}
+
+/**
+ * 停止巡航
+ * @param deviceId 设备ID
+ * @param channelId 通道ID（可选）
+ * @param cruiseId 巡航组号
+ */
+export function stopCruise(deviceId: string, channelId?: string, cruiseId?: number): Promise<AjaxResult<any>> {
+    return request({
+        url: `/gb28181/device/cruise/stop/${deviceId}`,
+        method: 'get',
+        params: { channelId, cruiseId },
+        timeout: 30000
+    })
+}
+
+/**
  * 报警复位控制
  * @param deviceId 设备ID
  * @param channelId 通道ID（可选）
@@ -286,7 +316,7 @@ export function iFrameControl(deviceId: string, channelId?: string): Promise<Aja
  */
 export function homePositionControl(deviceId: string, channelId?: string, deviceConfig?: any): Promise<AjaxResult<any>> {
     return request({
-        url: `/gb28181/device/homePosition/${deviceId}`,
+        url: `/gb28181/device/homePosition/control/${deviceId}`,
         method: 'post',
         params: { channelId },
         data: deviceConfig,
