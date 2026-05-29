@@ -21,7 +21,7 @@
         />
       </el-form-item>
       <el-form-item label="接入类型" prop="type">
-        <el-select v-model="queryParams.type" placeholder="请选择直播流接入类型" clearable>
+        <el-select v-model="queryParams.type" placeholder="请选择直播流接入类型" clearable style="width: 240px;">
           <el-option
               v-for="dict in qs_live_stream_type"
               :key="dict.value"
@@ -31,7 +31,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable>
+        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable style="width: 240px;">
           <el-option
               v-for="dict in qs_status"
               :key="dict.value"
@@ -41,7 +41,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="设备状态" prop="deviceStatus">
-        <el-select v-model="queryParams.deviceStatus" placeholder="请选择设备状态" clearable>
+        <el-select v-model="queryParams.deviceStatus" placeholder="请选择设备状态" clearable style="width: 240px;">
           <el-option
               v-for="dict in qs_device_status"
               :key="dict.value"
@@ -245,14 +245,13 @@
                   <!-- 设备校时（海康/大华/海康ISUP） -->
                   <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
                   <!-- 设备信息（大华/海康/海康ISUP/GB28181） -->
-                  <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9' || scope.row.type === '12'" :disabled="scope.row.deviceStatus !== 'ON'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
+                  <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9' || scope.row.type === '12' || scope.row.type === '14'" :disabled="scope.row.deviceStatus !== 'ON'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
                   <!-- 海康设备抓图 -->
                   <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8'" :disabled="scope.row.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
                   <!-- 大华设备抓图 -->
                   <el-dropdown-item v-if="scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
-                  <!-- 设备重启（海康/大华/海康ISUP） -->
-                  <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
-                  <el-dropdown-item v-if="scope.row.type === '12'" :disabled="scope.row.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
+                  <!-- 设备重启（海康/大华/海康ISUP/GB28181/JT1078） -->
+                  <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9' || scope.row.type === '12' || scope.row.type === '14'" :disabled="scope.row.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
                   <!-- GB28181录像控制 -->
                   <el-dropdown-item v-if="scope.row.type === '12'" :disabled="scope.row.deviceStatus !== 'ON'" command="recordControl" icon="VideoCamera">录像控制</el-dropdown-item>
                   <!-- 设备配置查询 -->
@@ -415,14 +414,13 @@
                       <!-- 设备校时（海康/大华/海康ISUP） -->
                       <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
                       <!-- 设备信息（大华/海康/海康ISUP/GB28181） -->
-                      <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9' || item.type === '12'" :disabled="item.deviceStatus !== 'ON'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
+                      <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9' || item.type === '12' || item.type === '14'" :disabled="item.deviceStatus !== 'ON'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
                       <!-- 海康设备抓图 -->
                       <el-dropdown-item v-if="item.type === '7' || item.type === '8'" :disabled="item.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
                       <!-- 大华设备抓图 -->
                       <el-dropdown-item v-if="item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
-                      <!-- 设备重启（海康/大华/海康ISUP） -->
-                      <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
-                      <el-dropdown-item v-if="item.type === '12'" :disabled="item.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
+                      <!-- 设备重启（海康/大华/海康ISUP/GB28181/JT1078） -->
+                      <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9' || item.type === '12' || item.type === '14'" :disabled="item.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
                       <!-- GB28181录像控制 -->
                   <el-dropdown-item v-if="item.type === '12'" :disabled="item.deviceStatus !== 'ON'" command="recordControl" icon="VideoCamera">录像控制</el-dropdown-item>
                   <!-- 设备配置查询 -->
@@ -3281,6 +3279,1151 @@
         <el-button type="danger" v-if="gb28181DeviceInfoTabActive === 'sdCard'" @click="handleFormatGb28181SdCard" :loading="gb28181DeviceInfoLoading" icon="Tools">格式化</el-button>
       </div>
     </el-dialog>
+
+    <!-- JT1078设备信息对话框 -->
+    <el-dialog title="设备信息" v-model="jt1078ParamsDialogVisible" width="1000px" append-to-body>
+      <div class="terminal-params-dialog-wrapper" v-loading="jt1078ParamsLoading">
+        <el-descriptions :column="2" border style="margin-bottom: 20px;">
+          <el-descriptions-item label="设备ID">{{ jt1078CurrentDevice.deviceId || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="手机号">{{ jt1078CurrentDevice.mobileNo || '-' }}</el-descriptions-item>
+        </el-descriptions>
+        
+        <el-tabs v-model="jt1078ParamsTabActive">
+          <!-- 终端参数查询和设置标签页 -->
+          <el-tab-pane label="终端参数" name="params">
+            <div v-if="jt1078TerminalParams && Object.keys(jt1078TerminalParams).length > 0">
+              <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+                终端参数
+                <el-button type="primary" size="small" @click="handleQueryJt1078Params" style="margin-left: 10px;" icon="Refresh">刷新</el-button>
+              </div>
+              <div class="terminal-params-table-wrapper">
+                <el-table :data="jt1078EditableParams" border style="width: 100%;">
+                  <el-table-column prop="key" label="参数ID" width="120" />
+                  <el-table-column prop="value" label="参数值">
+                    <template #default="{ row }">
+                      <el-input
+                        v-if="typeof row.originalValue === 'number'"
+                        v-model.number="row.editableValue"
+                        type="number"
+                        size="small"
+                        placeholder="请输入数值"
+                      />
+                      <div v-else-if="typeof row.originalValue === 'object'" style="width: 100%;">
+                        <el-input
+                          v-model="row.editableValue"
+                          type="textarea"
+                          :rows="4"
+                          size="small"
+                          placeholder="请输入JSON格式数据"
+                          readonly
+                        />
+                        <div style="font-size: 12px; color: var(--el-text-color-secondary); margin-top: 4px;">
+                          ⚠️ 对象类型参数暂不支持编辑
+                        </div>
+                      </div>
+                      <el-input
+                        v-else
+                        v-model="row.editableValue"
+                        size="small"
+                        placeholder="请输入字符"
+                      />
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="操作" width="100">
+                    <template #default="{ row }">
+                      <el-button 
+                        v-if="typeof row.originalValue !== 'object'"
+                        type="primary" 
+                        size="small" 
+                        @click="removeParam(row.key)" 
+                        icon="Delete"
+                      >删除</el-button>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+            </div>
+            <el-empty v-else description="暂无参数数据，请点击查询按钮获取参数" style="padding: 40px 0;" />
+            
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--el-border-color-lighter);">
+              <div class="panel-section-title" style="font-weight: bold; font-size: 14px; margin-bottom: 15px;">添加新参数</div>
+              <el-form :model="jt1078SetParamsForm" label-width="100px" class="data-form">
+                <el-row :gutter="20">
+                  <el-col :span="12">
+                    <div class="panel-section-title" style="font-size: 13px; margin-bottom: 10px; color: var(--el-text-color-secondary);">数值型参数</div>
+                    <el-form-item label="参数ID">
+                      <el-input-number v-model="jt1078TempParamId" :min="0" placeholder="请输入参数ID" size="small" style="width: 100%;" />
+                    </el-form-item>
+                    <el-form-item label="参数值">
+                      <el-input-number v-model="jt1078TempParamValue" :min="0" placeholder="请输入参数值" size="small" style="width: 100%;" />
+                    </el-form-item>
+                    <el-form-item>
+                      <el-button type="primary" @click="addIntParam" icon="Plus" size="small">添加数值参数</el-button>
+                    </el-form-item>
+                  </el-col>
+                  <el-col :span="12">
+                    <div class="panel-section-title" style="font-size: 13px; margin-bottom: 10px; color: var(--el-text-color-secondary);">字符型参数</div>
+                    <el-form-item label="参数ID">
+                      <el-input-number v-model="jt1078TempStrParamId" :min="0" placeholder="请输入参数ID" size="small" style="width: 100%;" />
+                    </el-form-item>
+                    <el-form-item label="参数值">
+                      <el-input v-model="jt1078TempStrParamValue" placeholder="请输入参数值" size="small" />
+                    </el-form-item>
+                    <el-form-item>
+                      <el-button type="primary" @click="addStrParam" icon="Plus" size="small">添加字符参数</el-button>
+                    </el-form-item>
+                  </el-col>
+                </el-row>
+              </el-form>
+            </div>
+          </el-tab-pane>
+          
+          <!-- 终端音视频属性标签页 -->
+          <el-tab-pane label="终端音视频属性" name="terminalAVProperties">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              终端音视频属性
+            </div>
+            <div v-if="jt1078TerminalAVPropertiesResult" style="margin-top: 20px;">
+              <div class="terminal-params-table-wrapper">
+                <el-table :data="Object.entries(jt1078TerminalAVPropertiesResult).map(([key, value]) => ({ key, value }))" border style="width: 100%;">
+                  <el-table-column prop="key" label="属性名" width="180">
+                    <template #default="{ row }">
+                      {{ jt1078TerminalAVPropertiesFieldMap[row.key] || row.key }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="value" label="属性值">
+                    <template #default="{ row }">
+                      <span v-if="typeof row.value === 'boolean'">{{ row.value ? '是' : '否' }}</span>
+                      <span v-else-if="typeof row.value === 'object'">{{ JSON.stringify(row.value, null, 2) }}</span>
+                      <span v-else>{{ row.value }}</span>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+            </div>
+            <el-empty v-else description="暂无属性数据，请点击查询按钮获取属性" style="padding: 40px 0;" />
+            <div style="margin-top: 20px; text-align: center;">
+              <el-button type="primary" @click="handleQueryTerminalAVProperties" :loading="jt1078ParamsLoading">查询终端音视频属性</el-button>
+            </div>
+          </el-tab-pane>
+          
+          <!-- 查询指定终端参数标签页 -->
+          <el-tab-pane label="查询指定参数" name="querySpecific">
+            <el-form :model="jt1078QuerySpecificForm" label-width="100px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="参数ID列表">
+                <el-input 
+                  v-model="jt1078QuerySpecificForm.ids" 
+                  type="textarea" 
+                  :rows="4" 
+                  placeholder="请输入参数ID，多个用逗号分隔，如：0,1,2,3" 
+                />
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleQuerySpecificTerminalParams" :loading="jt1078ParamsLoading" icon="Search">查询指定参数</el-button>
+                <el-button type="success" @click="handleSetQuerySpecificParams" :loading="jt1078ParamsLoading" icon="Check" :disabled="!hasQuerySpecificModifiedParams">保存修改</el-button>
+              </el-form-item>
+            </el-form>
+            
+            <div v-if="jt1078QuerySpecificEditableParams && jt1078QuerySpecificEditableParams.length > 0" style="margin-top: 20px;">
+              <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">查询结果（可编辑）</div>
+              <div class="terminal-params-table-wrapper">
+                <el-table :data="jt1078QuerySpecificEditableParams" border style="width: 100%;">
+                  <el-table-column prop="key" label="参数ID" width="120" />
+                  <el-table-column prop="value" label="参数值">
+                    <template #default="{ row }">
+                      <el-input
+                        v-if="typeof row.originalValue === 'number'"
+                        v-model.number="row.editableValue"
+                        type="number"
+                        size="small"
+                        placeholder="请输入数值"
+                      />
+                      <div v-else-if="typeof row.originalValue === 'object'" style="width: 100%;">
+                        <el-input
+                          v-model="row.editableValue"
+                          type="textarea"
+                          :rows="4"
+                          size="small"
+                          placeholder="请输入JSON格式数据"
+                          readonly
+                        />
+                        <div style="font-size: 12px; color: var(--el-text-color-secondary); margin-top: 4px;">
+                          ⚠️ 对象类型参数暂不支持编辑
+                        </div>
+                      </div>
+                      <el-input
+                        v-else
+                        v-model="row.editableValue"
+                        size="small"
+                        placeholder="请输入字符"
+                      />
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+            </div>
+          </el-tab-pane>
+          
+          <!-- 终端控制标签页 -->
+          <el-tab-pane label="终端控制" name="control">
+            <el-form :model="jt1078ControlForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="命令类型">
+                <el-select v-model="jt1078ControlForm.command" placeholder="请选择命令">
+                  <el-option label="1 - 无线升级" :value="1" />
+                  <el-option label="2 - 控制终端连接指定服务器" :value="2" />
+                  <el-option label="3 - 终端关机" :value="3" />
+                  <el-option label="4 - 终端复位" :value="4" />
+                  <el-option label="5 - 终端恢复出厂设置" :value="5" />
+                  <el-option label="6 - 关闭数据通信" :value="6" />
+                  <el-option label="7 - 关闭所有无线通信" :value="7" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="命令参数">
+                <el-input 
+                  v-model="jt1078ControlForm.parameter" 
+                  type="textarea" 
+                  :rows="3" 
+                  placeholder="请输入命令参数（可选）" 
+                />
+              </el-form-item>
+              <el-form-item>
+                <el-button type="danger" @click="handleTerminalControl" :loading="jt1078ParamsLoading" icon="SwitchButton">执行控制</el-button>
+              </el-form-item>
+            </el-form>
+            
+            <el-alert
+              v-if="jt1078ControlResult"
+              title="执行结果"
+              :type="jt1078ControlResult.success ? 'success' : 'error'"
+              :description="jt1078ControlResult.message"
+              style="margin-top: 20px;"
+            />
+          </el-tab-pane>
+          
+          <!-- 终端属性标签页 -->
+          <el-tab-pane label="终端属性" name="attribute">
+            <div v-if="jt1078TerminalAttribute && Object.keys(jt1078TerminalAttribute).length > 0">
+              <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+                终端属性
+                <el-button type="primary" size="small" @click="handleQueryJt1078Attribute" style="margin-left: 10px;" icon="Refresh">刷新</el-button>
+              </div>
+              <div class="terminal-params-table-wrapper">
+                <el-table :data="Object.entries(jt1078TerminalAttribute).map(([key, value]) => ({ key, value }))" border style="width: 100%;">
+                  <el-table-column prop="key" label="属性名" width="180">
+                    <template #default="{ row }">
+                      {{ jt1078AttributeFieldMap[row.key] || row.key }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="value" label="属性值">
+                    <template #default="{ row }">
+                      <span v-if="typeof row.value === 'object'">{{ JSON.stringify(row.value, null, 2) }}</span>
+                      <span v-else>{{ row.value }}</span>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+            </div>
+            <el-empty v-else description="暂无属性数据，请点击查询按钮获取属性" style="padding: 40px 0;" />
+          </el-tab-pane>
+
+          <!-- 位置信息查询标签页 -->
+          <el-tab-pane label="位置信息" name="location">
+            <div v-if="jt1078Location && Object.keys(jt1078Location).length > 0">
+              <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+                位置信息
+                <el-button type="primary" size="small" @click="handleQueryJt1078Location" style="margin-left: 10px;" icon="Refresh">刷新</el-button>
+              </div>
+              <div class="terminal-params-table-wrapper">
+                <el-table :data="Object.entries(jt1078Location).map(([key, value]) => ({ key, value }))" border style="width: 100%;">
+                  <el-table-column prop="key" label="属性名" width="180">
+                    <template #default="{ row }">
+                      {{ jt1078LocationFieldMap[row.key] || row.key }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="value" label="属性值">
+                    <template #default="{ row }">
+                      <span v-if="typeof row.value === 'object'">{{ JSON.stringify(row.value, null, 2) }}</span>
+                      <span v-else>{{ row.value }}</span>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+            </div>
+            <el-empty v-else description="暂无位置数据，请点击查询按钮获取位置" style="padding: 40px 0;" />
+          </el-tab-pane>
+
+          <!-- 临时位置跟踪控制标签页 -->
+          <el-tab-pane label="位置跟踪" name="locationTrack">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              临时位置跟踪控制
+            </div>
+            <el-form :model="jt1078TempLocationForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="时间间隔(秒)">
+                <el-input-number v-model="jt1078TempLocationForm.interval" :min="1" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="有效期(秒)">
+                <el-input-number v-model="jt1078TempLocationForm.validityPeriod" :min="1" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleTempLocationTrack" :loading="jt1078ParamsLoading" icon="SetUp">执行控制</el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+
+          <!-- 人工确认报警消息标签页 -->
+          <el-tab-pane label="报警确认" name="alarmConfirm">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              人工确认报警消息
+            </div>
+            <el-form :model="jt1078AlarmConfirmForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="消息流水号">
+                <el-input-number v-model="jt1078AlarmConfirmForm.responseSerialNo" :min="0" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="报警类型">
+                <el-select v-model="jt1078AlarmConfirmForm.type" placeholder="请选择报警类型" size="small" style="width: 100%;">
+                  <el-option label="0-确认紧急报警" :value="0" />
+                  <el-option label="3-确认危险预警" :value="3" />
+                  <el-option label="20-确认进出区域报警" :value="20" />
+                  <el-option label="21-确认进出路线报警" :value="21" />
+                  <el-option label="22-确认路段行驶时间不足/过长报警" :value="22" />
+                  <el-option label="27-确认车辆非法点火报警" :value="27" />
+                  <el-option label="28-确认车辆非法位移报警" :value="28" />
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleConfirmAlarm" :loading="jt1078ParamsLoading" icon="Check">确认报警</el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+
+          <!-- 链路检测标签页 -->
+          <el-tab-pane label="链路检测" name="linkCheck">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              服务器向终端发起链路检测请求
+            </div>
+            <div style="margin-top: 20px;">
+              <el-button type="primary" @click="handleLinkCheck" :loading="jt1078ParamsLoading" icon="Connection">执行检测</el-button>
+            </div>
+            <el-alert
+              v-if="jt1078LinkCheckResult"
+              title="检测结果"
+              type="success"
+              :description="JSON.stringify(jt1078LinkCheckResult, null, 2)"
+              style="margin-top: 20px;"
+            />
+          </el-tab-pane>
+
+          <!-- 文本信息下发标签页 -->
+          <el-tab-pane label="文本下发" name="textSend">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              文本信息下发
+            </div>
+            <el-form :model="jt1078TextForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="标志">
+                <el-checkbox-group v-model="jt1078TextForm.signBits" style="width: 100%;">
+                  <el-checkbox :label="1 << 0">紧急</el-checkbox>
+                  <el-checkbox :label="1 << 2">终端显示器显示</el-checkbox>
+                  <el-checkbox :label="1 << 3">终端 TTS 播读</el-checkbox>
+                  <el-checkbox :label="1 << 4">广告屏显示</el-checkbox>
+                </el-checkbox-group>
+              </el-form-item>
+              <el-form-item label="类型">
+                <el-select v-model="jt1078TextForm.type" size="small" style="width: 100%;">
+                  <el-option label="通知" :value="1" />
+                  <el-option label="服务" :value="2" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="文本内容">
+                <el-input v-model="jt1078TextForm.content" type="textarea" :rows="4" size="small" />
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleSendText" :loading="jt1078ParamsLoading">下发文本</el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+
+          <!-- 事件设置标签页 -->
+          <el-tab-pane label="事件设置" name="eventSetting">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              事件设置
+            </div>
+            <el-form :model="jt1078EventForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="设置类型">
+                <el-select v-model="jt1078EventForm.type" size="small" style="width: 100%;">
+                  <el-option label="清空" :value="0" />
+                  <el-option label="更新(先清空,后追加)" :value="1" />
+                  <el-option label="追加" :value="2" />
+                  <el-option label="修改" :value="3" />
+                  <el-option label="指定删除" :value="4" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="事件列表">
+                <div style="width: 100%;">
+                  <div v-for="(event, index) in jt1078EventForm.events" :key="index" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <el-input-number v-model="event.id" :min="0" size="small" placeholder="事件ID" style="flex: 1;" />
+                    <el-input v-model="event.content" size="small" placeholder="内容" style="flex: 2;" />
+                    <el-button type="danger" size="small" @click="jt1078EventForm.events.splice(index, 1)" icon="Delete">删除</el-button>
+                  </div>
+                  <el-button type="primary" size="small" @click="jt1078EventForm.events.push({ id: 0, content: '' })" icon="Plus">添加事件</el-button>
+                </div>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleEventSetting" :loading="jt1078ParamsLoading">设置事件</el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+
+          <!-- 提问下发标签页 -->
+          <el-tab-pane label="提问下发" name="questionSend">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              提问下发
+            </div>
+            <el-form :model="jt1078QuestionForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="标志">
+                <el-checkbox-group v-model="jt1078QuestionForm.signBits" style="width: 100%;">
+                  <el-checkbox :label="1 << 0">紧急</el-checkbox>
+                  <el-checkbox :label="1 << 2">终端显示器显示</el-checkbox>
+                  <el-checkbox :label="1 << 3">终端 TTS 播读</el-checkbox>
+                  <el-checkbox :label="1 << 4">广告屏显示</el-checkbox>
+                </el-checkbox-group>
+              </el-form-item>
+              <el-form-item label="问题内容">
+                <el-input v-model="jt1078QuestionForm.content" type="textarea" :rows="3" size="small" />
+              </el-form-item>
+              <el-form-item label="候选答案">
+                <div style="width: 100%;">
+                  <div v-for="(option, index) in jt1078QuestionForm.options" :key="index" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <el-input-number v-model="option.id" :min="0" size="small" placeholder="答案ID" style="flex: 1;" />
+                    <el-input v-model="option.content" size="small" placeholder="答案内容" style="flex: 2;" />
+                    <el-button type="danger" size="small" @click="jt1078QuestionForm.options.splice(index, 1)" icon="Delete">删除</el-button>
+                  </div>
+                  <el-button type="primary" size="small" @click="jt1078QuestionForm.options.push({ id: 0, content: '' })" icon="Plus">添加答案</el-button>
+                </div>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleSendQuestion" :loading="jt1078ParamsLoading">下发提问</el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+
+          <!-- 信息点播菜单设置标签页 -->
+          <el-tab-pane label="菜单设置" name="menuSetting">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              信息点播菜单设置
+            </div>
+            <el-form :model="jt1078MenuForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="设置类型">
+                <el-select v-model="jt1078MenuForm.type" size="small" style="width: 100%;">
+                  <el-option label="清空" :value="0" />
+                  <el-option label="更新(先清空,后追加)" :value="1" />
+                  <el-option label="追加" :value="2" />
+                  <el-option label="修改" :value="3" />
+                  <el-option label="指定删除" :value="4" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="信息项列表">
+                <div style="width: 100%;">
+                  <div v-for="(info, index) in jt1078MenuForm.infos" :key="index" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <el-input-number v-model="info.type" :min="0" size="small" placeholder="信息类型" style="flex: 1;" />
+                    <el-input v-model="info.name" size="small" placeholder="信息名称" style="flex: 2;" />
+                    <el-button type="danger" size="small" @click="jt1078MenuForm.infos.splice(index, 1)" icon="Delete">删除</el-button>
+                  </div>
+                  <el-button type="primary" size="small" @click="jt1078MenuForm.infos.push({ type: 0, name: '' })" icon="Plus">添加信息</el-button>
+                </div>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleMenuSetting" :loading="jt1078ParamsLoading">设置菜单</el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+
+          <!-- 信息服务标签页 -->
+          <el-tab-pane label="信息服务" name="infoService">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              信息服务
+            </div>
+            <el-form :model="jt1078InfoServiceForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="信息类型">
+                <el-input-number v-model="jt1078InfoServiceForm.type" :min="0" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="文本信息">
+                <el-input v-model="jt1078InfoServiceForm.content" type="textarea" :rows="4" size="small" />
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleInfoService" :loading="jt1078ParamsLoading">发送信息</el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+
+          <!-- 电话回拨标签页 -->
+          <el-tab-pane label="电话回拨" name="phoneCallback">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              电话回拨
+            </div>
+            <el-form :model="jt1078PhoneCallbackForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="类型">
+                <el-select v-model="jt1078PhoneCallbackForm.type" size="small" style="width: 100%;">
+                  <el-option label="通话" :value="0" />
+                  <el-option label="监听" :value="1" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="电话号码">
+                <el-input v-model="jt1078PhoneCallbackForm.phoneNumber" size="small" />
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handlePhoneCallback" :loading="jt1078ParamsLoading">回拨电话</el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+
+          <!-- 设置电话本标签页 -->
+          <el-tab-pane label="电话本" name="phoneBook">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              设置电话本
+            </div>
+            <el-form :model="jt1078PhoneBookForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="设置类型">
+                <el-select v-model="jt1078PhoneBookForm.type" size="small" style="width: 100%;">
+                  <el-option label="清空" :value="0" />
+                  <el-option label="更新(先清空,后追加)" :value="1" />
+                  <el-option label="追加" :value="2" />
+                  <el-option label="修改" :value="3" />
+                  <el-option label="指定删除" :value="4" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="联系人列表">
+                <div style="width: 100%;">
+                  <div v-for="(contact, index) in jt1078PhoneBookForm.contacts" :key="index" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <el-input-number v-model="contact.sign" :min="0" size="small" placeholder="标志" style="flex: 1;" />
+                    <el-input v-model="contact.phone" size="small" placeholder="电话号码" style="flex: 2;" />
+                    <el-input v-model="contact.name" size="small" placeholder="联系人" style="flex: 2;" />
+                    <el-button type="danger" size="small" @click="jt1078PhoneBookForm.contacts.splice(index, 1)" icon="Delete">删除</el-button>
+                  </div>
+                  <el-button type="primary" size="small" @click="jt1078PhoneBookForm.contacts.push({ sign: 0, phone: '', name: '' })" icon="Plus">添加联系人</el-button>
+                </div>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleSetPhoneBook" :loading="jt1078ParamsLoading">设置电话本</el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+
+          <!-- 车辆控制标签页 -->
+          <el-tab-pane label="车辆控制" name="vehicleControl">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              车辆控制
+            </div>
+            <el-form :model="jt1078VehicleControlForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="控制类型">
+                <el-select v-model="jt1078VehicleControlForm.type" size="small" style="width: 100%;">
+                  <el-option label="车门加锁" :value="1" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="控制标志">
+                <el-select v-model="jt1078VehicleControlForm.param" size="small" style="width: 100%;">
+                  <el-option label="车门解锁" :value="0" />
+                  <el-option label="车门加锁" :value="1" />
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleVehicleControl" :loading="jt1078ParamsLoading">执行控制</el-button>
+              </el-form-item>
+            </el-form>
+            <el-alert
+              v-if="jt1078VehicleControlResult"
+              title="控制结果"
+              type="success"
+              :description="JSON.stringify(jt1078VehicleControlResult, null, 2)"
+              style="margin-top: 20px;"
+            />
+          </el-tab-pane>
+
+          <!-- 圆形区域标签页 -->
+          <el-tab-pane label="圆形区域" name="circleArea">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              设置圆形区域
+            </div>
+            <el-form :model="jt1078CircleAreaForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="设置属性">
+                <el-select v-model="jt1078CircleAreaForm.action" size="small" style="width: 100%;">
+                  <el-option label="更新(先清空,后追加)" :value="1" />
+                  <el-option label="追加" :value="2" />
+                  <el-option label="修改" :value="3" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="区域列表">
+                <div v-for="(item, index) in jt1078CircleAreaForm.items" :key="index" style="border: 1px solid #e6e6e6; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
+                  <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <el-input-number v-model="item.id" :min="0" size="small" placeholder="区域ID" style="flex: 1;" />
+                    <el-input-number v-model="item.attribute" :min="0" size="small" placeholder="区域属性" style="flex: 1;" />
+                  </div>
+                  <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <el-input-number v-model="item.latitude" :min="0" size="small" placeholder="中心点纬度" style="flex: 1;" />
+                    <el-input-number v-model="item.longitude" :min="0" size="small" placeholder="中心点经度" style="flex: 1;" />
+                    <el-input-number v-model="item.radius" :min="0" size="small" placeholder="半径(米)" style="flex: 1;" />
+                  </div>
+                  <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <el-date-picker v-model="item.startTime" type="datetime" placeholder="起始时间" size="small" style="flex: 1;" />
+                    <el-date-picker v-model="item.endTime" type="datetime" placeholder="结束时间" size="small" style="flex: 1;" />
+                  </div>
+                  <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <el-input-number v-model="item.maxSpeed" :min="0" size="small" placeholder="最高速度" style="flex: 1;" />
+                    <el-input-number v-model="item.duration" :min="0" size="small" placeholder="超速持续时间" style="flex: 1;" />
+                    <el-input-number v-model="item.nightMaxSpeed" :min="0" size="small" placeholder="夜间最高速度" style="flex: 1;" />
+                  </div>
+                  <el-input v-model="item.name" placeholder="区域名称" size="small" style="margin-bottom: 10px;" />
+                  <el-button type="danger" size="small" @click="jt1078CircleAreaForm.items.splice(index, 1)" icon="Delete">删除</el-button>
+                </div>
+                <el-button type="primary" size="small" @click="jt1078CircleAreaForm.items.push({ id: 0, attribute: 0, latitude: 0, longitude: 0, radius: 0, startTime: '', endTime: '', maxSpeed: null, duration: null, nightMaxSpeed: null, name: '' })" icon="Plus">添加区域</el-button>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleSetCircleArea" :loading="jt1078ParamsLoading">设置圆形区域</el-button>
+              </el-form-item>
+            </el-form>
+            
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px; margin-top: 30px;">
+              删除圆形区域
+            </div>
+            <el-form :model="jt1078DeleteCircleForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="区域ID列表">
+                <div v-for="(id, index) in jt1078DeleteCircleForm.ids" :key="index" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                  <el-input-number v-model="jt1078DeleteCircleForm.ids[index]" :min="0" size="small" placeholder="区域ID" style="flex: 1;" />
+                  <el-button type="danger" size="small" @click="jt1078DeleteCircleForm.ids.splice(index, 1)" icon="Delete">删除</el-button>
+                </div>
+                <el-button type="primary" size="small" @click="jt1078DeleteCircleForm.ids.push(0)" icon="Plus">添加ID</el-button>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleDeleteCircleArea" :loading="jt1078ParamsLoading">删除圆形区域</el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+
+          <!-- 矩形区域标签页 -->
+          <el-tab-pane label="矩形区域" name="rectArea">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              设置矩形区域
+            </div>
+            <el-form :model="jt1078RectAreaForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="设置属性">
+                <el-select v-model="jt1078RectAreaForm.action" size="small" style="width: 100%;">
+                  <el-option label="更新(先清空,后追加)" :value="1" />
+                  <el-option label="追加" :value="2" />
+                  <el-option label="修改" :value="3" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="区域列表">
+                <div v-for="(item, index) in jt1078RectAreaForm.items" :key="index" style="border: 1px solid #e6e6e6; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
+                  <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <el-input-number v-model="item.id" :min="0" size="small" placeholder="区域ID" style="flex: 1;" />
+                    <el-input-number v-model="item.attribute" :min="0" size="small" placeholder="区域属性" style="flex: 1;" />
+                  </div>
+                  <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <el-input-number v-model="item.latitudeUL" :min="0" size="small" placeholder="左上角纬度" style="flex: 1;" />
+                    <el-input-number v-model="item.longitudeUL" :min="0" size="small" placeholder="左上角经度" style="flex: 1;" />
+                  </div>
+                  <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <el-input-number v-model="item.latitudeLR" :min="0" size="small" placeholder="右下角纬度" style="flex: 1;" />
+                    <el-input-number v-model="item.longitudeLR" :min="0" size="small" placeholder="右下角经度" style="flex: 1;" />
+                  </div>
+                  <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <el-date-picker v-model="item.startTime" type="datetime" placeholder="起始时间" size="small" style="flex: 1;" />
+                    <el-date-picker v-model="item.endTime" type="datetime" placeholder="结束时间" size="small" style="flex: 1;" />
+                  </div>
+                  <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <el-input-number v-model="item.maxSpeed" :min="0" size="small" placeholder="最高速度" style="flex: 1;" />
+                    <el-input-number v-model="item.duration" :min="0" size="small" placeholder="超速持续时间" style="flex: 1;" />
+                    <el-input-number v-model="item.nightMaxSpeed" :min="0" size="small" placeholder="夜间最高速度" style="flex: 1;" />
+                  </div>
+                  <el-input v-model="item.name" placeholder="区域名称" size="small" style="margin-bottom: 10px;" />
+                  <el-button type="danger" size="small" @click="jt1078RectAreaForm.items.splice(index, 1)" icon="Delete">删除</el-button>
+                </div>
+                <el-button type="primary" size="small" @click="jt1078RectAreaForm.items.push({ id: 0, attribute: 0, latitudeUL: 0, longitudeUL: 0, latitudeLR: 0, longitudeLR: 0, startTime: '', endTime: '', maxSpeed: null, duration: null, nightMaxSpeed: null, name: '' })" icon="Plus">添加区域</el-button>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleSetRectArea" :loading="jt1078ParamsLoading">设置矩形区域</el-button>
+              </el-form-item>
+            </el-form>
+            
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px; margin-top: 30px;">
+              删除矩形区域
+            </div>
+            <el-form :model="jt1078DeleteRectForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="区域ID列表">
+                <div v-for="(id, index) in jt1078DeleteRectForm.ids" :key="index" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                  <el-input-number v-model="jt1078DeleteRectForm.ids[index]" :min="0" size="small" placeholder="区域ID" style="flex: 1;" />
+                  <el-button type="danger" size="small" @click="jt1078DeleteRectForm.ids.splice(index, 1)" icon="Delete">删除</el-button>
+                </div>
+                <el-button type="primary" size="small" @click="jt1078DeleteRectForm.ids.push(0)" icon="Plus">添加ID</el-button>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleDeleteRectArea" :loading="jt1078ParamsLoading">删除矩形区域</el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+
+          <!-- 多边形区域标签页 -->
+          <el-tab-pane label="多边形区域" name="polygonArea">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              设置多边形区域
+            </div>
+            <el-form :model="jt1078PolygonAreaForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="区域ID">
+                <el-input-number v-model="jt1078PolygonAreaForm.id" :min="0" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="区域属性">
+                <el-input-number v-model="jt1078PolygonAreaForm.attribute" :min="0" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="起始时间">
+                <el-date-picker v-model="jt1078PolygonAreaForm.startTime" type="datetime" placeholder="起始时间" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="结束时间">
+                <el-date-picker v-model="jt1078PolygonAreaForm.endTime" type="datetime" placeholder="结束时间" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="最高速度">
+                <el-input-number v-model="jt1078PolygonAreaForm.maxSpeed" :min="0" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="超速持续时间">
+                <el-input-number v-model="jt1078PolygonAreaForm.duration" :min="0" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="夜间最高速度">
+                <el-input-number v-model="jt1078PolygonAreaForm.nightMaxSpeed" :min="0" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="区域名称">
+                <el-input v-model="jt1078PolygonAreaForm.name" placeholder="区域名称" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="顶点列表">
+                <div v-for="(point, index) in jt1078PolygonAreaForm.points" :key="index" style="border: 1px solid #e6e6e6; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
+                  <div style="display: flex; gap: 10px;">
+                    <el-input-number v-model="point.latitude" :min="0" size="small" placeholder="纬度" style="flex: 1;" />
+                    <el-input-number v-model="point.longitude" :min="0" size="small" placeholder="经度" style="flex: 1;" />
+                  </div>
+                  <el-button type="danger" size="small" @click="jt1078PolygonAreaForm.points.splice(index, 1)" icon="Delete" style="margin-top: 10px;">删除</el-button>
+                </div>
+                <el-button type="primary" size="small" @click="jt1078PolygonAreaForm.points.push({ latitude: 0, longitude: 0 })" icon="Plus">添加顶点</el-button>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleSetPolygonArea" :loading="jt1078ParamsLoading">设置多边形区域</el-button>
+              </el-form-item>
+            </el-form>
+            
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px; margin-top: 30px;">
+              删除多边形区域
+            </div>
+            <el-form :model="jt1078DeletePolygonForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="区域ID列表">
+                <div v-for="(id, index) in jt1078DeletePolygonForm.ids" :key="index" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                  <el-input-number v-model="jt1078DeletePolygonForm.ids[index]" :min="0" size="small" placeholder="区域ID" style="flex: 1;" />
+                  <el-button type="danger" size="small" @click="jt1078DeletePolygonForm.ids.splice(index, 1)" icon="Delete">删除</el-button>
+                </div>
+                <el-button type="primary" size="small" @click="jt1078DeletePolygonForm.ids.push(0)" icon="Plus">添加ID</el-button>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleDeletePolygonArea" :loading="jt1078ParamsLoading">删除多边形区域</el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+
+          <!-- 路线管理标签页 -->
+          <el-tab-pane label="路线管理" name="routeManagement">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              设置路线
+            </div>
+            <el-form :model="jt1078RouteForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="路线ID">
+                <el-input-number v-model="jt1078RouteForm.id" :min="0" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="路线属性">
+                <el-input-number v-model="jt1078RouteForm.attribute" :min="0" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="起始时间">
+                <el-date-picker v-model="jt1078RouteForm.startTime" type="datetime" placeholder="起始时间" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="结束时间">
+                <el-date-picker v-model="jt1078RouteForm.endTime" type="datetime" placeholder="结束时间" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="路线名称">
+                <el-input v-model="jt1078RouteForm.name" placeholder="路线名称" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="路线点列表">
+                <div v-for="(item, index) in jt1078RouteForm.items" :key="index" style="border: 1px solid #e6e6e6; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
+                  <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <el-input-number v-model="item.id" :min="0" size="small" placeholder="点ID" style="flex: 1;" />
+                    <el-input-number v-model="item.routeId" :min="0" size="small" placeholder="路线ID" style="flex: 1;" />
+                  </div>
+                  <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <el-input-number v-model="item.latitude" :min="0" size="small" placeholder="纬度" style="flex: 1;" />
+                    <el-input-number v-model="item.longitude" :min="0" size="small" placeholder="经度" style="flex: 1;" />
+                  </div>
+                  <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <el-input-number v-model="item.width" :min="0" size="small" placeholder="路段宽度" style="flex: 1;" />
+                    <el-input-number v-model="item.attribute" :min="0" size="small" placeholder="路段属性" style="flex: 1;" />
+                  </div>
+                  <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <el-input-number v-model="item.upperLimit" :min="0" size="small" placeholder="上限速度" style="flex: 1;" />
+                    <el-input-number v-model="item.lowerLimit" :min="0" size="small" placeholder="下限速度" style="flex: 1;" />
+                    <el-input-number v-model="item.maxSpeed" :min="0" size="small" placeholder="最高速度" style="flex: 1;" />
+                  </div>
+                  <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <el-input-number v-model="item.duration" :min="0" size="small" placeholder="超速持续时间" style="flex: 1;" />
+                    <el-input-number v-model="item.nightMaxSpeed" :min="0" size="small" placeholder="夜间最高速度" style="flex: 1;" />
+                  </div>
+                  <el-button type="danger" size="small" @click="jt1078RouteForm.items.splice(index, 1)" icon="Delete">删除</el-button>
+                </div>
+                <el-button type="primary" size="small" @click="jt1078RouteForm.items.push({ id: 0, routeId: 0, latitude: 0, longitude: 0, width: 0, attribute: 0, upperLimit: null, lowerLimit: null, maxSpeed: null, duration: null, nightMaxSpeed: null })" icon="Plus">添加路线点</el-button>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleSetRoute" :loading="jt1078ParamsLoading">设置路线</el-button>
+              </el-form-item>
+            </el-form>
+            
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px; margin-top: 30px;">
+              删除路线
+            </div>
+            <el-form :model="jt1078DeleteRouteForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="路线ID列表">
+                <div v-for="(id, index) in jt1078DeleteRouteForm.ids" :key="index" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                  <el-input-number v-model="jt1078DeleteRouteForm.ids[index]" :min="0" size="small" placeholder="路线ID" style="flex: 1;" />
+                  <el-button type="danger" size="small" @click="jt1078DeleteRouteForm.ids.splice(index, 1)" icon="Delete">删除</el-button>
+                </div>
+                <el-button type="primary" size="small" @click="jt1078DeleteRouteForm.ids.push(0)" icon="Plus">添加ID</el-button>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleDeleteRoute" :loading="jt1078ParamsLoading">删除路线</el-button>
+              </el-form-item>
+            </el-form>
+
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px; margin-top: 30px;">
+              查询区域或线路数据
+            </div>
+            <el-form :model="jt1078QueryAreaForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="查询类型">
+                <el-select v-model="jt1078QueryAreaForm.type" size="small" style="width: 100%;">
+                  <el-option label="圆形区域" :value="1" />
+                  <el-option label="矩形区域" :value="2" />
+                  <el-option label="多边形区域" :value="3" />
+                  <el-option label="路线" :value="4" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="ID列表">
+                <div v-for="(id, index) in jt1078QueryAreaForm.ids" :key="index" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                  <el-input-number v-model="jt1078QueryAreaForm.ids[index]" :min="0" size="small" placeholder="ID" style="flex: 1;" />
+                  <el-button type="danger" size="small" @click="jt1078QueryAreaForm.ids.splice(index, 1)" icon="Delete">删除</el-button>
+                </div>
+                <el-button type="primary" size="small" @click="jt1078QueryAreaForm.ids.push(0)" icon="Plus">添加ID</el-button>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleQueryAreaOrRoute" :loading="jt1078ParamsLoading">查询</el-button>
+              </el-form-item>
+            </el-form>
+            <el-alert
+              v-if="jt1078QueryAreaResult"
+              title="查询结果"
+              type="success"
+              :description="JSON.stringify(jt1078QueryAreaResult, null, 2)"
+              style="margin-top: 20px;"
+            />
+          </el-tab-pane>
+
+          <!-- 行驶记录仪标签页 -->
+          <el-tab-pane label="行驶记录仪" name="tachograph">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              行驶记录仪数据采集命令
+            </div>
+            <el-form label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item>
+                <el-button type="primary" @click="handleTachographDataCollect" :loading="jt1078ParamsLoading">发送数据采集命令</el-button>
+              </el-form-item>
+            </el-form>
+            
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px; margin-top: 30px;">
+              行驶记录仪参数下传命令
+            </div>
+            <el-form :model="jt1078TachographParamSendForm" label-width="120px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="命令字">
+                <el-select v-model="jt1078TachographParamSendForm.type" size="small" style="width: 100%;">
+                  <el-option label="130-设置车辆信息" :value="130" />
+                  <el-option label="131-设置记录仪初次安装日期" :value="131" />
+                  <el-option label="132-设置状态配置信息" :value="132" />
+                  <el-option label="194-设置记录仪时间" :value="194" />
+                  <el-option label="195-设置记录仪脉冲系数" :value="195" />
+                  <el-option label="196-设置初始里程" :value="196" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="数据内容">
+                <el-input v-model="jt1078TachographParamSendForm.content" type="textarea" :rows="4" placeholder="输入数据内容（可选）" />
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleTachographParamSend" :loading="jt1078ParamsLoading">下传参数</el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+
+          <!-- 驾驶员身份信息标签页 -->
+          <el-tab-pane label="驾驶员身份" name="driverInfo">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              驾驶员身份信息
+            </div>
+            <div v-if="jt1078DriverInfoResult" style="margin-top: 20px;">
+              <div class="terminal-params-table-wrapper">
+                <el-table :data="Object.entries(jt1078DriverInfoResult).map(([key, value]) => ({ key, value }))" border style="width: 100%;">
+                  <el-table-column prop="key" label="属性名" width="180">
+                    <template #default="{ row }">
+                      {{ jt1078DriverInfoFieldMap[row.key] || row.key }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="value" label="属性值">
+                    <template #default="{ row }">
+                      <span v-if="typeof row.value === 'boolean'">{{ row.value ? '是' : '否' }}</span>
+                      <span v-else-if="typeof row.value === 'object'">{{ JSON.stringify(row.value, null, 2) }}</span>
+                      <span v-else>{{ row.value }}</span>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+            </div>
+            <el-empty v-else description="暂无驾驶员身份数据，请点击查询按钮获取" style="padding: 40px 0;" />
+            <div style="margin-top: 20px; text-align: center;">
+              <el-button type="primary" @click="handleReportDriverInfo" :loading="jt1078ParamsLoading">请求上报驾驶员身份信息</el-button>
+            </div>
+          </el-tab-pane>
+
+          <!-- 摄像头拍摄标签页 -->
+          <el-tab-pane label="摄像头拍摄" name="cameraShoot">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              摄像头立即拍摄命令
+            </div>
+            <el-form :model="jt1078CameraShootForm" label-width="140px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="通道ID">
+                <el-input-number v-model="jt1078CameraShootForm.channelId" :min="1" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="拍摄命令">
+                <el-select v-model="jt1078CameraShootForm.command" size="small" style="width: 100%;">
+                  <el-option label="停止拍摄" :value="0" />
+                  <el-option label="录像" :value="65535" />
+                  <el-option label="拍照1张" :value="1" />
+                  <el-option label="拍照2张" :value="2" />
+                  <el-option label="拍照3张" :value="3" />
+                  <el-option label="拍照4张" :value="4" />
+                  <el-option label="拍照5张" :value="5" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="拍照间隔/录像时间(秒)">
+                <el-input-number v-model="jt1078CameraShootForm.time" :min="0" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="保存标志">
+                <el-select v-model="jt1078CameraShootForm.save" size="small" style="width: 100%;">
+                  <el-option label="实时上传" :value="0" />
+                  <el-option label="保存" :value="1" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="分辨率">
+                <el-select v-model="jt1078CameraShootForm.resolution" size="small" style="width: 100%;">
+                  <el-option label="320x240" :value="1" />
+                  <el-option label="640x480" :value="2" />
+                  <el-option label="800x600" :value="3" />
+                  <el-option label="1024x768" :value="4" />
+                  <el-option label="176x144 (QCIF)" :value="5" />
+                  <el-option label="352x288 (CIF)" :value="6" />
+                  <el-option label="704x288 (HALF D1)" :value="7" />
+                  <el-option label="704x576 (D1)" :value="8" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="图像/视频质量(1-10)">
+                <el-input-number v-model="jt1078CameraShootForm.quality" :min="1" :max="10" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="亮度(0-255)">
+                <el-input-number v-model="jt1078CameraShootForm.brightness" :min="0" :max="255" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="对比度(0-127)">
+                <el-input-number v-model="jt1078CameraShootForm.contrast" :min="0" :max="127" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="饱和度(0-127)">
+                <el-input-number v-model="jt1078CameraShootForm.saturation" :min="0" :max="127" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="色度(0-255)">
+                <el-input-number v-model="jt1078CameraShootForm.chroma" :min="0" :max="255" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleCameraShoot" :loading="jt1078ParamsLoading">发送拍摄命令</el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+
+          <!-- 多媒体数据标签页 -->
+          <el-tab-pane label="多媒体数据" name="multimedia">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              存储多媒体数据检索
+            </div>
+            <el-form :model="jt1078SearchMultimediaForm" label-width="140px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="多媒体类型">
+                <el-select v-model="jt1078SearchMultimediaForm.type" size="small" style="width: 100%;">
+                  <el-option label="图像" :value="0" />
+                  <el-option label="音频" :value="1" />
+                  <el-option label="视频" :value="2" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="通道ID(0=全部)">
+                <el-input-number v-model="jt1078SearchMultimediaForm.channelId" :min="0" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="事件项编码">
+                <el-select v-model="jt1078SearchMultimediaForm.event" size="small" style="width: 100%;">
+                  <el-option label="平台下发指令" :value="0" />
+                  <el-option label="定时动作" :value="1" />
+                  <el-option label="抢劫报警触发" :value="2" />
+                  <el-option label="碰撞侧翻报警触发" :value="3" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="起始时间">
+                <el-date-picker v-model="jt1078SearchMultimediaForm.startTime" type="datetime" placeholder="选择日期时间" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="结束时间">
+                <el-date-picker v-model="jt1078SearchMultimediaForm.endTime" type="datetime" placeholder="选择日期时间" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleSearchMultimedia" :loading="jt1078ParamsLoading">检索多媒体数据</el-button>
+              </el-form-item>
+            </el-form>
+            <el-alert
+              v-if="jt1078SearchMultimediaResult"
+              title="检索结果"
+              type="success"
+              :description="JSON.stringify(jt1078SearchMultimediaResult, null, 2)"
+              style="margin-top: 20px;"
+            />
+            
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px; margin-top: 30px;">
+              存储多媒体数据上传
+            </div>
+            <el-form :model="jt1078UploadMultimediaForm" label-width="140px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="多媒体类型">
+                <el-select v-model="jt1078UploadMultimediaForm.type" size="small" style="width: 100%;">
+                  <el-option label="图像" :value="0" />
+                  <el-option label="音频" :value="1" />
+                  <el-option label="视频" :value="2" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="通道ID">
+                <el-input-number v-model="jt1078UploadMultimediaForm.channelId" :min="0" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="事件项编码">
+                <el-select v-model="jt1078UploadMultimediaForm.event" size="small" style="width: 100%;">
+                  <el-option label="平台下发指令" :value="0" />
+                  <el-option label="定时动作" :value="1" />
+                  <el-option label="抢劫报警触发" :value="2" />
+                  <el-option label="碰撞侧翻报警触发" :value="3" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="起始时间">
+                <el-date-picker v-model="jt1078UploadMultimediaForm.startTime" type="datetime" placeholder="选择日期时间" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="结束时间">
+                <el-date-picker v-model="jt1078UploadMultimediaForm.endTime" type="datetime" placeholder="选择日期时间" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="删除标志">
+                <el-select v-model="jt1078UploadMultimediaForm.delete" size="small" style="width: 100%;">
+                  <el-option label="保留" :value="0" />
+                  <el-option label="删除" :value="1" />
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleUploadMultimedia" :loading="jt1078ParamsLoading">上传多媒体数据</el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+
+          <!-- 录音标签页 -->
+          <el-tab-pane label="录音" name="recording">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              录音开始命令
+            </div>
+            <el-form :model="jt1078StartRecordingForm" label-width="140px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="录音命令">
+                <el-select v-model="jt1078StartRecordingForm.command" size="small" style="width: 100%;">
+                  <el-option label="停止录音" :value="0" />
+                  <el-option label="开始录音" :value="1" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="录音时间(秒)">
+                <el-input-number v-model="jt1078StartRecordingForm.time" :min="0" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="保存标志">
+                <el-select v-model="jt1078StartRecordingForm.save" size="small" style="width: 100%;">
+                  <el-option label="实时上传" :value="0" />
+                  <el-option label="保存" :value="1" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="音频采样率">
+                <el-select v-model="jt1078StartRecordingForm.audioSamplingRate" size="small" style="width: 100%;">
+                  <el-option label="8K" :value="0" />
+                  <el-option label="11K" :value="1" />
+                  <el-option label="23K" :value="2" />
+                  <el-option label="32K" :value="3" />
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleStartRecording" :loading="jt1078ParamsLoading">发送录音命令</el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+
+          <!-- 单条多媒体标签页 -->
+          <el-tab-pane label="单条多媒体" name="singleMultimedia">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              单条存储多媒体数据检索上传命令
+            </div>
+            <el-form :model="jt1078SearchUploadMultimediaForm" label-width="140px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="多媒体ID">
+                <el-input-number v-model="jt1078SearchUploadMultimediaForm.id" :min="1" size="small" style="width: 100%;" />
+              </el-form-item>
+              <el-form-item label="删除标志">
+                <el-select v-model="jt1078SearchUploadMultimediaForm.delete" size="small" style="width: 100%;">
+                  <el-option label="保留" :value="0" />
+                  <el-option label="删除" :value="1" />
+                </el-select>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleSearchUploadMultimedia" :loading="jt1078ParamsLoading">检索上传单条多媒体</el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+
+          <!-- 终端升级标签页 -->
+          <el-tab-pane label="终端升级" name="terminalUpgrade">
+            <div class="panel-section-title" style="font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+              下发终端升级包
+            </div>
+            <el-form :model="jt1078TerminalUpgradeForm" label-width="140px" class="data-form" style="margin-top: 20px;">
+              <el-form-item label="升级类型">
+                <el-select v-model="jt1078TerminalUpgradeForm.type" size="small" style="width: 100%;">
+                  <el-option label="终端" :value="0" />
+                  <el-option label="读卡器" :value="12" />
+                  <el-option label="北斗" :value="52" />
+                </el-select>
+              </el-form-item>
+              <el-form-item label="制造商ID">
+                <el-input v-model="jt1078TerminalUpgradeForm.makerId" placeholder="终端制造商编码" size="small" />
+              </el-form-item>
+              <el-form-item label="版本号">
+                <el-input v-model="jt1078TerminalUpgradeForm.version" placeholder="版本号" size="small" />
+              </el-form-item>
+              <el-form-item label="数据包">
+                <el-input v-model="jt1078TerminalUpgradeForm.packet" type="textarea" :rows="4" placeholder="数据包(Base64编码)" />
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="handleTerminalUpgrade" :loading="jt1078ParamsLoading">下发升级包</el-button>
+              </el-form-item>
+            </el-form>
+          </el-tab-pane>
+        </el-tabs>
+      </div>
+      <div class="dialog-footer" style="margin-top: 20px;">
+        <el-button @click="jt1078ParamsDialogVisible = false">关闭</el-button>
+        <el-button v-if="jt1078ParamsTabActive === 'params'" type="primary" @click="handleQueryJt1078Params" :loading="jt1078ParamsLoading" icon="Search">查询参数</el-button>
+        <el-button v-if="jt1078ParamsTabActive === 'params'" type="success" @click="handleSetJt1078Params" :loading="jt1078ParamsLoading" icon="Check" :disabled="!hasModifiedParams">保存修改</el-button>
+        <el-button v-if="jt1078ParamsTabActive === 'attribute'" type="primary" @click="handleQueryJt1078Attribute" :loading="jt1078ParamsLoading" icon="Search">查询属性</el-button>
+        <el-button v-if="jt1078ParamsTabActive === 'location'" type="primary" @click="handleQueryJt1078Location" :loading="jt1078ParamsLoading" icon="Search">查询位置</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -3393,6 +4536,7 @@ import {
 } from "@/api/qs/zlm";
 import {DocumentCopy, InfoFilled, Refresh, Sunny, Moon, SwitchButton, CircleClose, Position, Plus, Delete, WindPower, List, Grid, CircleCheck, Picture, VideoCamera, MapLocation, Monitor, More, ArrowDown, Clock, Camera, Cpu, Histogram, Bell, Lock, Key, Timer, Place, OfficeBuilding, CollectionTag, Link, Medal, SetUp, Box, Connection, Odometer, Files, TrendCharts, Tools, Lightning, Warning, Loading, Search, Setting, VideoPlay, VideoPause} from '@element-plus/icons-vue'
 import StreamDropdown from "@/components/Channel/streamDropdown.vue";
+import { queryTerminalParams, setTerminalParams, querySpecificTerminalParams, terminalControl, queryTerminalAttribute, queryLocation, tempLocationTrack, confirmAlarm, linkCheck, sendText, eventSetting, sendQuestion, menuSetting, infoService, phoneCallback, setPhoneBook, vehicleControl, setCircleArea, deleteCircleArea, setRectArea, deleteRectArea, setPolygonArea, deletePolygonArea, setRoute, deleteRoute, queryAreaOrRoute, tachographDataCollect, tachographParamSend, reportDriverInfo, queryTerminalAVProperties, cameraShoot, searchMultimedia, uploadMultimedia, startRecording, searchUploadMultimedia, terminalUpgrade } from "@/api/qs/jt1078";
 import MediaInfo from "@/components/Channel/mediaInfo.vue";
 import SelectMapPosition from '@/components/SelectMapPosition';
 import ChannelCode from '@/views/components/common/channelCode.vue';
@@ -3621,6 +4765,381 @@ const cameraInfo = reactive<DaHuaCameraInfo>({
 const rtspUrlInfo = reactive<DaHuaRtspUrlInfo>({
   success: false,
   rtspUrls: []
+});
+// JT1078终端参数
+const jt1078ParamsDialogVisible = ref(false);
+const jt1078ParamsTabActive = ref('params');
+const jt1078ParamsLoading = ref(false);
+const jt1078CurrentDevice = reactive({
+  deviceId: '',
+  mobileNo: ''
+});
+const jt1078TerminalParams = reactive({});
+// JT1078终端属性
+const jt1078TerminalAttribute = reactive<any>({});
+// JT1078终端属性字段名映射
+const jt1078AttributeFieldMap: Record<string, string> = {
+  messageId: '消息ID',
+  properties: '属性',
+  protocolVersion: '协议版本',
+  clientId: '客户端ID',
+  serialNo: '流水号',
+  verified: '已验证',
+  version: '版本',
+  reserved: '保留',
+  subpackage: '分包',
+  bodyLength: '消息体长度',
+  encryption: '加密方式',
+  deviceType: '终端类型',
+  makerId: '制造商ID',
+  deviceModel: '终端型号',
+  deviceId: '终端ID',
+  iccid: '终端SIM卡ICCID',
+  hardwareVersion: '硬件版本号',
+  firmwareVersion: '固件版本号',
+  gnssAttribute: 'GNSS模块属性',
+  networkAttribute: '通信模块属性'
+};
+// JT1078驾驶员身份信息字段名映射
+const jt1078DriverInfoFieldMap: Record<string, string> = {
+  messageId: '消息ID',
+  properties: '属性',
+  protocolVersion: '协议版本',
+  clientId: '客户端ID',
+  serialNo: '流水号',
+  verified: '已验证',
+  status: '状态',
+  dateTime: '日期时间',
+  cardStatus: '卡状态',
+  version: '版本',
+  reserved: '保留',
+  subpackage: '分包',
+  bodyLength: '消息体长度',
+  encryption: '加密方式'
+};
+// JT1078终端音视频属性字段名映射
+const jt1078TerminalAVPropertiesFieldMap: Record<string, string> = {
+  messageId: '消息ID',
+  properties: '属性',
+  protocolVersion: '协议版本',
+  clientId: '客户端ID',
+  serialNo: '流水号',
+  verified: '已验证',
+  audioFormat: '音频编码格式',
+  audioChannels: '音频通道数',
+  audioSamplingRate: '音频采样率',
+  audioBitDepth: '音频采样精度',
+  audioFrameLength: '音频帧长度',
+  audioSupport: '音频输出支持',
+  videoFormat: '视频编码格式',
+  maxAudioChannels: '最大音频通道数',
+  maxVideoChannels: '最大视频通道数',
+  version: '版本',
+  reserved: '保留',
+  subpackage: '分包',
+  bodyLength: '消息体长度',
+  encryption: '加密方式'
+};
+// JT1078位置信息字段名映射
+const jt1078LocationFieldMap: Record<string, string> = {
+  messageId: '消息ID',
+  properties: '属性',
+  protocolVersion: '协议版本',
+  clientId: '客户端ID',
+  serialNo: '流水号',
+  verified: '已验证',
+  warnBit: '报警标志位',
+  statusBit: '状态标志位',
+  latitude: '原始纬度',
+  longitude: '原始经度',
+  altitude: '海拔高度',
+  speed: '原始速度',
+  direction: '方向',
+  deviceTime: '设备时间',
+  responseSerialNo: '应答流水号',
+  lng: '经度',
+  lat: '纬度',
+  speedKph: '速度(公里/小时)',
+  version: '版本',
+  reserved: '保留',
+  subpackage: '分包',
+  bodyLength: '消息体长度',
+  encryption: '加密方式'
+};
+// JT1078位置信息
+const jt1078Location = reactive<any>({});
+// JT1078临时位置跟踪控制表单
+const jt1078TempLocationForm = reactive({
+  interval: 10,
+  validityPeriod: 600
+});
+// JT1078人工确认报警消息表单
+const jt1078AlarmConfirmForm = reactive({
+  responseSerialNo: 0,
+  type: 0
+});
+// JT1078链路检测结果
+const jt1078LinkCheckResult = ref<any>(null);
+// JT1078文本信息下发表单
+const jt1078TextForm = reactive({
+  signBits: [] as number[],
+  type: 1,
+  content: ''
+});
+// JT1078事件设置表单
+const jt1078EventForm = reactive({
+  type: 1,
+  events: [] as { id: number; content: string }[]
+});
+// JT1078提问下发表单
+const jt1078QuestionForm = reactive({
+  signBits: [] as number[],
+  content: '',
+  options: [] as { id: number; content: string }[]
+});
+// JT1078信息点播菜单设置表单
+const jt1078MenuForm = reactive({
+  type: 1,
+  infos: [] as { type: number; name: string }[]
+});
+// JT1078信息服务表单
+const jt1078InfoServiceForm = reactive({
+  type: 0,
+  content: ''
+});
+// JT1078电话回拨表单
+const jt1078PhoneCallbackForm = reactive({
+  type: 0,
+  phoneNumber: ''
+});
+// JT1078设置电话本表单
+const jt1078PhoneBookForm = reactive({
+  type: 1,
+  contacts: [] as { sign: number; phone: string; name: string }[]
+});
+// JT1078车辆控制表单
+const jt1078VehicleControlForm = reactive({
+  type: 1,
+  param: 0
+});
+// JT1078车辆控制结果
+const jt1078VehicleControlResult = ref<any>(null);
+// JT1078设置圆形区域表单
+const jt1078CircleAreaForm = reactive({
+  action: 1,
+  items: [] as { id: number, attribute: number, latitude: number, longitude: number, radius: number, startTime: string, endTime: string, maxSpeed: number | null, duration: number | null, nightMaxSpeed: number | null, name: string }[]
+});
+// JT1078删除圆形区域表单
+const jt1078DeleteCircleForm = reactive({
+  ids: [] as number[]
+});
+// JT1078设置矩形区域表单
+const jt1078RectAreaForm = reactive({
+  action: 1,
+  items: [] as { id: number, attribute: number, latitudeUL: number, longitudeUL: number, latitudeLR: number, longitudeLR: number, startTime: string, endTime: string, maxSpeed: number | null, duration: number | null, nightMaxSpeed: number | null, name: string }[]
+});
+// JT1078删除矩形区域表单
+const jt1078DeleteRectForm = reactive({
+  ids: [] as number[]
+});
+// JT1078设置多边形区域表单
+const jt1078PolygonAreaForm = reactive({
+  id: 0,
+  attribute: 0,
+  startTime: '',
+  endTime: '',
+  maxSpeed: null as number | null,
+  duration: null as number | null,
+  nightMaxSpeed: null as number | null,
+  name: '',
+  points: [] as { latitude: number, longitude: number }[]
+});
+// JT1078删除多边形区域表单
+const jt1078DeletePolygonForm = reactive({
+  ids: [] as number[]
+});
+// JT1078设置路线表单
+const jt1078RouteForm = reactive({
+  id: 0,
+  attribute: 0,
+  startTime: '',
+  endTime: '',
+  name: '',
+  items: [] as { id: number, routeId: number, latitude: number, longitude: number, width: number, attribute: number, upperLimit: number | null, lowerLimit: number | null, maxSpeed: number | null, duration: number | null, nightMaxSpeed: number | null }[]
+});
+// JT1078删除路线表单
+const jt1078DeleteRouteForm = reactive({
+  ids: [] as number[]
+});
+// JT1078查询区域或线路表单
+const jt1078QueryAreaForm = reactive({
+  type: 1,
+  ids: [] as number[]
+});
+// JT1078查询结果
+const jt1078QueryAreaResult = ref<any>(null);
+// JT1078行驶记录仪数据采集命令表单
+const jt1078TachographDataCollectForm = reactive({});
+// JT1078行驶记录仪参数下传命令表单
+const jt1078TachographParamSendForm = reactive({
+  type: 130,
+  content: ''
+});
+// JT1078上报驾驶员身份信息请求结果
+const jt1078DriverInfoResult = ref<any>(null);
+// JT1078查询终端音视频属性结果
+const jt1078TerminalAVPropertiesResult = ref<any>(null);
+// JT1078摄像头立即拍摄命令表单
+const jt1078CameraShootForm = reactive({
+  channelId: 1,
+  command: 1,
+  time: 0,
+  save: 1,
+  resolution: 2,
+  quality: 5,
+  brightness: 128,
+  contrast: 64,
+  saturation: 64,
+  chroma: 128
+});
+// JT1078存储多媒体数据检索表单
+const jt1078SearchMultimediaForm = reactive({
+  type: 0,
+  channelId: 0,
+  event: 0,
+  startTime: '',
+  endTime: ''
+});
+// JT1078存储多媒体数据检索结果
+const jt1078SearchMultimediaResult = ref<any>(null);
+// JT1078存储多媒体数据上传表单
+const jt1078UploadMultimediaForm = reactive({
+  type: 0,
+  channelId: 0,
+  event: 0,
+  startTime: '',
+  endTime: '',
+  delete: 0
+});
+// JT1078录音开始命令表单
+const jt1078StartRecordingForm = reactive({
+  command: 1,
+  time: 0,
+  save: 1,
+  audioSamplingRate: 0
+});
+// JT1078单条存储多媒体数据检索上传命令表单
+const jt1078SearchUploadMultimediaForm = reactive({
+  id: 0,
+  delete: 0
+});
+// JT1078下发终端升级包表单
+const jt1078TerminalUpgradeForm = reactive({
+  type: 0,
+  makerId: '',
+  version: '',
+  packet: ''
+});
+const jt1078SetParamsForm = reactive({
+  parametersInt: {} as Record<number, number>,
+  parametersStr: {} as Record<number, string>
+});
+const jt1078TempParamId = ref(0);
+const jt1078TempParamValue = ref(0);
+const jt1078TempStrParamId = ref(0);
+const jt1078TempStrParamValue = ref('');
+
+// 查询指定参数表单
+const jt1078QuerySpecificForm = reactive({
+  ids: ''
+});
+const jt1078QuerySpecificResult = reactive({});
+const jt1078QuerySpecificEditableParams = ref<any[]>([]);
+
+// 终端控制表单
+const jt1078ControlForm = reactive({
+  command: 1,
+  parameter: ''
+});
+const jt1078ControlResult = ref<{ success: boolean; message: string } | null>(null);
+
+// 可编辑参数的计算属性
+const jt1078EditableParams = computed(() => {
+  const params = [];
+  // 从查询结果添加
+  if (jt1078TerminalParams) {
+    for (const [key, value] of Object.entries(jt1078TerminalParams)) {
+      // 处理对象类型，转换为JSON字符串
+      let displayValue = value;
+      let editableValue = value;
+      if (value && typeof value === 'object') {
+        displayValue = JSON.stringify(value, null, 2);
+        editableValue = JSON.stringify(value, null, 2);
+      }
+      params.push({
+        key,
+        value: displayValue,
+        editableValue,
+        originalValue: value,
+        isNew: false
+      });
+    }
+  }
+  // 从新添加的数值参数添加
+  if (jt1078SetParamsForm.parametersInt) {
+    for (const [key, value] of Object.entries(jt1078SetParamsForm.parametersInt)) {
+      // 避免重复
+      if (!params.find(p => p.key === String(key))) {
+        params.push({
+          key: String(key),
+          value: value,
+          editableValue: value,
+          originalValue: value,
+          isNew: true
+        });
+      }
+    }
+  }
+  // 从新添加的字符参数添加
+  if (jt1078SetParamsForm.parametersStr) {
+    for (const [key, value] of Object.entries(jt1078SetParamsForm.parametersStr)) {
+      // 避免重复
+      if (!params.find(p => p.key === String(key))) {
+        params.push({
+          key: String(key),
+          value: value,
+          editableValue: value,
+          originalValue: value,
+          isNew: true
+        });
+      }
+    }
+  }
+  return params;
+});
+
+// 判断是否有可编辑参数
+const hasEditableParams = computed(() => {
+  return jt1078EditableParams.value.length > 0;
+});
+
+// 判断是否有参数被修改（用于提示）
+const hasModifiedParams = computed(() => {
+  return jt1078EditableParams.value.some(param => {
+    // 新添加的参数总是认为被修改了
+    if (param.isNew) {
+      return true;
+    }
+    // 比较原始值和当前值是否不同
+    return String(param.originalValue) !== String(param.editableValue);
+  });
+});
+
+// 判断查询指定参数是否有修改
+const hasQuerySpecificModifiedParams = computed(() => {
+  return jt1078QuerySpecificEditableParams.value.some(param => {
+    return String(param.originalValue) !== String(param.editableValue);
+  });
 });
 // 设备配置
 const deviceConfigDialogVisible = ref(false);
@@ -5402,8 +6921,1403 @@ const handleMoreAction = (command: string, row: QsDevice) => {
       }
       openDeviceConfigDialog(row);
       break;
+    case 'jt1078Params':
+      if (row.deviceStatus !== 'ON') {
+        proxy.$modal.msgWarning('设备离线，无法操作终端参数');
+        return;
+      }
+      openJt1078ParamsDialog(row);
+      break;
   }
 }
+
+// 打开JT1078终端参数对话框
+const openJt1078ParamsDialog = (row: QsDevice) => {
+  currentDeviceRow.value = row;
+  jt1078CurrentDevice.deviceId = row.deviceCode || '';
+  jt1078CurrentDevice.mobileNo = row.jtMobileNo || '';
+  // 清空参数
+  Object.keys(jt1078TerminalParams).forEach(key => {
+    delete jt1078TerminalParams[key];
+  });
+  // 重置设置表单
+  Object.keys(jt1078SetParamsForm.parametersInt).forEach(key => {
+    delete jt1078SetParamsForm.parametersInt[key];
+  });
+  Object.keys(jt1078SetParamsForm.parametersStr).forEach(key => {
+    delete jt1078SetParamsForm.parametersStr[key];
+  });
+  jt1078TempParamId.value = 0;
+  jt1078TempParamValue.value = 0;
+  jt1078TempStrParamId.value = 0;
+  jt1078TempStrParamValue.value = '';
+  // 重置查询指定参数表单
+  jt1078QuerySpecificForm.ids = '';
+  Object.keys(jt1078QuerySpecificResult).forEach(key => {
+    delete jt1078QuerySpecificResult[key];
+  });
+  jt1078QuerySpecificEditableParams.value = [];
+  // 重置终端控制表单
+  jt1078ControlForm.command = 1;
+  jt1078ControlForm.parameter = '';
+  jt1078ControlResult.value = null;
+  // 重置标签页
+  jt1078ParamsTabActive.value = 'params';
+  jt1078ParamsDialogVisible.value = true;
+  // 自动查询参数
+  nextTick(() => {
+    handleQueryJt1078Params();
+  });
+};
+
+// 删除参数
+const removeParam = (key: string) => {
+  // 从查询结果删除
+  if (jt1078TerminalParams[key]) {
+    delete jt1078TerminalParams[key];
+  }
+  // 从数值参数删除
+  if (jt1078SetParamsForm.parametersInt[key]) {
+    delete jt1078SetParamsForm.parametersInt[key];
+  }
+  // 从字符参数删除
+  if (jt1078SetParamsForm.parametersStr[key]) {
+    delete jt1078SetParamsForm.parametersStr[key];
+  }
+};
+
+// 添加数值参数
+const addIntParam = () => {
+  if (jt1078TempParamId.value === null || jt1078TempParamId.value === undefined) {
+    proxy.$modal.msgWarning('请输入参数ID');
+    return;
+  }
+  if (jt1078TempParamValue.value === null || jt1078TempParamValue.value === undefined) {
+    proxy.$modal.msgWarning('请输入参数值');
+    return;
+  }
+  const key = String(jt1078TempParamId.value);
+  // 添加到查询结果中（统一展示）
+  jt1078TerminalParams[key] = jt1078TempParamValue.value;
+  jt1078TempParamId.value = 0;
+  jt1078TempParamValue.value = 0;
+};
+
+// 删除数值参数（保留以兼容）
+const removeIntParam = (key: number) => {
+  removeParam(String(key));
+};
+
+// 添加字符参数
+const addStrParam = () => {
+  if (jt1078TempStrParamId.value === null || jt1078TempStrParamId.value === undefined) {
+    proxy.$modal.msgWarning('请输入参数ID');
+    return;
+  }
+  if (!jt1078TempStrParamValue.value) {
+    proxy.$modal.msgWarning('请输入参数值');
+    return;
+  }
+  const key = String(jt1078TempStrParamId.value);
+  // 添加到查询结果中（统一展示）
+  jt1078TerminalParams[key] = jt1078TempStrParamValue.value;
+  jt1078TempStrParamId.value = 0;
+  jt1078TempStrParamValue.value = '';
+};
+
+// 删除字符参数（保留以兼容）
+const removeStrParam = (key: number) => {
+  removeParam(String(key));
+};
+
+// 查询JT1078终端参数
+const handleQueryJt1078Params = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await queryTerminalParams({
+      clientId: jt1078CurrentDevice.mobileNo
+    });
+
+    if (response.code === 200 && response.data) {
+      // 清空旧参数
+      Object.keys(jt1078TerminalParams).forEach(key => {
+        delete jt1078TerminalParams[key];
+      });
+      // 清空设置表单
+      Object.keys(jt1078SetParamsForm.parametersInt).forEach(key => {
+        delete jt1078SetParamsForm.parametersInt[key];
+      });
+      Object.keys(jt1078SetParamsForm.parametersStr).forEach(key => {
+        delete jt1078SetParamsForm.parametersStr[key];
+      });
+      // 复制新参数
+      if (response.data.parameters) {
+        Object.assign(jt1078TerminalParams, response.data.parameters);
+      }
+      proxy.$modal.msgSuccess('查询终端参数成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '查询失败');
+    }
+  } catch (error) {
+    console.error('查询终端参数失败:', error);
+    proxy.$modal.msgError('查询终端参数失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// 查询JT1078终端属性
+const handleQueryJt1078Attribute = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await queryTerminalAttribute({
+      clientId: jt1078CurrentDevice.mobileNo
+    });
+
+    if (response.code === 200 && response.data) {
+      // 清空旧属性
+      Object.keys(jt1078TerminalAttribute).forEach(key => {
+        delete jt1078TerminalAttribute[key];
+      });
+      // 复制新属性
+      Object.assign(jt1078TerminalAttribute, response.data);
+      proxy.$modal.msgSuccess('查询终端属性成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '查询失败');
+    }
+  } catch (error) {
+    console.error('查询终端属性失败:', error);
+    proxy.$modal.msgError('查询终端属性失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// 查询JT1078位置信息
+const handleQueryJt1078Location = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await queryLocation({
+      clientId: jt1078CurrentDevice.mobileNo
+    });
+
+    if (response.code === 200 && response.data) {
+      // 清空旧位置
+      Object.keys(jt1078Location).forEach(key => {
+        delete jt1078Location[key];
+      });
+      // 复制新位置
+      Object.assign(jt1078Location, response.data);
+      proxy.$modal.msgSuccess('查询位置信息成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '查询失败');
+    }
+  } catch (error) {
+    console.error('查询位置信息失败:', error);
+    proxy.$modal.msgError('查询位置信息失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078临时位置跟踪控制
+const handleTempLocationTrack = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await tempLocationTrack({
+      clientId: jt1078CurrentDevice.mobileNo,
+      interval: jt1078TempLocationForm.interval,
+      validityPeriod: jt1078TempLocationForm.validityPeriod
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('临时位置跟踪控制成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '控制失败');
+    }
+  } catch (error) {
+    console.error('临时位置跟踪控制失败:', error);
+    proxy.$modal.msgError('临时位置跟踪控制失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078人工确认报警消息
+const handleConfirmAlarm = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await confirmAlarm({
+      clientId: jt1078CurrentDevice.mobileNo,
+      responseSerialNo: jt1078AlarmConfirmForm.responseSerialNo,
+      type: jt1078AlarmConfirmForm.type
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('人工确认报警消息成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '确认失败');
+    }
+  } catch (error) {
+    console.error('人工确认报警消息失败:', error);
+    proxy.$modal.msgError('人工确认报警消息失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078链路检测
+const handleLinkCheck = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await linkCheck({
+      clientId: jt1078CurrentDevice.mobileNo
+    });
+
+    if (response.code === 200) {
+      jt1078LinkCheckResult.value = response.data;
+      proxy.$modal.msgSuccess('链路检测成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '检测失败');
+    }
+  } catch (error) {
+    console.error('链路检测失败:', error);
+    proxy.$modal.msgError('链路检测失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078文本信息下发
+const handleSendText = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  if (!jt1078TextForm.content) {
+    proxy.$modal.msgError('文本内容不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    let sign = 0;
+    jt1078TextForm.signBits.forEach(bit => {
+      sign |= bit;
+    });
+    const response = await sendText({
+      clientId: jt1078CurrentDevice.mobileNo,
+      sign: sign,
+      type: jt1078TextForm.type,
+      content: jt1078TextForm.content
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('文本信息下发成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '下发失败');
+    }
+  } catch (error) {
+    console.error('文本信息下发失败:', error);
+    proxy.$modal.msgError('文本信息下发失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078事件设置
+const handleEventSetting = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await eventSetting({
+      clientId: jt1078CurrentDevice.mobileNo,
+      type: jt1078EventForm.type,
+      events: jt1078EventForm.events
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('事件设置成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '设置失败');
+    }
+  } catch (error) {
+    console.error('事件设置失败:', error);
+    proxy.$modal.msgError('事件设置失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078提问下发
+const handleSendQuestion = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  if (!jt1078QuestionForm.content) {
+    proxy.$modal.msgError('问题内容不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    let sign = 0;
+    jt1078QuestionForm.signBits.forEach(bit => {
+      sign |= bit;
+    });
+    const response = await sendQuestion({
+      clientId: jt1078CurrentDevice.mobileNo,
+      sign: sign,
+      content: jt1078QuestionForm.content,
+      options: jt1078QuestionForm.options
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('提问下发成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '下发失败');
+    }
+  } catch (error) {
+    console.error('提问下发失败:', error);
+    proxy.$modal.msgError('提问下发失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078信息点播菜单设置
+const handleMenuSetting = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await menuSetting({
+      clientId: jt1078CurrentDevice.mobileNo,
+      type: jt1078MenuForm.type,
+      infos: jt1078MenuForm.infos
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('信息点播菜单设置成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '设置失败');
+    }
+  } catch (error) {
+    console.error('信息点播菜单设置失败:', error);
+    proxy.$modal.msgError('信息点播菜单设置失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078信息服务
+const handleInfoService = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  if (!jt1078InfoServiceForm.content) {
+    proxy.$modal.msgError('信息内容不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await infoService({
+      clientId: jt1078CurrentDevice.mobileNo,
+      type: jt1078InfoServiceForm.type,
+      content: jt1078InfoServiceForm.content
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('信息服务成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '服务失败');
+    }
+  } catch (error) {
+    console.error('信息服务失败:', error);
+    proxy.$modal.msgError('信息服务失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078电话回拨
+const handlePhoneCallback = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  if (!jt1078PhoneCallbackForm.phoneNumber) {
+    proxy.$modal.msgError('电话号码不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await phoneCallback({
+      clientId: jt1078CurrentDevice.mobileNo,
+      type: jt1078PhoneCallbackForm.type,
+      phoneNumber: jt1078PhoneCallbackForm.phoneNumber
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('电话回拨成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '回拨失败');
+    }
+  } catch (error) {
+    console.error('电话回拨失败:', error);
+    proxy.$modal.msgError('电话回拨失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078设置电话本
+const handleSetPhoneBook = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await setPhoneBook({
+      clientId: jt1078CurrentDevice.mobileNo,
+      type: jt1078PhoneBookForm.type,
+      contacts: jt1078PhoneBookForm.contacts
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('设置电话本成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '设置失败');
+    }
+  } catch (error) {
+    console.error('设置电话本失败:', error);
+    proxy.$modal.msgError('设置电话本失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078车辆控制
+const handleVehicleControl = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await vehicleControl({
+      clientId: jt1078CurrentDevice.mobileNo,
+      type: jt1078VehicleControlForm.type,
+      param: jt1078VehicleControlForm.param
+    });
+
+    if (response.code === 200) {
+      jt1078VehicleControlResult.value = response.data;
+      proxy.$modal.msgSuccess('车辆控制成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '控制失败');
+    }
+  } catch (error) {
+    console.error('车辆控制失败:', error);
+    proxy.$modal.msgError('车辆控制失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078设置圆形区域
+const handleSetCircleArea = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await setCircleArea({
+      clientId: jt1078CurrentDevice.mobileNo,
+      action: jt1078CircleAreaForm.action,
+      items: jt1078CircleAreaForm.items
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('设置圆形区域成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '设置失败');
+    }
+  } catch (error) {
+    console.error('设置圆形区域失败:', error);
+    proxy.$modal.msgError('设置圆形区域失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078删除圆形区域
+const handleDeleteCircleArea = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await deleteCircleArea({
+      clientId: jt1078CurrentDevice.mobileNo,
+      id: jt1078DeleteCircleForm.ids
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('删除圆形区域成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '删除失败');
+    }
+  } catch (error) {
+    console.error('删除圆形区域失败:', error);
+    proxy.$modal.msgError('删除圆形区域失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078设置矩形区域
+const handleSetRectArea = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await setRectArea({
+      clientId: jt1078CurrentDevice.mobileNo,
+      action: jt1078RectAreaForm.action,
+      items: jt1078RectAreaForm.items
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('设置矩形区域成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '设置失败');
+    }
+  } catch (error) {
+    console.error('设置矩形区域失败:', error);
+    proxy.$modal.msgError('设置矩形区域失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078删除矩形区域
+const handleDeleteRectArea = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await deleteRectArea({
+      clientId: jt1078CurrentDevice.mobileNo,
+      id: jt1078DeleteRectForm.ids
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('删除矩形区域成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '删除失败');
+    }
+  } catch (error) {
+    console.error('删除矩形区域失败:', error);
+    proxy.$modal.msgError('删除矩形区域失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078设置多边形区域
+const handleSetPolygonArea = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await setPolygonArea({
+      clientId: jt1078CurrentDevice.mobileNo,
+      id: jt1078PolygonAreaForm.id,
+      attribute: jt1078PolygonAreaForm.attribute,
+      startTime: jt1078PolygonAreaForm.startTime,
+      endTime: jt1078PolygonAreaForm.endTime,
+      maxSpeed: jt1078PolygonAreaForm.maxSpeed,
+      duration: jt1078PolygonAreaForm.duration,
+      nightMaxSpeed: jt1078PolygonAreaForm.nightMaxSpeed,
+      name: jt1078PolygonAreaForm.name,
+      points: jt1078PolygonAreaForm.points
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('设置多边形区域成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '设置失败');
+    }
+  } catch (error) {
+    console.error('设置多边形区域失败:', error);
+    proxy.$modal.msgError('设置多边形区域失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078删除多边形区域
+const handleDeletePolygonArea = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await deletePolygonArea({
+      clientId: jt1078CurrentDevice.mobileNo,
+      id: jt1078DeletePolygonForm.ids
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('删除多边形区域成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '删除失败');
+    }
+  } catch (error) {
+    console.error('删除多边形区域失败:', error);
+    proxy.$modal.msgError('删除多边形区域失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078设置路线
+const handleSetRoute = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await setRoute({
+      clientId: jt1078CurrentDevice.mobileNo,
+      id: jt1078RouteForm.id,
+      attribute: jt1078RouteForm.attribute,
+      startTime: jt1078RouteForm.startTime,
+      endTime: jt1078RouteForm.endTime,
+      name: jt1078RouteForm.name,
+      items: jt1078RouteForm.items
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('设置路线成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '设置失败');
+    }
+  } catch (error) {
+    console.error('设置路线失败:', error);
+    proxy.$modal.msgError('设置路线失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078删除路线
+const handleDeleteRoute = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await deleteRoute({
+      clientId: jt1078CurrentDevice.mobileNo,
+      id: jt1078DeleteRouteForm.ids
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('删除路线成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '删除失败');
+    }
+  } catch (error) {
+    console.error('删除路线失败:', error);
+    proxy.$modal.msgError('删除路线失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078查询区域或线路数据
+const handleQueryAreaOrRoute = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await queryAreaOrRoute({
+      clientId: jt1078CurrentDevice.mobileNo,
+      type: jt1078QueryAreaForm.type,
+      id: jt1078QueryAreaForm.ids
+    });
+
+    if (response.code === 200) {
+      jt1078QueryAreaResult.value = response.data;
+      proxy.$modal.msgSuccess('查询成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '查询失败');
+    }
+  } catch (error) {
+    console.error('查询失败:', error);
+    proxy.$modal.msgError('查询失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078行驶记录仪数据采集命令
+const handleTachographDataCollect = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await tachographDataCollect({
+      clientId: jt1078CurrentDevice.mobileNo
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('行驶记录仪数据采集命令发送成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '发送失败');
+    }
+  } catch (error) {
+    console.error('行驶记录仪数据采集命令发送失败:', error);
+    proxy.$modal.msgError('行驶记录仪数据采集命令发送失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078行驶记录仪参数下传命令
+const handleTachographParamSend = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await tachographParamSend({
+      clientId: jt1078CurrentDevice.mobileNo,
+      type: jt1078TachographParamSendForm.type,
+      content: jt1078TachographParamSendForm.content
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('行驶记录仪参数下传成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '下传失败');
+    }
+  } catch (error) {
+    console.error('行驶记录仪参数下传失败:', error);
+    proxy.$modal.msgError('行驶记录仪参数下传失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078上报驾驶员身份信息请求
+const handleReportDriverInfo = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await reportDriverInfo({
+      clientId: jt1078CurrentDevice.mobileNo
+    });
+
+    if (response.code === 200) {
+      jt1078DriverInfoResult.value = response.data;
+      proxy.$modal.msgSuccess('上报驾驶员身份信息请求成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '请求失败');
+    }
+  } catch (error) {
+    console.error('上报驾驶员身份信息请求失败:', error);
+    proxy.$modal.msgError('上报驾驶员身份信息请求失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078查询终端音视频属性
+const handleQueryTerminalAVProperties = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await queryTerminalAVProperties({
+      clientId: jt1078CurrentDevice.mobileNo
+    });
+
+    if (response.code === 200) {
+      jt1078TerminalAVPropertiesResult.value = response.data;
+      proxy.$modal.msgSuccess('查询终端音视频属性成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '查询失败');
+    }
+  } catch (error) {
+    console.error('查询终端音视频属性失败:', error);
+    proxy.$modal.msgError('查询终端音视频属性失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078摄像头立即拍摄命令
+const handleCameraShoot = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await cameraShoot({
+      clientId: jt1078CurrentDevice.mobileNo,
+      ...jt1078CameraShootForm
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('摄像头立即拍摄命令发送成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '发送失败');
+    }
+  } catch (error) {
+    console.error('摄像头立即拍摄命令发送失败:', error);
+    proxy.$modal.msgError('摄像头立即拍摄命令发送失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078存储多媒体数据检索
+const handleSearchMultimedia = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await searchMultimedia({
+      clientId: jt1078CurrentDevice.mobileNo,
+      ...jt1078SearchMultimediaForm
+    });
+
+    if (response.code === 200) {
+      jt1078SearchMultimediaResult.value = response.data;
+      proxy.$modal.msgSuccess('存储多媒体数据检索成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '检索失败');
+    }
+  } catch (error) {
+    console.error('存储多媒体数据检索失败:', error);
+    proxy.$modal.msgError('存储多媒体数据检索失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078存储多媒体数据上传
+const handleUploadMultimedia = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await uploadMultimedia({
+      clientId: jt1078CurrentDevice.mobileNo,
+      ...jt1078UploadMultimediaForm
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('存储多媒体数据上传命令发送成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '发送失败');
+    }
+  } catch (error) {
+    console.error('存储多媒体数据上传失败:', error);
+    proxy.$modal.msgError('存储多媒体数据上传失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078录音开始命令
+const handleStartRecording = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await startRecording({
+      clientId: jt1078CurrentDevice.mobileNo,
+      ...jt1078StartRecordingForm
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('录音命令发送成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '发送失败');
+    }
+  } catch (error) {
+    console.error('录音命令发送失败:', error);
+    proxy.$modal.msgError('录音命令发送失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078单条存储多媒体数据检索上传命令
+const handleSearchUploadMultimedia = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await searchUploadMultimedia({
+      clientId: jt1078CurrentDevice.mobileNo,
+      ...jt1078SearchUploadMultimediaForm
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('单条存储多媒体数据检索上传命令发送成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '发送失败');
+    }
+  } catch (error) {
+    console.error('单条存储多媒体数据检索上传命令发送失败:', error);
+    proxy.$modal.msgError('单条存储多媒体数据检索上传命令发送失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// JT1078下发终端升级包
+const handleTerminalUpgrade = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const response = await terminalUpgrade({
+      clientId: jt1078CurrentDevice.mobileNo,
+      ...jt1078TerminalUpgradeForm
+    });
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('终端升级包下发成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '下发失败');
+    }
+  } catch (error) {
+    console.error('终端升级包下发失败:', error);
+    proxy.$modal.msgError('终端升级包下发失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// 设置JT1078终端参数
+const handleSetJt1078Params = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  if (!hasModifiedParams.value) {
+    proxy.$modal.msgWarning('没有修改任何参数');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const requestData: any = {
+        clientId: jt1078CurrentDevice.mobileNo,
+        parametersLong: {} as Record<number, number>,
+        parametersStr: {} as Record<number, string>
+      };
+
+    // 遍历可编辑参数，只发送修改过的
+    jt1078EditableParams.value.forEach(param => {
+      const key = Number(param.key);
+      let value = param.editableValue;
+      
+      // 检查是否是新添加的或者被修改过
+      const isModified = param.isNew || String(param.originalValue) !== String(value);
+      if (!isModified) {
+        return; // 跳过未修改的参数
+      }
+      
+      // 尝试解析JSON字符串，但只有当originalValue是对象时才解析
+      let isObject = false;
+      if (typeof value === 'string' && param.originalValue && typeof param.originalValue === 'object') {
+        try {
+          value = JSON.parse(value);
+          isObject = true;
+        } catch (e) {
+          // 不是JSON，保持原样
+        }
+      }
+      
+      // 对象类型的参数跳过，不发送（这些是复杂对象，需要专门处理）
+      if (isObject || (value && typeof value === 'object')) {
+        console.warn('跳过对象类型参数，不建议编辑:', key, value);
+        return;
+      }
+      
+      // 尝试把值转换为数值，能成功就用parametersLong，否则用parametersStr
+      const numValue = Number(value);
+      if (!isNaN(numValue) && value !== '' && value !== null && value !== undefined) {
+        // 能转换为数值，用parametersLong发送
+        // 确保我们发送的是数值类型，而不是字符串
+        requestData.parametersLong[key] = numValue;
+      } else {
+        // 不能转换为数值，用parametersStr发送
+        requestData.parametersStr[key] = String(value);
+      }
+    });
+
+    // 如果没有参数，直接返回
+    const hasLongParams = Object.keys(requestData.parametersLong).length > 0;
+    const hasStrParams = Object.keys(requestData.parametersStr).length > 0;
+    
+    if (!hasLongParams && !hasStrParams) {
+      proxy.$modal.msgWarning('没有可保存的参数（对象类型参数不支持编辑）');
+      return;
+    }
+
+    // 清理数据，确保没有parameters字段，只保留需要的字段
+    const cleanRequestData: any = {
+      clientId: requestData.clientId
+    };
+    
+    if (hasLongParams) {
+      cleanRequestData.parametersLong = requestData.parametersLong;
+    }
+    if (hasStrParams) {
+      cleanRequestData.parametersStr = requestData.parametersStr;
+    }
+
+    console.log('发送保存请求:', cleanRequestData);
+    
+    const response = await setTerminalParams(cleanRequestData);
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('设置终端参数成功');
+      // 设置成功后重新查询
+      await handleQueryJt1078Params();
+    } else {
+      proxy.$modal.msgError(response.msg || '设置失败');
+    }
+  } catch (error) {
+    console.error('设置终端参数失败:', error);
+    proxy.$modal.msgError('设置终端参数失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// 查询指定终端参数
+const handleQuerySpecificTerminalParams = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  if (!jt1078QuerySpecificForm.ids.trim()) {
+    proxy.$modal.msgWarning('请输入参数ID列表');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+
+    // 解析参数ID列表
+    const idArray = jt1078QuerySpecificForm.ids
+      .split(',')
+      .map(id => parseInt(id.trim()))
+      .filter(id => !isNaN(id));
+
+    if (idArray.length === 0) {
+      proxy.$modal.msgWarning('参数ID格式无效');
+      return;
+    }
+
+    const response = await querySpecificTerminalParams({
+      clientId: jt1078CurrentDevice.mobileNo,
+      id: idArray
+    });
+
+    if (response.code === 200 && response.data) {
+      // 清空旧结果
+      Object.keys(jt1078QuerySpecificResult).forEach(key => {
+        delete jt1078QuerySpecificResult[key];
+      });
+      // 复制新结果
+      if (response.data.parameters) {
+        Object.assign(jt1078QuerySpecificResult, response.data.parameters);
+      }
+      // 初始化可编辑参数
+      jt1078QuerySpecificEditableParams.value = [];
+      for (const [key, value] of Object.entries(jt1078QuerySpecificResult)) {
+        let displayValue = value;
+        let editableValue = value;
+        if (value && typeof value === 'object') {
+          displayValue = JSON.stringify(value, null, 2);
+          editableValue = JSON.stringify(value, null, 2);
+        }
+        jt1078QuerySpecificEditableParams.value.push({
+          key,
+          value: displayValue,
+          editableValue,
+          originalValue: value,
+          isNew: false
+        });
+      }
+      proxy.$modal.msgSuccess('查询指定参数成功');
+    } else {
+      proxy.$modal.msgError(response.msg || '查询失败');
+    }
+  } catch (error) {
+    console.error('查询指定终端参数失败:', error);
+    proxy.$modal.msgError('查询指定终端参数失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// 终端控制
+const handleTerminalControl = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+
+    const requestData: any = {
+      clientId: jt1078CurrentDevice.mobileNo,
+      command: jt1078ControlForm.command
+    };
+
+    if (jt1078ControlForm.parameter.trim()) {
+      requestData.parameter = jt1078ControlForm.parameter.trim();
+    }
+
+    const response = await terminalControl(requestData);
+
+    if (response.code === 200) {
+      jt1078ControlResult.value = {
+        success: true,
+        message: '终端控制执行成功'
+      };
+      proxy.$modal.msgSuccess('终端控制执行成功');
+    } else {
+      jt1078ControlResult.value = {
+        success: false,
+        message: response.msg || '执行失败'
+      };
+      proxy.$modal.msgError(response.msg || '执行失败');
+    }
+  } catch (error) {
+    console.error('终端控制失败:', error);
+    jt1078ControlResult.value = {
+      success: false,
+      message: '终端控制执行失败'
+    };
+    proxy.$modal.msgError('终端控制执行失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
+
+// 保存查询指定参数的修改
+const handleSetQuerySpecificParams = async () => {
+  if (!jt1078CurrentDevice.mobileNo) {
+    proxy.$modal.msgError('设备手机号不能为空');
+    return;
+  }
+
+  if (!hasQuerySpecificModifiedParams.value) {
+    proxy.$modal.msgWarning('没有修改任何参数');
+    return;
+  }
+
+  try {
+    jt1078ParamsLoading.value = true;
+    const requestData: any = {
+        clientId: jt1078CurrentDevice.mobileNo,
+        parametersLong: {} as Record<number, number>,
+        parametersStr: {} as Record<number, string>
+      };
+
+    // 遍历可编辑参数，只发送修改过的
+    jt1078QuerySpecificEditableParams.value.forEach(param => {
+      const key = Number(param.key);
+      let value = param.editableValue;
+      
+      // 检查是否被修改过
+      const isModified = String(param.originalValue) !== String(value);
+      if (!isModified) {
+        return; // 跳过未修改的参数
+      }
+      
+      // 尝试解析JSON字符串，但只有当originalValue是对象时才解析
+      let isObject = false;
+      if (typeof value === 'string' && param.originalValue && typeof param.originalValue === 'object') {
+        try {
+          value = JSON.parse(value);
+          isObject = true;
+        } catch (e) {
+          // 不是JSON，保持原样
+        }
+      }
+      
+      // 对象类型的参数跳过，不发送（这些是复杂对象，需要专门处理）
+      if (isObject || (value && typeof value === 'object')) {
+        console.warn('跳过对象类型参数，不建议编辑:', key, value);
+        return;
+      }
+      
+      // 尝试把值转换为数值，能成功就用parametersLong，否则用parametersStr
+      const numValue = Number(value);
+      if (!isNaN(numValue) && value !== '' && value !== null && value !== undefined) {
+        // 能转换为数值，用parametersLong发送
+        // 确保我们发送的是数值类型，而不是字符串
+        requestData.parametersLong[key] = numValue;
+      } else {
+        // 不能转换为数值，用parametersStr发送
+        requestData.parametersStr[key] = String(value);
+      }
+    });
+
+    // 如果没有参数，直接返回
+    const hasLongParams = Object.keys(requestData.parametersLong).length > 0;
+    const hasStrParams = Object.keys(requestData.parametersStr).length > 0;
+    
+    if (!hasLongParams && !hasStrParams) {
+      proxy.$modal.msgWarning('没有可保存的参数（对象类型参数不支持编辑）');
+      return;
+    }
+
+    // 清理数据，确保没有parameters字段，只保留需要的字段
+    const cleanRequestData: any = {
+      clientId: requestData.clientId
+    };
+    
+    if (hasLongParams) {
+      cleanRequestData.parametersLong = requestData.parametersLong;
+    }
+    if (hasStrParams) {
+      cleanRequestData.parametersStr = requestData.parametersStr;
+    }
+
+    console.log('发送保存查询指定参数请求:', cleanRequestData);
+    
+    const response = await setTerminalParams(cleanRequestData);
+
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('设置终端参数成功');
+      // 设置成功后重新查询
+      await handleQuerySpecificTerminalParams();
+    } else {
+      proxy.$modal.msgError(response.msg || '设置失败');
+    }
+  } catch (error) {
+    console.error('设置终端参数失败:', error);
+    proxy.$modal.msgError('设置终端参数失败');
+  } finally {
+    jt1078ParamsLoading.value = false;
+  }
+};
 
 // 刷新设备状态和通道（GB28181）
 const handleRefreshDevice = async (row: QsDevice) => {
@@ -5518,6 +8432,17 @@ const handleReboot = async (row: QsDevice) => {
         return;
       }
       response = await rebootGb28181Device(row.gbDeviceId);
+    } else if (row.type === '14') {
+      // JT1078 设备 - 终端控制命令字4是终端复位（重启）
+      if (!row.jtMobileNo) {
+        proxy.$modal.msgError('设备未配置JT1078手机号');
+        return;
+      }
+      response = await terminalControl({
+        clientId: row.jtMobileNo,
+        command: 4, // 4表示终端复位（重启）
+        parameter: ''
+      });
     } else {
       proxy.$modal.msgError('不支持的设备类型');
       return;
@@ -6134,8 +9059,12 @@ const openDeviceInfoDialog = (row: QsDevice) => {
   const isHaikangIsupDevice = row.type === '8';
   const isDaHuaDevice = row.type === '9';
   const isGB28181Device = row.type === '12';
+  const isJT1078Device = row.type === '14';
   
-  if (isHaikangSdkDevice) {
+  if (isJT1078Device) {
+    // 打开JT1078终端参数对话框
+    openJt1078ParamsDialog(row);
+  } else if (isHaikangSdkDevice) {
     // 打开海康SDK设备信息弹窗
     haikangDeviceInfoTabActive.value = 'deviceInfo';
     Object.assign(haikangDeviceInfo, {
@@ -7703,6 +10632,29 @@ watch(easyPlayerOpen, (newVal) => {
 .app-container {
   padding: 16px;
   animation: fadeIn 0.4s ease-out;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+
+/* 滚动条美化 */
+.app-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.app-container::-webkit-scrollbar-track {
+  background: var(--el-fill-color-lighter);
+  border-radius: 4px;
+}
+
+.app-container::-webkit-scrollbar-thumb {
+  background: var(--el-border-color);
+  border-radius: 4px;
+  transition: background 0.3s;
+
+  &:hover {
+    background: var(--el-text-color-secondary);
+  }
 }
 
 @keyframes fadeIn {
@@ -10683,6 +13635,41 @@ html.dark {
   padding: 24px 20px 20px;
   animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
   overflow: hidden;
+}
+
+/* 终端参数对话框容器 */
+.terminal-params-dialog-wrapper {
+  position: relative;
+  padding: 24px 20px 20px;
+  animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) both;
+  overflow: hidden;
+}
+
+/* 终端参数表格容器 */
+.terminal-params-table-wrapper {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--el-border-color);
+  border-radius: 4px;
+}
+
+.terminal-params-table-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.terminal-params-table-wrapper::-webkit-scrollbar-track {
+  background: var(--el-fill-color-lighter);
+  border-radius: 4px;
+}
+
+.terminal-params-table-wrapper::-webkit-scrollbar-thumb {
+  background: var(--el-border-color);
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+.terminal-params-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--el-text-color-secondary);
 }
 
 .tab-content-wrapper::before {
