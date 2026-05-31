@@ -155,7 +155,7 @@
         </template>
       </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" width="180"/>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="300" fixed="right">
+      <el-table-column label="操作" align="center" class-name="small-padding fixed-width" width="350" fixed="right">
         <template #default="scope">
           <div class="table-actions">
             <el-tooltip content="播放" v-if="scope.row.deviceStatus === 'ON'">
@@ -1121,6 +1121,68 @@
             <div v-else style="text-align: center; padding: 20px; color: var(--el-text-color-secondary);">
               <p>该设备暂不支持云台控制及相关功能</p>
             </div>
+          </div>
+        </el-tab-pane>
+
+        <!-- 抓图记录 -->
+        <el-tab-pane label="抓图记录" name="snapshots">
+          <div style="padding: 10px;">
+            <!-- 顶部操作栏 -->
+            <div style="margin-bottom: 10px;">
+              <el-button type="primary" :icon="Camera" @click="handleCaptureFromStream" :loading="captureLoading" :disabled="!shouldShowCaptureBtn">
+                抓图
+              </el-button>
+              <el-button type="success" :icon="Refresh" @click="getDeviceSnapshotList" :loading="deviceSnapshotLoading">
+                刷新
+              </el-button>
+            </div>
+
+            <!-- 抓图网格列表 -->
+            <div v-loading="deviceSnapshotLoading">
+              <div v-if="deviceSnapshotList.length > 0" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;">
+                <div
+                  v-for="item in deviceSnapshotList"
+                  :key="item.id"
+                  style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); aspect-ratio: 1/1;"
+                >
+                  <!-- 图片 -->
+                  <image-preview v-if="item.fileUrl" :src="item.fileUrl" :width="'100%'" :height="'100%'"/>
+                  <!-- 右上角操作按钮 -->
+                  <div class="snapshot-actions" style="position: absolute; top: 8px; right: 8px; display: flex; gap: 4px;">
+                    <el-tooltip content="下载">
+                      <el-button
+                        type="success"
+                        text
+                        bg
+                        size="small"
+                        :icon="Download"
+                        @click.stop="handleDownloadDeviceSnapshot(item)"
+                      />
+                    </el-tooltip>
+                    <el-tooltip content="删除">
+                      <el-button
+                        type="danger"
+                        text
+                        bg
+                        size="small"
+                        :icon="Delete"
+                        @click.stop="handleDeleteDeviceSnapshot(item)"
+                      />
+                    </el-tooltip>
+                  </div>
+                </div>
+              </div>
+              <el-empty v-else description="暂无抓图记录" />
+            </div>
+
+            <!-- 分页 -->
+            <pagination
+              v-show="deviceSnapshotTotal > 0"
+              :total="deviceSnapshotTotal"
+              v-model:page="deviceSnapshotQuery.pageNum"
+              v-model:limit="deviceSnapshotQuery.pageSize"
+              @pagination="getDeviceSnapshotList"
+            />
           </div>
         </el-tab-pane>
       </el-tabs>
@@ -4428,7 +4490,7 @@
 </template>
 
 <script setup lang="ts" name="Device">
-import {onUnmounted, watch, nextTick, reactive, ref, getCurrentInstance, toRefs} from "vue";
+import {onUnmounted, watch, nextTick, reactive, ref, getCurrentInstance, toRefs, computed} from "vue";
 import useClipboard from "vue-clipboard3";
 import { ElLoading } from "element-plus";
 import {
@@ -4534,7 +4596,7 @@ import {
   startGb28181Play, stopGb28181Play,
   startJt1078Play, stopJt1078Play
 } from "@/api/qs/zlm";
-import {DocumentCopy, InfoFilled, Refresh, Sunny, Moon, SwitchButton, CircleClose, Position, Plus, Delete, WindPower, List, Grid, CircleCheck, Picture, VideoCamera, MapLocation, Monitor, More, ArrowDown, Clock, Camera, Cpu, Histogram, Bell, Lock, Key, Timer, Place, OfficeBuilding, CollectionTag, Link, Medal, SetUp, Box, Connection, Odometer, Files, TrendCharts, Tools, Lightning, Warning, Loading, Search, Setting, VideoPlay, VideoPause} from '@element-plus/icons-vue'
+import {DocumentCopy, InfoFilled, Refresh, Sunny, Moon, SwitchButton, CircleClose, Position, Plus, Delete, Download, WindPower, List, Grid, CircleCheck, Picture, VideoCamera, MapLocation, Monitor, More, ArrowDown, Clock, Camera, Cpu, Histogram, Bell, Lock, Key, Timer, Place, OfficeBuilding, CollectionTag, Link, Medal, SetUp, Box, Connection, Odometer, Files, TrendCharts, Tools, Lightning, Warning, Loading, Search, Setting, VideoPlay, VideoPause} from '@element-plus/icons-vue'
 import StreamDropdown from "@/components/Channel/streamDropdown.vue";
 import { queryTerminalParams, setTerminalParams, querySpecificTerminalParams, terminalControl, queryTerminalAttribute, queryLocation, tempLocationTrack, confirmAlarm, linkCheck, sendText, eventSetting, sendQuestion, menuSetting, infoService, phoneCallback, setPhoneBook, vehicleControl, setCircleArea, deleteCircleArea, setRectArea, deleteRectArea, setPolygonArea, deletePolygonArea, setRoute, deleteRoute, queryAreaOrRoute, tachographDataCollect, tachographParamSend, reportDriverInfo, queryTerminalAVProperties, cameraShoot, searchMultimedia, uploadMultimedia, startRecording, searchUploadMultimedia, terminalUpgrade } from "@/api/qs/jt1078";
 import MediaInfo from "@/components/Channel/mediaInfo.vue";
@@ -4548,6 +4610,8 @@ import {getAllDevice} from "@/api/qs/jt1078";
 import type {Jt1078Device} from "@/types/api/qs/jt1078";
 import {ElMessageBox} from "element-plus";
 import {useRouter} from "vue-router";
+import {captureFromStream, listSnapshot, delSnapshot} from "@/api/qs/snapshot";
+import type { QsDeviceSnapshot, SnapshotQueryParams } from "@/types/api/qs/snapshot";
 
 const {toClipboard} = useClipboard()
 
@@ -4602,6 +4666,19 @@ const isPresetSupported = ref(true); // 是否支持预置点功能
 const isQuality = ref(true);
 const isLive = ref(true);
 const sharedIframe = ref(null);
+const captureLoading = ref(false);
+
+// 抓图列表相关
+const deviceSnapshotList = ref<QsDeviceSnapshot[]>([]);
+const deviceSnapshotQuery = reactive({
+  deviceId: undefined as number | undefined,
+  pageNum: 1,
+  pageSize: 10,
+  snapshotType: undefined,
+  sdkType: undefined
+});
+const deviceSnapshotTotal = ref(0);
+const deviceSnapshotLoading = ref(false);
 
 // 云台
 const controSpeed = ref(5);
@@ -8373,6 +8450,128 @@ const handleRefreshDevice = async (row: QsDevice) => {
   }
 }
 
+// 计算属性：判断是否应该显示抓图按钮
+const shouldShowCaptureBtn = computed(() => {
+  const supportedTypes = ['1', '2', '3', '4', '5', '6', '13', '14']; // 1=RTSP, 2=RTMP, 3=FLV, 4=HLS, 5=ONVIF, 6=视频文件, 13=PUSH, 14=部标1078
+  const deviceType = deviceRow.value?.type;
+  return supportedTypes.includes(deviceType) && streamInfo.value?.app && streamInfo.value?.stream;
+});
+
+// 获取设备抓图列表
+function getDeviceSnapshotList() {
+  deviceSnapshotLoading.value = true;
+  listSnapshot({
+    ...deviceSnapshotQuery,
+    deviceId: deviceRow.value?.id
+  }).then(response => {
+    deviceSnapshotList.value = response.rows;
+    deviceSnapshotTotal.value = response.total;
+    deviceSnapshotLoading.value = false;
+  }).catch(() => {
+    deviceSnapshotLoading.value = false;
+  });
+}
+
+// 删除单个抓图记录
+function handleDeleteDeviceSnapshot(row: QsDeviceSnapshot) {
+  proxy.$modal.confirm('是否确认删除该抓图记录?').then(() => {
+    return delSnapshot(row.id!);
+  }).then(() => {
+    getDeviceSnapshotList();
+    proxy.$modal.msgSuccess("删除成功");
+  }).catch(() => {});
+}
+
+// 下载抓图
+// 下载抓图
+async function handleDownloadDeviceSnapshot(row: QsDeviceSnapshot) {
+  if (row.fileUrl) {
+    try {
+      // 用 fetch 获取 blob，确保真正下载而不是预览
+      const response = await fetch(row.fileUrl);
+      if (!response.ok) {
+        throw new Error('下载失败');
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      // 从URL中提取文件名作为默认下载名
+      const urlFileName = row.fileUrl.split('/').pop();
+      link.download = row.fileName || urlFileName || 'snapshot.jpg';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('下载失败:', error);
+      ElMessage.error('下载失败，请稍后重试');
+    }
+  }
+}
+
+// 简单的文件大小格式化
+function formatDeviceSnapshotFileSize(bytes: number | undefined): string {
+  if (bytes === undefined) return '-';
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+}
+
+// 从流中抓图
+const handleCaptureFromStream = async () => {
+  try {
+    await proxy.$modal.confirm(`是否确认对设备"${deviceRow.value?.deviceName}"进行抓图？`);
+    
+    captureLoading.value = true;
+    let response;
+    const deviceType = deviceRow.value?.type;
+    const deviceId = deviceRow.value?.id!;
+    const channelId = deviceRow.value?.channel || 0;
+    
+    // 根据设备类型调用不同的API
+    if (deviceType === '7') {
+      // 海康设备
+      response = await captureHaikangAndSave(deviceId, channelId, 'manual');
+    } else if (deviceType === '8') {
+      // 海康ISUP设备
+      response = await captureHaiKangIsupAndSave(deviceId, channelId, 'manual');
+    } else if (deviceType === '9') {
+      // 大华设备
+      response = await captureDaHuaAndSave(deviceId, channelId, 'manual');
+    } else {
+      // 其他设备（RTSP/RTMP/FLV/HLS/ONVIF等）
+      if (!streamInfo.value?.app || !streamInfo.value?.stream) {
+        proxy.$modal.msgError('流信息不完整，无法抓图');
+        return;
+      }
+      response = await captureFromStream({
+        deviceId: deviceId,
+        app: streamInfo.value.app,
+        stream: streamInfo.value.stream,
+        snapshotType: 'manual'
+      });
+    }
+    
+    if (response.code === 200) {
+      proxy.$modal.msgSuccess('抓图成功，已保存到数据库');
+      // 刷新抓图列表
+      getDeviceSnapshotList();
+    } else {
+      proxy.$modal.msgError(response.msg || '抓图失败');
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('抓图失败:', error);
+      proxy.$modal.msgError('抓图失败');
+    }
+  } finally {
+    captureLoading.value = false;
+  }
+};
+
 // 设备抓图
 const handleCapture = async (row: QsDevice) => {
   try {
@@ -10469,7 +10668,15 @@ watch(easyPlayerOpen, (newVal) => {
       loadPresetList();
     }, 500);
   }
-})
+});
+
+// 监听tab切换，当切换到抓图记录时自动加载数据
+watch(tabActiveName, (newVal) => {
+  if (newVal === 'snapshots') {
+    deviceSnapshotQuery.pageNum = 1;
+    getDeviceSnapshotList();
+  }
+});
 </script>
 
 <style lang="scss">
@@ -11951,9 +12158,7 @@ watch(easyPlayerOpen, (newVal) => {
   transform: translateY(-1px);
 }
 
-:deep(.el-select) {
-  width: 100%;
-}
+
 
 :deep(.el-radio-group .el-radio) {
   margin-right: 24px;
@@ -14478,6 +14683,36 @@ html.dark {
   &:hover {
     background: var(--el-text-color-secondary);
   }
+}
+
+/* 抓图记录操作按钮样式 */
+.snapshot-actions .el-button {
+  transition: all 0.2s ease;
+}
+
+.snapshot-actions .el-button:hover {
+  transform: scale(1.08);
+}
+
+/* 强制保持白色图标 */
+.snapshot-actions .el-button .el-icon {
+  color: #ffffff !important;
+}
+
+.snapshot-actions .el-button--success,
+.snapshot-actions .el-button--success[text],
+.snapshot-actions .el-button--success[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-success) !important;
+  border-color: var(--el-color-success) !important;
+}
+
+.snapshot-actions .el-button--danger,
+.snapshot-actions .el-button--danger[text],
+.snapshot-actions .el-button--danger[text][bg] {
+  color: #ffffff !important;
+  background-color: var(--el-color-danger) !important;
+  border-color: var(--el-color-danger) !important;
 }
 </style>
 

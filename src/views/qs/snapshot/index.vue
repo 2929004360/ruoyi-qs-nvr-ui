@@ -231,9 +231,27 @@ function handleSelectionChange(selection: QsDeviceSnapshot[]) {
   multiple.value = !selection.length
 }
 
-function handleDownload(row: QsDeviceSnapshot) {
+async function handleDownload(row: QsDeviceSnapshot) {
   if (row.fileUrl) {
-    downloadFile(row.fileUrl, row.fileName || 'snapshot.jpg')
+    try {
+      // 用 fetch 获取 blob，确保真正下载而不是预览
+      const response = await fetch(row.fileUrl);
+      if (!response.ok) {
+        throw new Error('下载失败');
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = row.fileName || row.fileUrl.split('/').pop() || 'snapshot.jpg';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('下载失败:', error);
+      ElMessage.error('下载失败，请稍后重试');
+    }
   }
 }
 

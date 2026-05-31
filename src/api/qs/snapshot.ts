@@ -35,3 +35,17 @@ export function exportSnapshot(query: SnapshotQueryParams): Promise<AjaxResult> 
         params: query
     })
 }
+
+// 从流中抓图并保存
+export function captureFromStream(data: {
+    deviceId: number;
+    app: string;
+    stream: string;
+    snapshotType?: string;
+}): Promise<AjaxResult<QsDeviceSnapshot>> {
+    return request({
+        url: '/qs/snapshot/captureFromStream',
+        method: 'post',
+        params: data
+    })
+}
