@@ -24,6 +24,14 @@
 
         <screenfull id="screenfull" class="right-menu-item hover-effect" />
 
+        <el-tooltip content="大屏展示" effect="dark" placement="bottom">
+          <div class="right-menu-item hover-effect" @click="goToDashboard">
+            <el-icon :size="18">
+              <Monitor />
+            </el-icon>
+          </div>
+        </el-tooltip>
+
         <el-tooltip content="主题模式" effect="dark" placement="bottom">
           <div class="right-menu-item hover-effect theme-switch-wrapper" @click="toggleTheme">
             <div class="theme-icon-wrapper" :class="{ 'is-dark': settingsStore.isDark }">
@@ -82,7 +90,7 @@
 
 <script setup lang="ts">
 import { ElMessageBox } from 'element-plus'
-import { ArrowDown, User, Setting, Lock, SwitchButton, Sunny, Moon } from '@element-plus/icons-vue'
+import { ArrowDown, User, Setting, Lock, SwitchButton, Sunny, Moon, Monitor } from '@element-plus/icons-vue'
 import Breadcrumb from '@/components/Breadcrumb/index.vue'
 import TopNav from '@/components/TopNav/index.vue'
 import TopBar from './TopBar/index.vue'
@@ -108,6 +116,10 @@ const settingsStore = useSettingsStore()
 
 function toggleSideBar(): void {
   appStore.toggleSideBar()
+}
+
+function goToDashboard(): void {
+  router.push('/qs/dashboard/index')
 }
 
 function handleCommand(command: string): void {

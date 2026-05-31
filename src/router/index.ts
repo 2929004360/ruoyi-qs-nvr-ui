@@ -95,6 +95,18 @@ export const constantRoutes = [
     hidden: true,
     component: () => import('@/views/components/easyPlayer.vue')
   },
+  {
+    path: '/qs/dashboard',
+    hidden: true,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/qs/dashboard/index.vue'),
+        name: 'QsDashboard',
+        meta: { title: '大屏监控', icon: 'monitor' }
+      }
+    ]
+  },
 ]
 
 // 动态路由，基于用户权限动态去加载
