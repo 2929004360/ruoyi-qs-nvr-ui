@@ -119,7 +119,7 @@ function toggleSideBar(): void {
 }
 
 function goToDashboard(): void {
-  router.push('/qs/dashboard/index')
+  window.open('/dashboard/index', '_blank')
 }
 
 function handleCommand(command: string): void {

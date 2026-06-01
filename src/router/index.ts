@@ -96,7 +96,7 @@ export const constantRoutes = [
     component: () => import('@/views/components/easyPlayer.vue')
   },
   {
-    path: '/qs/dashboard',
+    path: '/dashboard',
     hidden: true,
     children: [
       {
