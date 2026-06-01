@@ -1,7 +1,7 @@
 <div align="center">
 
 <br />
-<img alt="logo" src="../images/logo.png" width="150" height="150">
+<img alt="logo" src="images/logo.png" width="150" height="150">
 
 <br />
 <br />
@@ -350,36 +350,36 @@ com.ruoyi
 <div align="center">
   <table>
     <tr>
-      <td><img src="../images/1.png" width="100%"/></td>
-      <td><img src="../images/2.png" width="100%"/></td>
+      <td><img src="images/1.png" width="100%"/></td>
+      <td><img src="images/2.png" width="100%"/></td>
     </tr>
     <tr>
-      <td><img src="../images/3.png" width="100%"/></td>
-      <td><img src="../images/4.png" width="100%"/></td>
+      <td><img src="images/3.png" width="100%"/></td>
+      <td><img src="images/4.png" width="100%"/></td>
     </tr>
     <tr>
-      <td><img src="../images/5.png" width="100%"/></td>
-      <td><img src="../images/6.png" width="100%"/></td>
+      <td><img src="images/5.png" width="100%"/></td>
+      <td><img src="images/6.png" width="100%"/></td>
     </tr>
     <tr>
-      <td><img src="../images/7.png" width="100%"/></td>
-      <td><img src="../images/8.png" width="100%"/></td>
+      <td><img src="images/7.png" width="100%"/></td>
+      <td><img src="images/8.png" width="100%"/></td>
     </tr>
     <tr>
-      <td><img src="../images/9.png" width="100%"/></td>
-      <td><img src="../images/10.png" width="100%"/></td>
+      <td><img src="images/9.png" width="100%"/></td>
+      <td><img src="images/10.png" width="100%"/></td>
     </tr>
     <tr>
-      <td><img src="../images/11.png" width="100%"/></td>
-      <td><img src="../images/12.png" width="100%"/></td>
+      <td><img src="images/11.png" width="100%"/></td>
+      <td><img src="images/12.png" width="100%"/></td>
     </tr>
     <tr>
-      <td><img src="../images/13.png" width="100%"/></td>
-      <td><img src="../images/14.png" width="100%"/></td>
+      <td><img src="images/13.png" width="100%"/></td>
+      <td><img src="images/14.png" width="100%"/></td>
     </tr>
     <tr>
-      <td><img src="../images/15.png" width="100%"/></td>
-      <td><img src="../images/16.png" width="100%"/></td>
+      <td><img src="images/15.png" width="100%"/></td>
+      <td><img src="images/16.png" width="100%"/></td>
     </tr>
   </table>
 </div>
@@ -391,7 +391,7 @@ com.ruoyi
 也可以自愿有偿加入知识星球咨询：
 
 <div align="center">
-  <img src="../images/xingqui.jpg" width="50%" height="50%">
+  <img src="images/xingqui.jpg" width="50%" height="50%">
 </div>
 
 ---
