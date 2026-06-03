@@ -242,16 +242,14 @@
                   <!-- 目录订阅/取消订阅（GB28181） -->
                   <el-dropdown-item v-if="scope.row.type === '12' && scope.row.subscribeCatalogStatus !== 1" :disabled="scope.row.deviceStatus !== 'ON'" command="subscribeCatalog" icon="Connection">目录订阅</el-dropdown-item>
                   <el-dropdown-item v-if="scope.row.type === '12' && scope.row.subscribeCatalogStatus === 1" :disabled="scope.row.deviceStatus !== 'ON'" command="unsubscribeCatalog" icon="SwitchButton">取消目录订阅</el-dropdown-item>
-                  <!-- 设备校时（海康/大华/海康ISUP） -->
-                  <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
-                  <!-- 设备信息（大华/海康/海康ISUP/GB28181） -->
-                  <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9' || scope.row.type === '12' || scope.row.type === '14'" :disabled="scope.row.deviceStatus !== 'ON'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
-                  <!-- 海康设备抓图 -->
-                  <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8'" :disabled="scope.row.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
-                  <!-- 大华设备抓图 -->
-                  <el-dropdown-item v-if="scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
-                  <!-- 设备重启（海康/大华/海康ISUP/GB28181/JT1078） -->
-                  <el-dropdown-item v-if="scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9' || scope.row.type === '12' || scope.row.type === '14'" :disabled="scope.row.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
+                  <!-- 设备校时（海康/大华/海康ISUP/ONVIF） -->
+                  <el-dropdown-item v-if="scope.row.type === '5' || scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
+                  <!-- 设备信息（大华/海康/海康ISUP/GB28181/ONVIF） -->
+                  <el-dropdown-item v-if="scope.row.type === '5' || scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9' || scope.row.type === '12' || scope.row.type === '14'" :disabled="scope.row.deviceStatus !== 'ON'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
+                  <!-- 设备抓图（海康/海康ISUP/大华/ONVIF） -->
+                  <el-dropdown-item v-if="scope.row.type === '5' || scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9'" :disabled="scope.row.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
+                  <!-- 设备重启（海康/大华/海康ISUP/GB28181/JT1078/ONVIF） -->
+                  <el-dropdown-item v-if="scope.row.type === '5' || scope.row.type === '7' || scope.row.type === '8' || scope.row.type === '9' || scope.row.type === '12' || scope.row.type === '14'" :disabled="scope.row.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
                   <!-- GB28181录像控制 -->
                   <el-dropdown-item v-if="scope.row.type === '12'" :disabled="scope.row.deviceStatus !== 'ON'" command="recordControl" icon="VideoCamera">录像控制</el-dropdown-item>
                   <!-- 设备配置查询 -->
@@ -411,16 +409,14 @@
                       <!-- 目录订阅/取消订阅（GB28181） -->
                       <el-dropdown-item v-if="item.type === '12' && item.subscribeCatalogStatus !== 1" :disabled="item.deviceStatus !== 'ON'" command="subscribeCatalog" icon="Connection">目录订阅</el-dropdown-item>
                       <el-dropdown-item v-if="item.type === '12' && item.subscribeCatalogStatus === 1" :disabled="item.deviceStatus !== 'ON'" command="unsubscribeCatalog" icon="SwitchButton">取消目录订阅</el-dropdown-item>
-                      <!-- 设备校时（海康/大华/海康ISUP） -->
-                      <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
-                      <!-- 设备信息（大华/海康/海康ISUP/GB28181） -->
-                      <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9' || item.type === '12' || item.type === '14'" :disabled="item.deviceStatus !== 'ON'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
-                      <!-- 海康设备抓图 -->
-                      <el-dropdown-item v-if="item.type === '7' || item.type === '8'" :disabled="item.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
-                      <!-- 大华设备抓图 -->
-                      <el-dropdown-item v-if="item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
-                      <!-- 设备重启（海康/大华/海康ISUP/GB28181/JT1078） -->
-                      <el-dropdown-item v-if="item.type === '7' || item.type === '8' || item.type === '9' || item.type === '12' || item.type === '14'" :disabled="item.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
+                      <!-- 设备校时（海康/大华/海康ISUP/ONVIF） -->
+                      <el-dropdown-item v-if="item.type === '5' || item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="timeSync" icon="Clock" class="time-sync-item">校时</el-dropdown-item>
+                      <!-- 设备信息（大华/海康/海康ISUP/GB28181/ONVIF） -->
+                      <el-dropdown-item v-if="item.type === '5' || item.type === '7' || item.type === '8' || item.type === '9' || item.type === '12' || item.type === '14'" :disabled="item.deviceStatus !== 'ON'" command="deviceInfo" icon="InfoFilled" class="time-sync-item">设备信息</el-dropdown-item>
+                      <!-- 设备抓图（海康/海康ISUP/大华/ONVIF） -->
+                      <el-dropdown-item v-if="item.type === '5' || item.type === '7' || item.type === '8' || item.type === '9'" :disabled="item.deviceStatus !== 'ON'" command="capture" icon="Camera">抓图</el-dropdown-item>
+                      <!-- 设备重启（海康/大华/海康ISUP/GB28181/JT1078/ONVIF） -->
+                  <el-dropdown-item v-if="item.type === '5' || item.type === '7' || item.type === '8' || item.type === '9' || item.type === '12' || item.type === '14'" :disabled="item.deviceStatus !== 'ON'" command="reboot" icon="Refresh" class="is-danger">重启</el-dropdown-item>
                       <!-- GB28181录像控制 -->
                   <el-dropdown-item v-if="item.type === '12'" :disabled="item.deviceStatus !== 'ON'" command="recordControl" icon="VideoCamera">录像控制</el-dropdown-item>
                   <!-- 设备配置查询 -->
@@ -519,7 +515,7 @@
                 </el-form-item>
                 <!-- 其他 -->
                 <el-form-item label="IP地址" prop="ipAddress" v-if="form.type === '5' || form.type === '7' || (form.type === '9' && form.onlineType === '1')">
-                  <el-select v-if="form.type === '5'" v-model="form.ipAddress" @change="onvifDeviceCodeChange" placeholder="请选择设备IP" filterable style="width: 100%;">
+                  <el-select v-if="form.type === '5'" v-model="form.ipAddress" @change="onvifDeviceCodeChange" placeholder="请选择或输入设备IP" filterable allow-create style="width: 100%;">
                     <el-option v-for="item in onvifDeviceList" :key="item.ip" :label="item.ip" :value="item.ip" />
                   </el-select>
                   <el-input v-else v-model="form.ipAddress" placeholder="请输入IP地址" :maxlength="50" show-word-limit/>
@@ -565,12 +561,12 @@
             <!-- ONVIF特有 -->
             <template v-if="form.type === '5'">
               <el-form-item label="验证类型" prop="onvifAuth">
-                <el-radio-group v-model="form.onvifAuth">
-                  <el-radio v-for="dict in qs_onvif_auth" :key="dict.value" :label="dict.value">{{ dict.label }}</el-radio>
-                </el-radio-group>
-              </el-form-item>
-              <el-form-item style="margin: -8px 0 0 90px;">
-                <el-button type="primary" @click="onvifAuthLogin" size="small">认证</el-button>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <el-radio-group v-model="form.onvifAuth">
+                    <el-radio v-for="dict in qs_onvif_auth" :key="dict.value" :label="dict.value">{{ dict.label }}</el-radio>
+                  </el-radio-group>
+                  <el-button type="primary" @click="onvifAuthLogin" size="small">认证</el-button>
+                </div>
               </el-form-item>
               <el-form-item label="流地址" prop="liveAddress">
                 <el-select v-model="form.liveAddress" placeholder="请选择流地址" filterable style="width: 100%;">
@@ -1026,8 +1022,8 @@
                   </div>
                 </el-tab-pane>
                 
-                <!-- 看守位控制 -->
-                <el-tab-pane label="看守位">
+                <!-- 看守位控制 - 仅 GB28181 -->
+                <el-tab-pane v-if="isGb28181Device" label="看守位">
                   <div class="control-panel">
                     <el-form :model="homePositionForm" label-width="100px" style="margin-top: 20px;">
                       <el-form-item label="预置点编号">
@@ -1051,8 +1047,8 @@
                   </div>
                 </el-tab-pane>
                 
-                <!-- 巡航轨迹管理 -->
-                <el-tab-pane label="巡航轨迹">
+                <!-- 巡航轨迹管理 - 仅 GB28181 -->
+                <el-tab-pane v-if="isGb28181Device" label="巡航轨迹">
                   <div class="control-panel">
                     <el-form :model="cruiseTrackForm" label-width="100px" style="margin-top: 20px;">
                       <el-form-item label="轨迹编号">
@@ -1083,8 +1079,8 @@
                   </div>
                 </el-tab-pane>
                 
-                <!-- PTZ精准控制 -->
-                <el-tab-pane label="精准控制">
+                <!-- PTZ精准控制 - 仅 GB28181 -->
+                <el-tab-pane v-if="isGb28181Device" label="精准控制">
                   <div class="control-panel">
                     <el-form :model="ptzPreciseForm" label-width="100px" style="margin-top: 20px;">
                       <el-form-item label="水平位置(0-359)">
@@ -1255,6 +1251,9 @@
         <el-form-item v-if="timeSyncForm.deviceType === '7' || timeSyncForm.deviceType === '8'">
           <div style="color: #909399; font-size: 12px;">海康设备仅支持本地时间同步到设备</div>
         </el-form-item>
+        <el-form-item v-if="timeSyncForm.deviceType === '5'">
+          <div style="color: #909399; font-size: 12px;">ONVIF设备：若不设置同步时间，将使用服务器当前时间</div>
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="timeSyncDialogVisible = false">取消</el-button>
@@ -1264,7 +1263,7 @@
 
     <!-- 设备信息对话框 -->
     <el-dialog :title="(currentDeviceRow?.type === '7' || currentDeviceRow?.type === '8') ? '海康设备信息' : '大华设备信息'" v-model="deviceInfoDialogVisible" width="850px" append-to-body class="glass-dialog device-info-dialog">
-      <el-tabs v-model="deviceInfoTabActive" type="border-card">
+      <el-tabs v-model="deviceInfoTabActive" type="border-card" @tab-change="handleDeviceInfoTabChange">
         <!-- 设备信息标签页 -->
         <el-tab-pane label="设备信息" name="deviceInfo">
           <div class="device-info-dashboard" v-loading="deviceInfoLoading">
@@ -2102,7 +2101,7 @@
 
     <!-- 海康设备信息弹窗 -->
     <el-dialog title="海康设备信息" v-model="haikangDeviceInfoDialogVisible" width="850px" append-to-body class="glass-dialog device-info-dialog">
-      <el-tabs v-model="haikangDeviceInfoTabActive" type="border-card">
+      <el-tabs v-model="haikangDeviceInfoTabActive" type="border-card" @tab-change="handleHaikangDeviceInfoTabChange">
         <!-- 设备信息标签页 -->
         <el-tab-pane label="设备信息" name="deviceInfo">
           <div class="device-info-dashboard" v-loading="haikangDeviceInfoLoading">
@@ -2512,7 +2511,7 @@
 
     <!-- 海康ISUP设备信息弹窗 -->
     <el-dialog title="海康ISUP设备信息" v-model="haikangIsupDeviceInfoDialogVisible" width="850px" append-to-body class="glass-dialog device-info-dialog">
-      <el-tabs v-model="haikangIsupDeviceInfoTabActive" type="border-card">
+      <el-tabs v-model="haikangIsupDeviceInfoTabActive" type="border-card" @tab-change="handleHaikangIsupDeviceInfoTabChange">
         <!-- 设备信息标签页 -->
         <el-tab-pane label="设备信息" name="deviceInfo">
           <div class="device-info-dashboard" v-loading="haikangIsupDeviceInfoLoading">
@@ -3342,6 +3341,470 @@
       </div>
     </el-dialog>
 
+    <!-- ONVIF设备信息对话框 -->
+    <el-dialog title="ONVIF设备信息" v-model="onvifDeviceInfoDialogVisible" width="850px" append-to-body class="glass-dialog device-info-dialog">
+      <el-tabs v-model="onvifDeviceInfoTabActive" type="border-card" @tab-change="handleOnvifTabChange">
+        <!-- 设备信息标签页 -->
+        <el-tab-pane label="设备信息" name="deviceInfo">
+          <div class="device-info-dashboard" v-loading="onvifDeviceInfoLoading">
+            <el-empty v-if="!onvifDeviceInfo.success" description="暂无设备信息" />
+            <template v-else>
+              <div class="dashboard-header">
+                <div class="dashboard-title">
+                  <el-icon class="dashboard-icon"><Cpu /></el-icon>
+                  <span>设备基本信息</span>
+                </div>
+              </div>
+              <div class="info-cards-grid cols-3">
+                <div class="info-card primary" style="animation-delay: 0.04s">
+                  <div class="info-card-glow"></div>
+                  <div class="info-card-icon"><el-icon><OfficeBuilding /></el-icon></div>
+                  <div class="info-card-content">
+                    <div class="info-card-label">厂商</div>
+                    <div class="info-card-value">{{ onvifDeviceInfo.manufacturer || '-' }}</div>
+                  </div>
+                </div>
+                <div class="info-card success" style="animation-delay: 0.07s">
+                  <div class="info-card-glow"></div>
+                  <div class="info-card-icon"><el-icon><SetUp /></el-icon></div>
+                  <div class="info-card-content">
+                    <div class="info-card-label">型号</div>
+                    <div class="info-card-value">{{ onvifDeviceInfo.model || '-' }}</div>
+                  </div>
+                </div>
+                <div class="info-card warning" style="animation-delay: 0.10s">
+                  <div class="info-card-glow"></div>
+                  <div class="info-card-icon"><el-icon><Medal /></el-icon></div>
+                  <div class="info-card-content">
+                    <div class="info-card-label">固件版本</div>
+                    <div class="info-card-value">{{ onvifDeviceInfo.firmwareVersion || '-' }}</div>
+                  </div>
+                </div>
+                <div class="info-card info" style="animation-delay: 0.13s">
+                  <div class="info-card-glow"></div>
+                  <div class="info-card-icon"><el-icon><VideoCamera /></el-icon></div>
+                  <div class="info-card-content">
+                    <div class="info-card-label">Profile 数量</div>
+                    <div class="info-card-value">{{ onvifDeviceInfo.profileCount || '-' }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 流地址信息 -->
+              <div v-if="onvifDeviceInfo.streamUris && onvifDeviceInfo.streamUris.length > 0" style="margin-top: 30px;">
+                <div class="panel-header">
+                  <el-icon><Link /></el-icon>
+                  <span>流地址</span>
+                </div>
+                <el-table :data="onvifDeviceInfo.streamUris" border size="small" style="width: 100%; margin-top: 15px;">
+                  <el-table-column prop="type" label="类型" width="150">
+                    <template #default="{ row }">
+                      <el-tag v-if="row.type === 'main'" type="primary">主码流</el-tag>
+                      <el-tag v-else-if="row.type === 'sub'" type="success">子码流</el-tag>
+                      <el-tag v-else>{{ row.type || '-' }}</el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="uri" label="地址">
+                    <template #default="{ row }">
+                      <el-input :value="row.uri || '-'" readonly size="small">
+                        <template #append>
+                          <el-button @click="handleCopy(row.uri)" icon="DocumentCopy">复制</el-button>
+                        </template>
+                      </el-input>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </div>
+
+              <!-- Profile 信息 -->
+              <div v-if="onvifDeviceInfo.profiles && onvifDeviceInfo.profiles.length > 0" style="margin-top: 30px;">
+                <div class="panel-header">
+                  <el-icon><VideoCamera /></el-icon>
+                  <span>Profiles</span>
+                </div>
+                <el-table :data="onvifDeviceInfo.profiles" border size="small" style="width: 100%; margin-top: 15px;">
+                  <el-table-column prop="token" label="Token" width="250" />
+                  <el-table-column prop="name" label="名称" />
+                </el-table>
+              </div>
+            </template>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="onvifDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleRefreshOnvifDeviceInfo" :loading="onvifDeviceInfoLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+        <!-- 存储配置标签页 -->
+        <el-tab-pane label="存储配置" name="storageConfigurations" @tab-click="handleGetOnvifStorageConfigurations">
+          <div class="tab-content-wrapper" v-loading="onvifStorageLoading">
+            <div class="panel-header">
+              <el-icon><SetUp /></el-icon>
+              <span>存储配置信息</span>
+            </div>
+            <el-alert v-if="onvifStorageConfigurations.hasError" type="error" :title="onvifStorageConfigurations.errorMessage || '获取配置出错'" show-icon style="margin-bottom: 20px;" />
+            <el-empty v-else-if="!onvifStorageConfigurations.success" description="暂无存储配置信息" />
+            <div v-else>
+              <el-table v-if="onvifStorageConfigurations.configurations && onvifStorageConfigurations.configurations.length > 0" :data="onvifStorageConfigurations.configurations" border size="small" style="width: 100%;">
+                <el-table-column prop="token" label="Token" width="200" />
+                <el-table-column prop="name" label="名称" width="150" />
+                <el-table-column prop="type" label="类型" width="120" />
+                <el-table-column prop="storageUri" label="存储地址" min-width="200" />
+                <el-table-column prop="enabled" label="启用状态" width="100">
+                  <template #default="{ row }">
+                    <el-tag :type="row.enabled ? 'success' : 'info'">{{ row.enabled ? '已启用' : '未启用' }}</el-tag>
+                  </template>
+                </el-table-column>
+              </el-table>
+              <el-empty v-else description="暂无存储配置数据" />
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="onvifDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetOnvifStorageConfigurations" :loading="onvifStorageLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+        <!-- 存储能力标签页 -->
+        <el-tab-pane label="存储能力" name="storageCapabilities" @tab-click="handleGetOnvifStorageCapabilities">
+          <div class="tab-content-wrapper" v-loading="onvifStorageLoading">
+            <div class="panel-header">
+              <el-icon><Box /></el-icon>
+              <span>存储能力信息</span>
+            </div>
+            <el-alert v-if="onvifStorageCapabilities.hasError" type="error" :title="onvifStorageCapabilities.errorMessage || '获取配置出错'" show-icon style="margin-bottom: 20px;" />
+            <el-empty v-else-if="!onvifStorageCapabilities.success" description="暂无存储能力信息" />
+            <div v-else>
+              <el-table v-if="onvifStorageCapabilities.capabilities && onvifStorageCapabilities.capabilities.length > 0" :data="onvifStorageCapabilities.capabilities" border size="small" style="width: 100%;">
+                <el-table-column prop="token" label="Token" width="200" />
+                <el-table-column prop="type" label="类型" width="120" />
+                <el-table-column prop="recording" label="录制" width="80">
+                  <template #default="{ row }">
+                    <el-tag :type="row.recording ? 'success' : 'info'">{{ row.recording ? '支持' : '不支持' }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="search" label="搜索" width="80">
+                  <template #default="{ row }">
+                    <el-tag :type="row.search ? 'success' : 'info'">{{ row.search ? '支持' : '不支持' }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="replay" label="回放" width="80">
+                  <template #default="{ row }">
+                    <el-tag :type="row.replay ? 'success' : 'info'">{{ row.replay ? '支持' : '不支持' }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="export" label="导出" width="80">
+                  <template #default="{ row }">
+                    <el-tag :type="row.export ? 'success' : 'info'">{{ row.export ? '支持' : '不支持' }}</el-tag>
+                  </template>
+                </el-table-column>
+              </el-table>
+              <el-empty v-else description="暂无存储能力数据" />
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="onvifDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetOnvifStorageCapabilities" :loading="onvifStorageLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+        <!-- 存储状态标签页 -->
+        <el-tab-pane label="存储状态" name="storageState" @tab-click="handleGetOnvifStorageState">
+          <div class="tab-content-wrapper" v-loading="onvifStorageLoading">
+            <div class="panel-header">
+              <el-icon><DataLine /></el-icon>
+              <span>存储状态信息</span>
+            </div>
+            <el-alert v-if="onvifStorageState.hasError" type="error" :title="onvifStorageState.errorMessage || '获取状态出错'" show-icon style="margin-bottom: 20px;" />
+            <el-empty v-else-if="!onvifStorageState.success" description="暂无存储状态信息" />
+            <div v-else>
+              <div v-if="onvifStorageState.states && onvifStorageState.states.length > 0">
+                <div v-for="(state, index) in onvifStorageState.states" :key="index" class="storage-state-card">
+                  <div class="storage-state-header">
+                    <div class="storage-state-name">{{ state.token || '存储 ' + (index + 1) }}</div>
+                    <el-tag :type="state.state === 'ready' ? 'success' : state.state === 'error' ? 'danger' : 'info'" size="small">
+                      {{ state.state || '-' }}
+                    </el-tag>
+                  </div>
+                  <div class="storage-stats">
+                    <div class="stat-item">
+                      <span class="stat-label">总容量</span>
+                      <span class="stat-value">{{ formatCapacity(state.totalCapacity) }}</span>
+                    </div>
+                    <div class="stat-item">
+                      <span class="stat-label">已用容量</span>
+                      <span class="stat-value">{{ formatCapacity(state.usedCapacity) }}</span>
+                    </div>
+                    <div class="stat-item">
+                      <span class="stat-label">可用容量</span>
+                      <span class="stat-value">{{ formatCapacity(state.freeCapacity) }}</span>
+                    </div>
+                  </div>
+                  <div v-if="state.totalCapacity && state.usedCapacity" class="storage-progress">
+                    <el-progress :percentage="calculateStoragePercentage(state.usedCapacity, state.totalCapacity)" 
+                                 :color="getStorageColor(state.usedCapacity, state.totalCapacity)" 
+                                 :stroke-width="12" />
+                  </div>
+                  <div v-if="state.lastUpdated" class="storage-updated">
+                    <el-icon><Clock /></el-icon>
+                    <span>最后更新：{{ state.lastUpdated }}</span>
+                  </div>
+                </div>
+              </div>
+              <el-empty v-else description="暂无存储状态数据" />
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="onvifDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetOnvifStorageState" :loading="onvifStorageLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+        <!-- 网络接口标签页 -->
+        <el-tab-pane label="网络接口" name="networkInterfaces" @tab-click="handleGetOnvifNetworkInterfaces">
+          <div class="tab-content-wrapper" v-loading="onvifStorageLoading">
+            <div class="panel-header">
+              <el-icon><Connection /></el-icon>
+              <span>网络接口配置</span>
+            </div>
+            <el-alert v-if="onvifNetworkInterfaces.hasError" type="error" :title="onvifNetworkInterfaces.errorMessage || '获取配置出错'" show-icon style="margin-bottom: 20px;" />
+            <el-empty v-else-if="!onvifNetworkInterfaces.success" description="暂无网络接口配置" />
+            <div v-else>
+              <el-table v-if="onvifNetworkInterfaces.networkInterfaces && onvifNetworkInterfaces.networkInterfaces.length > 0" :data="onvifNetworkInterfaces.networkInterfaces" border size="small" style="width: 100%;">
+                <el-table-column prop="token" label="Token" width="180" />
+                <el-table-column prop="name" label="名称" width="120" />
+                <el-table-column prop="enabled" label="启用状态" width="100">
+                  <template #default="{ row }">
+                    <el-tag :type="row.enabled ? 'success' : 'info'">{{ row.enabled ? '已启用' : '未启用' }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="hwAddress" label="MAC地址" width="150" />
+                <el-table-column prop="ipv4Address" label="IPv4地址" width="150" />
+                <el-table-column prop="ipv4SubnetMask" label="子网掩码" width="150" />
+                <el-table-column prop="ipv4Gateway" label="网关" width="150" />
+                <el-table-column prop="dnsServers" label="DNS服务器" min-width="150">
+                  <template #default="{ row }">
+                    {{ Array.isArray(row.dnsServers) ? row.dnsServers.join(', ') : (row.dnsServers || '-') }}
+                  </template>
+                </el-table-column>
+                <el-table-column prop="dhcpEnabled" label="DHCP" width="100">
+                  <template #default="{ row }">
+                    <el-tag :type="row.dhcpEnabled ? 'success' : 'info'">{{ row.dhcpEnabled ? '已启用' : '未启用' }}</el-tag>
+                  </template>
+                </el-table-column>
+              </el-table>
+              <el-empty v-else description="暂无网络接口数据" />
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="onvifDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetOnvifNetworkInterfaces" :loading="onvifStorageLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+        <!-- 网络协议标签页 -->
+        <el-tab-pane label="网络协议" name="networkProtocols" @tab-click="handleGetOnvifNetworkProtocols">
+          <div class="tab-content-wrapper" v-loading="onvifStorageLoading">
+            <div class="panel-header">
+              <el-icon><Link /></el-icon>
+              <span>网络协议配置</span>
+            </div>
+            <el-alert v-if="onvifNetworkProtocols.hasError" type="error" :title="onvifNetworkProtocols.errorMessage || '获取配置出错'" show-icon style="margin-bottom: 20px;" />
+            <el-empty v-else-if="!onvifNetworkProtocols.success" description="暂无网络协议配置" />
+            <div v-else>
+              <div v-if="onvifNetworkProtocols.networkProtocols && onvifNetworkProtocols.networkProtocols.length > 0" class="protocol-cards">
+                <div v-for="(protocol, index) in onvifNetworkProtocols.networkProtocols" :key="index" class="protocol-card">
+                  <div class="protocol-icon" :class="protocol.name?.toLowerCase()">
+                    <el-icon><Connection /></el-icon>
+                  </div>
+                  <div class="protocol-info">
+                    <div class="protocol-name">{{ protocol.name || '未知协议' }}</div>
+                    <div class="protocol-details">
+                      <span class="detail-item">
+                        <el-tag :type="protocol.enabled ? 'success' : 'info'" size="small">
+                          {{ protocol.enabled ? '已启用' : '未启用' }}
+                        </el-tag>
+                      </span>
+                      <span class="detail-item">
+                        <el-icon><Odometer /></el-icon>
+                        端口: {{ protocol.port || '-' }}
+                      </span>
+                      <span v-if="protocol.tlsEnabled !== undefined && protocol.tlsEnabled !== null" class="detail-item">
+                        <el-tag :type="protocol.tlsEnabled ? 'success' : 'info'" size="small">
+                          TLS: {{ protocol.tlsEnabled ? '已开启' : '未开启' }}
+                        </el-tag>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <el-empty v-else description="暂无网络协议数据" />
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="onvifDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetOnvifNetworkProtocols" :loading="onvifStorageLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+        <!-- 视频源配置标签页 -->
+        <el-tab-pane label="视频源配置" name="videoSourceConfigs" @tab-click="handleGetOnvifVideoSourceConfigs">
+          <div class="tab-content-wrapper" v-loading="onvifStorageLoading">
+            <div class="panel-header">
+              <el-icon><VideoCamera /></el-icon>
+              <span>视频源配置</span>
+            </div>
+            <el-alert v-if="onvifVideoSourceConfigs.hasError" type="error" :title="onvifVideoSourceConfigs.errorMessage || '获取配置出错'" show-icon style="margin-bottom: 20px;" />
+            <el-empty v-else-if="!onvifVideoSourceConfigs.success" description="暂无视频源配置" />
+            <div v-else>
+              <el-table v-if="onvifVideoSourceConfigs.videoSourceConfigs && onvifVideoSourceConfigs.videoSourceConfigs.length > 0" :data="onvifVideoSourceConfigs.videoSourceConfigs" border size="small" style="width: 100%;">
+                <el-table-column prop="token" label="Token" width="180" />
+                <el-table-column prop="name" label="名称" width="150" />
+                <el-table-column prop="enabled" label="启用状态" width="100">
+                  <template #default="{ row }">
+                    <el-tag :type="row.enabled ? 'success' : 'info'">{{ row.enabled ? '已启用' : '未启用' }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="width" label="宽度" width="100" />
+                <el-table-column prop="height" label="高度" width="100" />
+                <el-table-column prop="frameRate" label="帧率" width="100" />
+                <el-table-column prop="bitrate" label="码率" width="120" />
+                <el-table-column prop="snapshotUri" label="快照地址" min-width="200" />
+              </el-table>
+              <el-empty v-else description="暂无视频源配置数据" />
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="onvifDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetOnvifVideoSourceConfigs" :loading="onvifStorageLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+        <!-- 视频编码器配置标签页 -->
+        <el-tab-pane label="视频编码器配置" name="videoEncoderConfigs" @tab-click="handleGetOnvifVideoEncoderConfigs">
+          <div class="tab-content-wrapper" v-loading="onvifStorageLoading">
+            <div class="panel-header">
+              <el-icon><Setting /></el-icon>
+              <span>视频编码器配置</span>
+            </div>
+            <el-alert v-if="onvifVideoEncoderConfigs.hasError" type="error" :title="onvifVideoEncoderConfigs.errorMessage || '获取配置出错'" show-icon style="margin-bottom: 20px;" />
+            <el-empty v-else-if="!onvifVideoEncoderConfigs.success" description="暂无视频编码器配置" />
+            <div v-else>
+              <el-table v-if="onvifVideoEncoderConfigs.videoEncoderConfigs && onvifVideoEncoderConfigs.videoEncoderConfigs.length > 0" :data="onvifVideoEncoderConfigs.videoEncoderConfigs" border size="small" style="width: 100%;">
+                <el-table-column prop="token" label="Token" width="180" />
+                <el-table-column prop="name" label="名称" width="150" />
+                <el-table-column prop="enabled" label="启用状态" width="100">
+                  <template #default="{ row }">
+                    <el-tag :type="row.enabled ? 'success' : 'info'">{{ row.enabled ? '已启用' : '未启用' }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="encoding" label="编码格式" width="120" />
+                <el-table-column prop="width" label="宽度" width="100" />
+                <el-table-column prop="height" label="高度" width="100" />
+                <el-table-column prop="frameRate" label="帧率" width="100" />
+                <el-table-column prop="bitrate" label="码率" width="120" />
+                <el-table-column prop="quality" label="质量" width="100" />
+                <el-table-column prop="iFrameInterval" label="I帧间隔" width="120" />
+              </el-table>
+              <el-empty v-else description="暂无视频编码器配置数据" />
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="onvifDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetOnvifVideoEncoderConfigs" :loading="onvifStorageLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+        <!-- 音频源配置标签页 -->
+        <el-tab-pane label="音频源配置" name="audioSourceConfigs" @tab-click="handleGetOnvifAudioSourceConfigs">
+          <div class="tab-content-wrapper" v-loading="onvifStorageLoading">
+            <div class="panel-header">
+              <el-icon><Microphone /></el-icon>
+              <span>音频源配置</span>
+            </div>
+            <el-alert v-if="onvifAudioSourceConfigs.hasError" type="error" :title="onvifAudioSourceConfigs.errorMessage || '获取配置出错'" show-icon style="margin-bottom: 20px;" />
+            <el-empty v-else-if="!onvifAudioSourceConfigs.success" description="暂无音频源配置" />
+            <div v-else>
+              <el-table v-if="onvifAudioSourceConfigs.audioSourceConfigs && onvifAudioSourceConfigs.audioSourceConfigs.length > 0" :data="onvifAudioSourceConfigs.audioSourceConfigs" border size="small" style="width: 100%;">
+                <el-table-column prop="token" label="Token" width="180" />
+                <el-table-column prop="name" label="名称" width="150" />
+                <el-table-column prop="enabled" label="启用状态" width="100">
+                  <template #default="{ row }">
+                    <el-tag :type="row.enabled ? 'success' : 'info'">{{ row.enabled ? '已启用' : '未启用' }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="type" label="类型" width="120" />
+                <el-table-column prop="channels" label="声道" width="100" />
+                <el-table-column prop="sampleRate" label="采样率" width="120" />
+                <el-table-column prop="bitDepth" label="位深" width="100" />
+              </el-table>
+              <el-empty v-else description="暂无音频源配置数据" />
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="onvifDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetOnvifAudioSourceConfigs" :loading="onvifStorageLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+        <!-- 音频编码器配置标签页 -->
+        <el-tab-pane label="音频编码器配置" name="audioEncoderConfigs" @tab-click="handleGetOnvifAudioEncoderConfigs">
+          <div class="tab-content-wrapper" v-loading="onvifStorageLoading">
+            <div class="panel-header">
+              <el-icon><Operation /></el-icon>
+              <span>音频编码器配置</span>
+            </div>
+            <el-alert v-if="onvifAudioEncoderConfigs.hasError" type="error" :title="onvifAudioEncoderConfigs.errorMessage || '获取配置出错'" show-icon style="margin-bottom: 20px;" />
+            <el-empty v-else-if="!onvifAudioEncoderConfigs.success" description="暂无音频编码器配置" />
+            <div v-else>
+              <el-table v-if="onvifAudioEncoderConfigs.audioEncoderConfigs && onvifAudioEncoderConfigs.audioEncoderConfigs.length > 0" :data="onvifAudioEncoderConfigs.audioEncoderConfigs" border size="small" style="width: 100%;">
+                <el-table-column prop="token" label="Token" width="180" />
+                <el-table-column prop="name" label="名称" width="150" />
+                <el-table-column prop="enabled" label="启用状态" width="100">
+                  <template #default="{ row }">
+                    <el-tag :type="row.enabled ? 'success' : 'info'">{{ row.enabled ? '已启用' : '未启用' }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="encoding" label="编码格式" width="120" />
+                <el-table-column prop="channels" label="声道" width="100" />
+                <el-table-column prop="sampleRate" label="采样率" width="120" />
+                <el-table-column prop="bitrate" label="码率" width="120" />
+                <el-table-column prop="bitDepth" label="位深" width="100" />
+              </el-table>
+              <el-empty v-else description="暂无音频编码器配置数据" />
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="onvifDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetOnvifAudioEncoderConfigs" :loading="onvifStorageLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+        <!-- 视频输出配置标签页 -->
+        <el-tab-pane label="视频输出配置" name="videoOutputConfigs" @tab-click="handleGetOnvifVideoOutputConfigs">
+          <div class="tab-content-wrapper" v-loading="onvifStorageLoading">
+            <div class="panel-header">
+              <el-icon><Monitor /></el-icon>
+              <span>视频输出配置</span>
+            </div>
+            <el-alert v-if="onvifVideoOutputConfigs.hasError" type="error" :title="onvifVideoOutputConfigs.errorMessage || '获取配置出错'" show-icon style="margin-bottom: 20px;" />
+            <el-empty v-else-if="!onvifVideoOutputConfigs.success" description="暂无视频输出配置" />
+            <div v-else>
+              <el-table v-if="onvifVideoOutputConfigs.videoOutputConfigs && onvifVideoOutputConfigs.videoOutputConfigs.length > 0" :data="onvifVideoOutputConfigs.videoOutputConfigs" border size="small" style="width: 100%;">
+                <el-table-column prop="token" label="Token" width="180" />
+                <el-table-column prop="name" label="名称" width="150" />
+                <el-table-column prop="enabled" label="启用状态" width="100">
+                  <template #default="{ row }">
+                    <el-tag :type="row.enabled ? 'success' : 'info'">{{ row.enabled ? '已启用' : '未启用' }}</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="type" label="类型" width="120" />
+                <el-table-column prop="width" label="宽度" width="100" />
+                <el-table-column prop="height" label="高度" width="100" />
+                <el-table-column prop="frameRate" label="帧率" width="100" />
+                <el-table-column prop="outputUri" label="输出地址" min-width="200" />
+              </el-table>
+              <el-empty v-else description="暂无视频输出配置数据" />
+            </div>
+          </div>
+          <div class="dialog-footer" style="margin-top: 20px;">
+            <el-button @click="onvifDeviceInfoDialogVisible = false">关闭</el-button>
+            <el-button type="primary" @click="handleGetOnvifVideoOutputConfigs" :loading="onvifStorageLoading" icon="Refresh">刷新</el-button>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+    </el-dialog>
+
     <!-- JT1078设备信息对话框 -->
     <el-dialog title="设备信息" v-model="jt1078ParamsDialogVisible" width="1000px" append-to-body>
       <div class="terminal-params-dialog-wrapper" v-loading="jt1078ParamsLoading">
@@ -3350,7 +3813,7 @@
           <el-descriptions-item label="手机号">{{ jt1078CurrentDevice.mobileNo || '-' }}</el-descriptions-item>
         </el-descriptions>
         
-        <el-tabs v-model="jt1078ParamsTabActive">
+        <el-tabs v-model="jt1078ParamsTabActive" @tab-change="handleJt1078TabChange">
           <!-- 终端参数查询和设置标签页 -->
           <el-tab-pane label="终端参数" name="params">
             <div v-if="jt1078TerminalParams && Object.keys(jt1078TerminalParams).length > 0">
@@ -4603,7 +5066,7 @@ import MediaInfo from "@/components/Channel/mediaInfo.vue";
 import SelectMapPosition from '@/components/SelectMapPosition';
 import ChannelCode from '@/views/components/common/channelCode.vue';
 import DeviceSnapshotDialog from '@/components/DeviceSnapshotDialog/index.vue';
-import {getOnvifDeviceList, onvifLogin} from "@/api/qs/onvif";
+import {getOnvifDeviceList, onvifLogin, restartOnvifDevice, syncOnvifDeviceTime, getOnvifDeviceTime, getOnvifDeviceInfo, captureOnvifAndSave, getOnvifStorageConfigurations, getOnvifStorageCapabilities, getOnvifStorageState, getOnvifNetworkInterfaces, getOnvifNetworkProtocols, getOnvifVideoSourceConfigs, getOnvifVideoEncoderConfigs, getOnvifAudioSourceConfigs, getOnvifAudioEncoderConfigs, getOnvifVideoOutputConfigs} from "@/api/qs/onvif";
 import {getAllDevices, getChannelsByDeviceId, refreshDevice, rebootGb28181Device, recordCmd, queryDeviceStatus, queryDeviceInfo, subscribeCatalog, unsubscribeCatalog, queryDeviceConfig, updateDeviceConfig, queryHomePosition, updateHomePosition, queryCruiseTrackList, queryCruiseTrack, queryPTZPosition, homePositionControl, ptzPreciseControl, startCruise, stopCruise, querySDCardStatus, formatSDCardControl} from "@/api/qs/gb28181";
 import type {Gb28181Device, Gb28181Channel} from "@/types/api/qs/gb28181";
 import {getAllDevice} from "@/api/qs/jt1078";
@@ -4663,6 +5126,7 @@ const quality = ref(['普清', '高清', '超清']);
 const defaultQuality = ref('高清');
 const isPtz = ref(true);
 const isPresetSupported = ref(true); // 是否支持预置点功能
+const isGb28181Device = ref(false); // 是否是 GB28181 设备
 const isQuality = ref(true);
 const isLive = ref(true);
 const sharedIframe = ref(null);
@@ -4764,6 +5228,56 @@ const deviceInfo = reactive<DaHuaDeviceInfo>({
   limitLoginTime: undefined,
   leftLogTimes: undefined,
   lockLeftTime: undefined
+});
+// ONVIF 设备信息
+const onvifDeviceInfoDialogVisible = ref(false);
+const onvifDeviceInfoLoading = ref(false);
+const onvifDeviceInfoTabActive = ref('deviceInfo');
+const onvifDeviceInfo = reactive({
+  success: false,
+  manufacturer: '',
+  model: '',
+  firmwareVersion: '',
+  streamUris: [],
+  profileCount: 0,
+  profiles: []
+});
+// ONVIF 存储信息
+const onvifStorageDialogVisible = ref(false);
+const onvifStorageLoading = ref(false);
+const onvifStorageTabActive = ref('storageConfigurations');
+const onvifStorageDevice = ref<any>(null);
+const onvifStorageConfigurations = reactive({
+  success: false
+});
+const onvifStorageCapabilities = reactive({
+  success: false
+});
+const onvifStorageState = reactive({
+  success: false
+});
+// ONVIF 网络配置信息
+const onvifNetworkInterfaces = reactive({
+  success: false
+});
+const onvifNetworkProtocols = reactive({
+  success: false
+});
+// ONVIF 媒体配置信息
+const onvifVideoSourceConfigs = reactive({
+  success: false
+});
+const onvifVideoEncoderConfigs = reactive({
+  success: false
+});
+const onvifAudioSourceConfigs = reactive({
+  success: false
+});
+const onvifAudioEncoderConfigs = reactive({
+  success: false
+});
+const onvifVideoOutputConfigs = reactive({
+  success: false
 });
 const systemParam = reactive({
   videoStandard: undefined as number | undefined,
@@ -5634,6 +6148,45 @@ const handleCopy = async (text: string) => {
 };
 
 /**
+ * 格式化容量显示
+ */
+const formatCapacity = (capacity: any) => {
+  if (!capacity && capacity !== 0) return '-';
+  const num = Number(capacity);
+  if (isNaN(num)) return capacity;
+  
+  if (num >= 1024 * 1024 * 1024) {
+    return (num / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+  } else if (num >= 1024 * 1024) {
+    return (num / (1024 * 1024)).toFixed(2) + ' MB';
+  } else if (num >= 1024) {
+    return (num / 1024).toFixed(2) + ' KB';
+  } else {
+    return num + ' B';
+  }
+};
+
+/**
+ * 计算存储使用百分比
+ */
+const calculateStoragePercentage = (used: any, total: any) => {
+  const usedNum = Number(used);
+  const totalNum = Number(total);
+  if (!totalNum || isNaN(usedNum) || isNaN(totalNum)) return 0;
+  return Math.min(100, Math.round((usedNum / totalNum) * 100));
+};
+
+/**
+ * 根据存储使用比例获取颜色
+ */
+const getStorageColor = (used: any, total: any) => {
+  const percentage = calculateStoragePercentage(used, total);
+  if (percentage >= 90) return '#f56c6c'; // 红色
+  if (percentage >= 70) return '#e6a23c'; // 橙色
+  return '#67c23a'; // 绿色
+};
+
+/**
  * 直播流接入类型
  *
  * @param text
@@ -5846,7 +6399,12 @@ const dahuaDeviceCodeChange = (e: string) => {
  */
 const onvifDeviceCodeChange = (e: string) => {
   const device = onvifDeviceList.value.find(item => item.ip === e);
-  form.value.onvifHostName = device.hostName
+  if (device) {
+    form.value.onvifHostName = device.hostName
+  } else {
+    // 手动输入的 IP，不自动填充 hostName
+    form.value.onvifHostName = null
+  }
 }
 
 /**
@@ -5861,7 +6419,7 @@ const onvifAuthLogin = () => {
     return
   }
 
-  if (!form.value.onvifHostName) {
+  if (!form.value.userName) {
     proxy.$modal.msgError('请输入设备用户名');
     return
   }
@@ -5874,7 +6432,7 @@ const onvifAuthLogin = () => {
   let data = {
     ip: form.value.ipAddress,
     auth: form.value.onvifAuth,
-    hostName: form.value.hostName,
+    hostName: form.value.onvifHostName,
     username: form.value.userName,
     password: form.value.password,
   } as WSOnvifDevice;
@@ -5961,6 +6519,7 @@ const handlePlay = (row: QsDevice) => {
         defaultQuality.value = ''
         isPtz.value = row.type === '5' // ONVIF 支持云台
         isPresetSupported.value = row.type === '5' // ONVIF 支持预置点
+        isGb28181Device.value = false // 不是 GB28181 设备
         isQuality.value = false
         isLive.value = true
         deviceRow.value = row
@@ -5994,6 +6553,7 @@ const handlePlay = (row: QsDevice) => {
         quality.value = []
         defaultQuality.value = ''
         isPtz.value = false // 视频文件不支持云台
+        isGb28181Device.value = false // 不是 GB28181 设备
         isQuality.value = false
         isLive.value = true
         deviceRow.value = row
@@ -6055,6 +6615,7 @@ const handlePlay = (row: QsDevice) => {
         defaultQuality.value = ''
         isPtz.value = true // 海康、海康ISUP、大华支持云台
         isPresetSupported.value = true // 海康、海康ISUP、大华支持预置点
+        isGb28181Device.value = false // 不是 GB28181 设备
         isQuality.value = false
         isLive.value = true
         deviceRow.value = row
@@ -6088,6 +6649,7 @@ const handlePlay = (row: QsDevice) => {
         quality.value = []
         defaultQuality.value = ''
         isPtz.value = false // PUSH 不支持云台
+        isGb28181Device.value = false // 不是 GB28181 设备
         isQuality.value = false
         isLive.value = true
         deviceRow.value = row
@@ -6127,6 +6689,7 @@ const handlePlay = (row: QsDevice) => {
         defaultQuality.value = ''
         isPtz.value = true // GB28181 支持云台
         isPresetSupported.value = true // GB28181 支持预置点
+        isGb28181Device.value = true // 是 GB28181 设备
         isQuality.value = false
         isLive.value = true
         deviceRow.value = row
@@ -6166,6 +6729,7 @@ const handlePlay = (row: QsDevice) => {
         defaultQuality.value = ''
         isPtz.value = true // JT1078 支持云台
         isPresetSupported.value = false // JT1078 不支持预置点
+        isGb28181Device.value = false // 不是 GB28181 设备
         isQuality.value = false
         isLive.value = true
         deviceRow.value = row
@@ -8532,7 +9096,10 @@ const handleCaptureFromStream = async () => {
     const channelId = deviceRow.value?.channel || 0;
     
     // 根据设备类型调用不同的API
-    if (deviceType === '7') {
+    if (deviceType === '5') {
+      // ONVIF 设备
+      response = await captureOnvifAndSave(deviceId, channelId, 'manual');
+    } else if (deviceType === '7') {
       // 海康设备
       response = await captureHaikangAndSave(deviceId, channelId, 'manual');
     } else if (deviceType === '8') {
@@ -8542,7 +9109,7 @@ const handleCaptureFromStream = async () => {
       // 大华设备
       response = await captureDaHuaAndSave(deviceId, channelId, 'manual');
     } else {
-      // 其他设备（RTSP/RTMP/FLV/HLS/ONVIF等）
+      // 其他设备（RTSP/RTMP/FLV/HLS等）
       if (!streamInfo.value?.app || !streamInfo.value?.stream) {
         proxy.$modal.msgError('流信息不完整，无法抓图');
         return;
@@ -8581,7 +9148,10 @@ const handleCapture = async (row: QsDevice) => {
     let response;
     
     // 根据设备类型调用不同的API
-    if (row.type === '7') {
+    if (row.type === '5') {
+      // ONVIF 设备
+      response = await captureOnvifAndSave(row.id!, channelId, 'manual');
+    } else if (row.type === '7') {
       // 海康设备
       response = await captureHaikangAndSave(row.id!, channelId, 'manual');
     } else if (row.type === '8') {
@@ -8608,14 +9178,17 @@ const handleCapture = async (row: QsDevice) => {
   }
 }
 
-// 重启设备（支持海康/大华/海康ISUP/GB28181）
+// 重启设备（支持海康/大华/海康ISUP/GB28181/JT1078/ONVIF）
 const handleReboot = async (row: QsDevice) => {
   try {
     await proxy.$modal.confirm(`是否确认重启设备"${row.deviceName}"？`);
     
     let response;
     // 根据设备类型调用不同的API
-    if (row.type === '7') {
+    if (row.type === '5') {
+      // ONVIF 设备
+      response = await restartOnvifDevice(row.id!);
+    } else if (row.type === '7') {
       // 海康设备
       response = await rebootHaiKangDevice(row.id!);
     } else if (row.type === '8') {
@@ -8790,6 +9363,132 @@ const handleRefreshCurrentTab = () => {
   } else if (gb28181DeviceInfoTabActive.value === 'sdCard') {
     handleQueryGb28181SdCardStatus();
   }
+};
+
+// ONVIF标签页切换处理
+const handleOnvifTabChange = (tabName: string) => {
+  if (tabName === 'deviceInfo') {
+    handleRefreshOnvifDeviceInfo();
+  } else if (tabName === 'storageConfigurations') {
+    handleGetOnvifStorageConfigurations();
+  } else if (tabName === 'storageCapabilities') {
+    handleGetOnvifStorageCapabilities();
+  } else if (tabName === 'storageState') {
+    handleGetOnvifStorageState();
+  } else if (tabName === 'networkInterfaces') {
+    handleGetOnvifNetworkInterfaces();
+  } else if (tabName === 'networkProtocols') {
+    handleGetOnvifNetworkProtocols();
+  } else if (tabName === 'videoSourceConfigs') {
+    handleGetOnvifVideoSourceConfigs();
+  } else if (tabName === 'videoEncoderConfigs') {
+    handleGetOnvifVideoEncoderConfigs();
+  } else if (tabName === 'audioSourceConfigs') {
+    handleGetOnvifAudioSourceConfigs();
+  } else if (tabName === 'audioEncoderConfigs') {
+    handleGetOnvifAudioEncoderConfigs();
+  } else if (tabName === 'videoOutputConfigs') {
+    handleGetOnvifVideoOutputConfigs();
+  }
+};
+
+// 设备信息标签页切换处理
+const handleDeviceInfoTabChange = (tabName: string) => {
+  if (tabName === 'deviceInfo') {
+    handleRefreshDeviceInfo();
+  } else if (tabName === 'systemParam') {
+    handleGetSystemParam();
+  } else if (tabName === 'videoParam') {
+    handleGetVideoParam();
+  } else if (tabName === 'deviceVideoParam') {
+    handleGetDeviceVideoParam();
+  } else if (tabName === 'storageInfo') {
+    handleGetStorageInfo();
+  } else if (tabName === 'systemResourceInfo') {
+    handleGetSystemResourceInfo();
+  } else if (tabName === 'sdCardInfo') {
+    handleGetSDCardInfo();
+  } else if (tabName === 'bitrateInfo') {
+    handleGetBitrateInfo();
+  } else if (tabName === 'networkStatusInfo') {
+    handleGetNetworkStatusInfo();
+  } else if (tabName === 'softwareVersionInfo') {
+    handleGetSoftwareVersionInfo();
+  } else if (tabName === 'recordStateInfo') {
+    handleGetRecordStateInfo();
+  } else if (tabName === 'powerStateInfo') {
+    handleGetPowerStateInfo();
+  } else if (tabName === 'alarmArmInfo') {
+    handleGetAlarmArmInfo();
+  } else if (tabName === 'cameraInfo') {
+    handleGetCameraInfo();
+  } else if (tabName === 'rtspUrlInfo') {
+    handleGetRtspUrlInfo();
+  }
+};
+
+// 海康设备信息标签页切换处理
+const handleHaikangDeviceInfoTabChange = (tabName: string) => {
+  if (tabName === 'deviceInfo') {
+    handleRefreshHaikangDeviceInfo();
+  } else if (tabName === 'storageInfo') {
+    handleGetHaikangStorageInfo();
+  } else if (tabName === 'sdCardInfo') {
+    handleGetHaikangSdCardInfo();
+  } else if (tabName === 'bitrateInfo') {
+    handleGetHaikangBitrateInfo();
+  } else if (tabName === 'networkStatusInfo') {
+    handleGetHaikangNetworkStatusInfo();
+  } else if (tabName === 'softwareVersionInfo') {
+    handleGetHaikangSoftwareVersionInfo();
+  } else if (tabName === 'recordStateInfo') {
+    handleGetHaikangRecordStateInfo();
+  } else if (tabName === 'powerStateInfo') {
+    handleGetHaikangPowerStateInfo();
+  } else if (tabName === 'alarmArmInfo') {
+    handleGetHaikangAlarmArmInfo();
+  } else if (tabName === 'cameraInfo') {
+    handleGetHaikangCameraInfo();
+  } else if (tabName === 'rtspUrlInfo') {
+    handleGetHaikangRtspUrlInfo();
+  }
+};
+
+// 海康ISUP设备信息标签页切换处理
+const handleHaikangIsupDeviceInfoTabChange = (tabName: string) => {
+  if (tabName === 'deviceInfo') {
+    handleRefreshHaikangIsupDeviceInfo();
+  } else if (tabName === 'storageInfo') {
+    handleGetHaikangIsupStorageInfo();
+  } else if (tabName === 'sdCardInfo') {
+    handleGetHaikangIsupSdCardInfo();
+  } else if (tabName === 'bitrateInfo') {
+    handleGetHaikangIsupBitrateInfo();
+  } else if (tabName === 'networkStatus') {
+    handleGetHaikangIsupNetworkStatusInfo();
+  } else if (tabName === 'softwareVersion') {
+    handleGetHaikangIsupSoftwareVersionInfo();
+  } else if (tabName === 'powerState') {
+    handleGetHaikangIsupPowerStateInfo();
+  } else if (tabName === 'cameraInfo') {
+    handleGetHaikangIsupCameraInfo();
+  } else if (tabName === 'deviceConfig') {
+    handleGetHaikangIsupDeviceConfig();
+  } else if (tabName === 'versionInfo') {
+    handleGetHaikangIsupVersionInfo();
+  } else if (tabName === 'systemStatus') {
+    handleGetHaikangIsupSystemStatus();
+  }
+};
+
+// JT1078设备信息标签页切换处理
+const handleJt1078TabChange = (tabName: string) => {
+  if (tabName === 'params') {
+    handleQueryJt1078Params();
+  } else if (tabName === 'terminalAVProperties') {
+    handleQueryTerminalAVProperties();
+  }
+  // 注意：querySpecific 和 control 标签页不需要自动查询，因为它们需要用户主动输入
 };
 
 // 打开录像控制对话框
@@ -9254,11 +9953,48 @@ const openDeviceInfoDialog = (row: QsDevice) => {
   currentDeviceId.value = row.id;
   currentDeviceRow.value = row;
   
+  const isOnvifDevice = row.type === '5';
   const isHaikangSdkDevice = row.type === '7';
   const isHaikangIsupDevice = row.type === '8';
   const isDaHuaDevice = row.type === '9';
   const isGB28181Device = row.type === '12';
   const isJT1078Device = row.type === '14';
+  
+  if (isOnvifDevice) {
+    onvifDeviceInfoTabActive.value = 'deviceInfo';
+    onvifDeviceInfo.success = false;
+    onvifDeviceInfo.manufacturer = '';
+    onvifDeviceInfo.model = '';
+    onvifDeviceInfo.firmwareVersion = '';
+    onvifDeviceInfo.streamUris = [];
+    onvifDeviceInfo.profileCount = 0;
+    onvifDeviceInfo.profiles = [];
+    
+    // 重置存储信息状态
+    onvifStorageDevice.value = row;
+    onvifStorageConfigurations.success = false;
+    Object.keys(onvifStorageConfigurations).forEach(key => {
+      if (key !== 'success') {
+        delete onvifStorageConfigurations[key];
+      }
+    });
+    onvifStorageCapabilities.success = false;
+    Object.keys(onvifStorageCapabilities).forEach(key => {
+      if (key !== 'success') {
+        delete onvifStorageCapabilities[key];
+      }
+    });
+    onvifStorageState.success = false;
+    Object.keys(onvifStorageState).forEach(key => {
+      if (key !== 'success') {
+        delete onvifStorageState[key];
+      }
+    });
+    
+    onvifDeviceInfoDialogVisible.value = true;
+    handleRefreshOnvifDeviceInfo();
+    return;
+  }
   
   if (isJT1078Device) {
     // 打开JT1078终端参数对话框
@@ -10257,6 +10993,343 @@ const handleRefreshHaikangIsupDeviceInfo = async () => {
   }
 }
 
+// ONVIF设备信息 - 刷新设备信息
+const handleRefreshOnvifDeviceInfo = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    onvifDeviceInfoLoading.value = true;
+    const res = await getOnvifDeviceInfo(currentDeviceId.value);
+    
+    // 从 res.data 中获取实际数据，兼容两种返回格式
+    const data = res.data || res;
+    
+    if (data.success !== undefined ? data.success : true) {
+      onvifDeviceInfo.success = true;
+      onvifDeviceInfo.manufacturer = data.manufacturer || '';
+      onvifDeviceInfo.model = data.model || '';
+      onvifDeviceInfo.firmwareVersion = data.firmwareVersion || '';
+      
+      // 处理流地址数据 - 后端返回的是字符串数组，需要转换为对象数组
+      const streamUris = data.streamUris || [];
+      onvifDeviceInfo.streamUris = streamUris.map((uri, index) => ({
+        uri: uri,
+        type: index === 0 ? 'main' : 'sub'  // 第一个默认是主码流，后续是子码流
+      }));
+      
+      onvifDeviceInfo.profileCount = data.profileCount || 0;
+      
+      // 处理 Profiles 数据 - 后端返回的是字符串数组，需要转换为对象数组
+      const profiles = data.profiles || [];
+      onvifDeviceInfo.profiles = profiles.map((token, index) => ({
+        token: token,
+        name: `Profile ${index + 1}`
+      }));
+      
+      proxy.$modal.msgSuccess('获取设备信息成功');
+    } else {
+      proxy.$modal.msgError(data.message || '获取设备信息失败');
+    }
+  } catch (error) {
+    console.error('获取设备信息失败:', error);
+    proxy.$modal.msgError('获取设备信息失败');
+  } finally {
+    onvifDeviceInfoLoading.value = false;
+  }
+}
+
+// ONVIF存储信息 - 获取存储配置
+const handleGetOnvifStorageConfigurations = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    onvifStorageLoading.value = true;
+    const res = await getOnvifStorageConfigurations(currentDeviceId.value);
+    
+    // 从 res.data 中获取实际数据，兼容两种返回格式
+    const data = res.data || res;
+    
+    // 清空并设置新数据
+    Object.keys(onvifStorageConfigurations).forEach(key => {
+      delete onvifStorageConfigurations[key];
+    });
+    onvifStorageConfigurations.success = true;
+    Object.assign(onvifStorageConfigurations, data);
+    
+    proxy.$modal.msgSuccess('获取存储配置成功');
+  } catch (error) {
+    console.error('获取存储配置失败:', error);
+    proxy.$modal.msgError('获取存储配置失败');
+  } finally {
+    onvifStorageLoading.value = false;
+  }
+}
+
+// ONVIF存储信息 - 获取存储能力
+const handleGetOnvifStorageCapabilities = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    onvifStorageLoading.value = true;
+    const res = await getOnvifStorageCapabilities(currentDeviceId.value);
+    
+    // 从 res.data 中获取实际数据，兼容两种返回格式
+    const data = res.data || res;
+    
+    // 清空并设置新数据
+    Object.keys(onvifStorageCapabilities).forEach(key => {
+      delete onvifStorageCapabilities[key];
+    });
+    onvifStorageCapabilities.success = true;
+    Object.assign(onvifStorageCapabilities, data);
+    
+    proxy.$modal.msgSuccess('获取存储能力成功');
+  } catch (error) {
+    console.error('获取存储能力失败:', error);
+    proxy.$modal.msgError('获取存储能力失败');
+  } finally {
+    onvifStorageLoading.value = false;
+  }
+}
+
+// ONVIF存储信息 - 获取存储状态
+const handleGetOnvifStorageState = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    onvifStorageLoading.value = true;
+    const res = await getOnvifStorageState(currentDeviceId.value);
+    
+    // 从 res.data 中获取实际数据，兼容两种返回格式
+    const data = res.data || res;
+    
+    // 清空并设置新数据
+    Object.keys(onvifStorageState).forEach(key => {
+      delete onvifStorageState[key];
+    });
+    onvifStorageState.success = true;
+    Object.assign(onvifStorageState, data);
+    
+    proxy.$modal.msgSuccess('获取存储状态成功');
+  } catch (error) {
+    console.error('获取存储状态失败:', error);
+    proxy.$modal.msgError('获取存储状态失败');
+  } finally {
+    onvifStorageLoading.value = false;
+  }
+}
+
+// ONVIF网络配置 - 获取网络接口配置
+const handleGetOnvifNetworkInterfaces = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    onvifStorageLoading.value = true;
+    const res = await getOnvifNetworkInterfaces(currentDeviceId.value);
+    
+    // 从 res.data 中获取实际数据，兼容两种返回格式
+    const data = res.data || res;
+    
+    // 清空并设置新数据
+    Object.keys(onvifNetworkInterfaces).forEach(key => {
+      delete onvifNetworkInterfaces[key];
+    });
+    onvifNetworkInterfaces.success = true;
+    Object.assign(onvifNetworkInterfaces, data);
+    
+    proxy.$modal.msgSuccess('获取网络接口配置成功');
+  } catch (error) {
+    console.error('获取网络接口配置失败:', error);
+    proxy.$modal.msgError('获取网络接口配置失败');
+  } finally {
+    onvifStorageLoading.value = false;
+  }
+}
+
+// ONVIF网络配置 - 获取网络协议配置
+const handleGetOnvifNetworkProtocols = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    onvifStorageLoading.value = true;
+    const res = await getOnvifNetworkProtocols(currentDeviceId.value);
+    
+    // 从 res.data 中获取实际数据，兼容两种返回格式
+    const data = res.data || res;
+    
+    // 清空并设置新数据
+    Object.keys(onvifNetworkProtocols).forEach(key => {
+      delete onvifNetworkProtocols[key];
+    });
+    onvifNetworkProtocols.success = true;
+    Object.assign(onvifNetworkProtocols, data);
+    
+    proxy.$modal.msgSuccess('获取网络协议配置成功');
+  } catch (error) {
+    console.error('获取网络协议配置失败:', error);
+    proxy.$modal.msgError('获取网络协议配置失败');
+  } finally {
+    onvifStorageLoading.value = false;
+  }
+}
+
+// ONVIF媒体配置 - 获取视频源配置
+const handleGetOnvifVideoSourceConfigs = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    onvifStorageLoading.value = true;
+    const res = await getOnvifVideoSourceConfigs(currentDeviceId.value);
+    
+    // 从 res.data 中获取实际数据，兼容两种返回格式
+    const data = res.data || res;
+    
+    // 清空并设置新数据
+    Object.keys(onvifVideoSourceConfigs).forEach(key => {
+      delete onvifVideoSourceConfigs[key];
+    });
+    onvifVideoSourceConfigs.success = true;
+    Object.assign(onvifVideoSourceConfigs, data);
+    
+    proxy.$modal.msgSuccess('获取视频源配置成功');
+  } catch (error) {
+    console.error('获取视频源配置失败:', error);
+    proxy.$modal.msgError('获取视频源配置失败');
+  } finally {
+    onvifStorageLoading.value = false;
+  }
+}
+
+// ONVIF媒体配置 - 获取视频编码器配置
+const handleGetOnvifVideoEncoderConfigs = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    onvifStorageLoading.value = true;
+    const res = await getOnvifVideoEncoderConfigs(currentDeviceId.value);
+    
+    // 从 res.data 中获取实际数据，兼容两种返回格式
+    const data = res.data || res;
+    
+    // 清空并设置新数据
+    Object.keys(onvifVideoEncoderConfigs).forEach(key => {
+      delete onvifVideoEncoderConfigs[key];
+    });
+    onvifVideoEncoderConfigs.success = true;
+    Object.assign(onvifVideoEncoderConfigs, data);
+    
+    proxy.$modal.msgSuccess('获取视频编码器配置成功');
+  } catch (error) {
+    console.error('获取视频编码器配置失败:', error);
+    proxy.$modal.msgError('获取视频编码器配置失败');
+  } finally {
+    onvifStorageLoading.value = false;
+  }
+}
+
+// ONVIF媒体配置 - 获取音频源配置
+const handleGetOnvifAudioSourceConfigs = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    onvifStorageLoading.value = true;
+    const res = await getOnvifAudioSourceConfigs(currentDeviceId.value);
+    
+    // 从 res.data 中获取实际数据，兼容两种返回格式
+    const data = res.data || res;
+    
+    // 清空并设置新数据
+    Object.keys(onvifAudioSourceConfigs).forEach(key => {
+      delete onvifAudioSourceConfigs[key];
+    });
+    onvifAudioSourceConfigs.success = true;
+    Object.assign(onvifAudioSourceConfigs, data);
+    
+    proxy.$modal.msgSuccess('获取音频源配置成功');
+  } catch (error) {
+    console.error('获取音频源配置失败:', error);
+    proxy.$modal.msgError('获取音频源配置失败');
+  } finally {
+    onvifStorageLoading.value = false;
+  }
+}
+
+// ONVIF媒体配置 - 获取音频编码器配置
+const handleGetOnvifAudioEncoderConfigs = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    onvifStorageLoading.value = true;
+    const res = await getOnvifAudioEncoderConfigs(currentDeviceId.value);
+    
+    // 从 res.data 中获取实际数据，兼容两种返回格式
+    const data = res.data || res;
+    
+    // 清空并设置新数据
+    Object.keys(onvifAudioEncoderConfigs).forEach(key => {
+      delete onvifAudioEncoderConfigs[key];
+    });
+    onvifAudioEncoderConfigs.success = true;
+    Object.assign(onvifAudioEncoderConfigs, data);
+    
+    proxy.$modal.msgSuccess('获取音频编码器配置成功');
+  } catch (error) {
+    console.error('获取音频编码器配置失败:', error);
+    proxy.$modal.msgError('获取音频编码器配置失败');
+  } finally {
+    onvifStorageLoading.value = false;
+  }
+}
+
+// ONVIF媒体配置 - 获取视频输出配置
+const handleGetOnvifVideoOutputConfigs = async () => {
+  if (!currentDeviceId.value) {
+    proxy.$modal.msgError('设备ID不能为空');
+    return;
+  }
+  try {
+    onvifStorageLoading.value = true;
+    const res = await getOnvifVideoOutputConfigs(currentDeviceId.value);
+    
+    // 从 res.data 中获取实际数据，兼容两种返回格式
+    const data = res.data || res;
+    
+    // 清空并设置新数据
+    Object.keys(onvifVideoOutputConfigs).forEach(key => {
+      delete onvifVideoOutputConfigs[key];
+    });
+    onvifVideoOutputConfigs.success = true;
+    Object.assign(onvifVideoOutputConfigs, data);
+    
+    proxy.$modal.msgSuccess('获取视频输出配置成功');
+  } catch (error) {
+    console.error('获取视频输出配置失败:', error);
+    proxy.$modal.msgError('获取视频输出配置失败');
+  } finally {
+    onvifStorageLoading.value = false;
+  }
+}
+
 // 海康ISUP设备信息 - 获取存储信息
 const handleGetHaikangIsupStorageInfo = async () => {
   if (!currentDeviceId.value) {
@@ -10575,7 +11648,7 @@ const openTimeSyncDialog = (row: QsDevice) => {
   timeSyncDialogVisible.value = true;
 }
 
-// 获取设备时间（支持海康/大华/海康ISUP）
+// 获取设备时间（支持海康/大华/海康ISUP/ONVIF）
 const handleGetTime = async () => {
   if (!timeSyncForm.deviceId) {
     proxy.$modal.msgError('设备ID不能为空');
@@ -10594,6 +11667,9 @@ const handleGetTime = async () => {
     } else if (timeSyncForm.deviceType === '9') {
       // 大华设备
       res = await getDaHuaTime(timeSyncForm.deviceIp);
+    } else if (timeSyncForm.deviceType === '5') {
+      // ONVIF设备
+      res = await getOnvifDeviceTime(timeSyncForm.deviceId);
     } else {
       proxy.$modal.msgError('不支持的设备类型');
       return;
@@ -10620,14 +11696,10 @@ const handleSetCurrentTime = () => {
   timeSyncForm.syncTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-// 执行时间同步（支持海康/大华/海康ISUP）
+// 执行时间同步（支持海康/大华/海康ISUP/ONVIF）
 const handleTimeSync = async () => {
   if (!timeSyncForm.deviceId) {
     proxy.$modal.msgError('设备ID不能为空');
-    return;
-  }
-  if (!timeSyncForm.syncTime) {
-    proxy.$modal.msgError('请选择同步时间');
     return;
   }
   try {
@@ -10636,13 +11708,28 @@ const handleTimeSync = async () => {
     // 根据设备类型调用不同的API
     if (timeSyncForm.deviceType === '7') {
       // 海康设备（只支持本地时间同步到设备）
+      if (!timeSyncForm.syncTime) {
+        proxy.$modal.msgError('请选择同步时间');
+        return;
+      }
       response = await setHaiKangDevTime(timeSyncForm.deviceId, timeSyncForm.syncTime);
     } else if (timeSyncForm.deviceType === '8') {
       // 海康ISUP设备
+      if (!timeSyncForm.syncTime) {
+        proxy.$modal.msgError('请选择同步时间');
+        return;
+      }
       response = await setHaiKangIsupDevTime(timeSyncForm.deviceId, timeSyncForm.syncTime);
     } else if (timeSyncForm.deviceType === '9') {
       // 大华设备
+      if (!timeSyncForm.syncTime) {
+        proxy.$modal.msgError('请选择同步时间');
+        return;
+      }
       response = await setDaHuaTime(timeSyncForm.deviceId, timeSyncForm.syncTime, timeSyncForm.syncType);
+    } else if (timeSyncForm.deviceType === '5') {
+      // ONVIF设备：直接传递 yyyy-MM-dd HH:mm:ss 格式的时间，由后端处理时区转换
+      response = await syncOnvifDeviceTime(timeSyncForm.deviceId, timeSyncForm.syncTime);
     } else {
       proxy.$modal.msgError('不支持的设备类型');
       return;
@@ -14705,6 +15792,161 @@ html.dark {
   color: #ffffff !important;
   background-color: var(--el-color-success) !important;
   border-color: var(--el-color-success) !important;
+}
+
+/* ========== 存储状态卡片样式 ========== */
+.storage-state-card {
+  background: linear-gradient(135deg, #f5f7fa 0%, #fff 100%);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  border: 1px solid var(--el-border-color-lighter);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+}
+
+.storage-state-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.storage-state-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+.storage-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 8px;
+}
+
+.stat-label {
+  display: block;
+  font-size: 13px;
+  color: var(--el-text-color-secondary);
+  margin-bottom: 6px;
+}
+
+.stat-value {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--el-color-primary);
+}
+
+.storage-progress {
+  margin-bottom: 12px;
+}
+
+.storage-updated {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--el-text-color-secondary);
+  padding-top: 12px;
+  border-top: 1px dashed var(--el-border-color-lighter);
+}
+
+/* ========== 网络协议卡片样式 ========== */
+.protocol-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.protocol-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #fff 100%);
+  border-radius: 12px;
+  border: 1px solid var(--el-border-color-lighter);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+}
+
+.protocol-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  flex-shrink: 0;
+  
+  &.http {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+  
+  &.https {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  }
+  
+  &.rtsp {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  }
+}
+
+.protocol-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.protocol-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+  margin-bottom: 10px;
+}
+
+.protocol-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--el-text-color-secondary);
+  
+  .el-icon {
+    font-size: 14px;
+  }
 }
 
 .snapshot-actions .el-button--danger,
