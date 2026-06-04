@@ -54,7 +54,8 @@
           </el-row>
         </div>
         <div class="step-actions">
-          <el-button type="primary" @click="handleNext">下一步</el-button>
+          <el-button type="primary" @click="handleNext" v-if="isConnected">下一步</el-button>
+          <el-button type="primary" disabled v-else>请先测试连接</el-button>
         </div>
       </div>
 
@@ -182,6 +183,7 @@ const {proxy} = getCurrentInstance();
 
 const activeStep = ref(0);
 const isConnected = ref(false);
+const isUpdatingForm = ref(false); // 添加标志位
 
 const rtpPortRange1 = ref(30000)
 const rtpPortRange2 = ref(30500)
@@ -219,9 +221,21 @@ const data = reactive({
 const {form, rules} = toRefs(data);
 
 // 当 IP、端口或密钥发生变化时，重置连接状态
-watch(() => form.value.ip, () => { isConnected.value = false; });
-watch(() => form.value.httpPort, () => { isConnected.value = false; });
-watch(() => form.value.secret, () => { isConnected.value = false; });
+watch(() => form.value.ip, () => { 
+  if (!isUpdatingForm.value) {
+    isConnected.value = false; 
+  }
+});
+watch(() => form.value.httpPort, () => { 
+  if (!isUpdatingForm.value) {
+    isConnected.value = false; 
+  }
+});
+watch(() => form.value.secret, () => { 
+  if (!isUpdatingForm.value) {
+    isConnected.value = false; 
+  }
+});
 
 function cancel() {
   reset();
@@ -280,29 +294,42 @@ const handlePrev = () => {
 }
 
 const submitCheckMediaServerForm = () => {
-  proxy.$refs["mediaServerFormRef"].validateField(['ip', 'httpPort', 'secret'], (errorMessage) => {
-    if (!errorMessage) {
-      checkMediaServer(
-          form.value.ip,
-          form.value.httpPort,
-          form.value.secret,
-          form.value.type,
-      ).then(response => {
-        let httpPort = form.value.httpPort;
-        form.value = response.data
-        form.value.httpPort = httpPort
-        form.value.autoConfig = true
-        form.value.rtpEnable = true
-        rtpPortRange1.value = 30000
-        rtpPortRange2.value = 30500
-        sendRtpPortRange1.value = 50000
-        sendRtpPortRange2.value = 60000
-        nextTick(() => {
-          isConnected.value = true;
-        });
-        proxy.$modal.msgSuccess("该ZLMediaKit可用");
+  proxy.$refs["mediaServerFormRef"].validateField(['ip', 'httpPort', 'secret']).then(() => {
+    checkMediaServer(
+        form.value.ip,
+        form.value.httpPort,
+        form.value.secret,
+        form.value.type,
+    ).then(response => {
+      let httpPort = form.value.httpPort;
+      
+      // 设置标志位，防止 watch 重置 isConnected
+      isUpdatingForm.value = true;
+      
+      // 使用 Object.assign 而不是直接替换整个对象
+      Object.assign(form.value, response.data)
+      form.value.httpPort = httpPort
+      form.value.autoConfig = true
+      form.value.rtpEnable = true
+      rtpPortRange1.value = 30000
+      rtpPortRange2.value = 30500
+      sendRtpPortRange1.value = 50000
+      sendRtpPortRange2.value = 60000
+      // 确保设置 isConnected.value 为 true
+      isConnected.value = true;
+      
+      // 延迟重置标志位，确保 watch 响应完成
+      nextTick(() => {
+        isUpdatingForm.value = false;
       });
-    }
+      
+      proxy.$modal.msgSuccess("该ZLMediaKit可用");
+    }).catch(error => {
+      console.error("测试连接失败:", error);
+      proxy.$modal.msgError("测试连接失败，请检查配置");
+    });
+  }).catch(() => {
+    // 表单验证失败，不做处理
   });
 }
 

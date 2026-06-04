@@ -217,12 +217,20 @@ function clickEvent(id) {
   sendDevicePush(id)
 }
 
-async function sendDevicePush(id) {
-  loading.value = true
-  const idxTmp = playerIdx.value
+async function sendDevicePush(id, targetIdx, loadingCounterRef = null) {
+  const idxTmp = targetIdx !== undefined ? targetIdx : playerIdx.value
+  
+  if (loadingCounterRef !== null) {
+    loadingCounterRef.count++
+    loading.value = true
+  } else {
+    loading.value = true
+  }
+  
   videoTip.value[idxTmp] = '正在拉流...'
 
-  getDevice(id).then((res) => {
+  try {
+    const res = await getDevice(id)
     let row = res.data
 
     if (row.type === '1' || row.type === '2' || row.type === '3' || row.type === '4' || row.type === '5') {
@@ -269,75 +277,63 @@ async function sendDevicePush(id) {
         data.enable_mp4 = true
       }
 
-      streamPullPlay(data).then(async (res: any) => {
-        await nextTick(async () => {
-          let videoUrl
-          if (location.protocol === 'https:') {
-            videoUrl = res.data.wss_flv
-          } else {
-            videoUrl = res.data.ws_flv
-          }
+      const playRes = await streamPullPlay(data)
+      await nextTick(async () => {
+        let videoUrl
+        if (location.protocol === 'https:') {
+          videoUrl = playRes.data.wss_flv
+        } else {
+          videoUrl = playRes.data.ws_flv
+        }
 
-          setPlayUrl(videoUrl, idxTmp)
-          setEnableAudio(row.enableAudio, idxTmp)
+        setPlayUrl(videoUrl, idxTmp)
+        setEnableAudio(row.enableAudio, idxTmp)
 
-          quality.value = []
-          defaultQuality.value = ''
-          isPtz.value = row.type === '5' || row.type === '12'  // ONVIF 和 GB28181 支持云台
-          isQuality.value = false
-          isLive.value = true
-          
-          // 保存当前设备信息
-          deviceRows.value[idxTmp] = row
+        quality.value = []
+        defaultQuality.value = ''
+        isPtz.value = row.type === '5' || row.type === '12'  // ONVIF 和 GB28181 支持云台
+        isQuality.value = false
+        isLive.value = true
+        
+        // 保存当前设备信息
+        deviceRows.value[idxTmp] = row
 
-          await nextTick()
-          const playerRef = proxy.$refs[`player${idxTmp}`]
-          if (playerRef && playerRef.length > 0) {
-            playerRef[0].play(videoUrl)
-          }
-        })
-      }).catch(err => {
-        videoTip.value[idxTmp] = '播放失败'
+        await nextTick()
+        const playerRef = proxy.$refs[`player${idxTmp}`]
+        if (playerRef && playerRef.length > 0) {
+          playerRef[0].play(videoUrl)
+        }
       })
-          .finally(() => {
-            loading.value = false
-          })
     } else if (row.type === '6') {
-      loadRecord(row.id).then(async (res: any) => {
-        await nextTick(async () => {
-          let videoUrl
-          if (location.protocol === 'https:') {
-            videoUrl = res.data.wss_flv
-          } else {
-            videoUrl = res.data.ws_flv
-          }
+      const playRes = await loadRecord(row.id)
+      await nextTick(async () => {
+        let videoUrl
+        if (location.protocol === 'https:') {
+          videoUrl = playRes.data.wss_flv
+        } else {
+          videoUrl = playRes.data.ws_flv
+        }
 
-          setPlayUrl(videoUrl, idxTmp)
-          setEnableAudio(row.enableAudio, idxTmp)
+        setPlayUrl(videoUrl, idxTmp)
+        setEnableAudio(row.enableAudio, idxTmp)
 
-          quality.value = []
-          defaultQuality.value = ''
-          isPtz.value = row.type === '5' || row.type === '12'  // ONVIF 和 GB28181 支持云台
-          isQuality.value = false
-          isLive.value = true
-          
-          // 保存当前设备信息
-          deviceRows.value[idxTmp] = row
+        quality.value = []
+        defaultQuality.value = ''
+        isPtz.value = row.type === '5' || row.type === '12'  // ONVIF 和 GB28181 支持云台
+        isQuality.value = false
+        isLive.value = true
+        
+        // 保存当前设备信息
+        deviceRows.value[idxTmp] = row
 
-          await nextTick()
-          const playerRef = proxy.$refs[`player${idxTmp}`]
-          if (playerRef && playerRef.length > 0) {
-            playerRef[0].play(videoUrl)
-          }
+        await nextTick()
+        const playerRef = proxy.$refs[`player${idxTmp}`]
+        if (playerRef && playerRef.length > 0) {
+          playerRef[0].play(videoUrl)
+        }
 
-          getVideoSnapshot(row.id);
-        })
-      }).catch(err => {
-        videoTip.value[idxTmp] = '播放失败'
+        getVideoSnapshot(row.id);
       })
-          .finally(() => {
-            loading.value = false
-          })
     } else if (row.type === '7' || row.type === '8' || row.type === '9') {
       let data = {
         app: "haikang",
@@ -355,143 +351,131 @@ async function sendDevicePush(id) {
         data.app = "dahua"
       }
 
-      rtpPlay(data).then(async (res: any) => {
-        await nextTick(async () => {
-          let videoUrl
-          if (location.protocol === 'https:') {
-            videoUrl = res.data.wss_flv
-          } else {
-            videoUrl = res.data.ws_flv
-          }
+      const playRes = await rtpPlay(data)
+      await nextTick(async () => {
+        let videoUrl
+        if (location.protocol === 'https:') {
+          videoUrl = playRes.data.wss_flv
+        } else {
+          videoUrl = playRes.data.ws_flv
+        }
 
-          setPlayUrl(videoUrl, idxTmp)
-          setEnableAudio(row.enableAudio, idxTmp)
+        setPlayUrl(videoUrl, idxTmp)
+        setEnableAudio(row.enableAudio, idxTmp)
 
-          quality.value = []
-          defaultQuality.value = ''
-          isPtz.value = row.type === '5' || row.type === '12'  // ONVIF 和 GB28181 支持云台
-          isQuality.value = false
-          isLive.value = true
-          
-          // 保存当前设备信息
-          deviceRows.value[idxTmp] = row
+        quality.value = []
+        defaultQuality.value = ''
+        isPtz.value = row.type === '5' || row.type === '12'  // ONVIF 和 GB28181 支持云台
+        isQuality.value = false
+        isLive.value = true
+        
+        // 保存当前设备信息
+        deviceRows.value[idxTmp] = row
 
-          await nextTick()
-          const playerRef = proxy.$refs[`player${idxTmp}`]
-          if (playerRef && playerRef.length > 0) {
-            playerRef[0].play(videoUrl)
-          }
-        })
-      }).catch(err => {
-        videoTip.value[idxTmp] = '播放失败'
+        await nextTick()
+        const playerRef = proxy.$refs[`player${idxTmp}`]
+        if (playerRef && playerRef.length > 0) {
+          playerRef[0].play(videoUrl)
+        }
       })
-          .finally(() => {
-            loading.value = false
-          })
     } else if (row.type === '13') {
-      streamPullPush(row.id).then(async (res: any) => {
-        await nextTick(async () => {
-          let videoUrl
-          if (location.protocol === 'https:') {
-            videoUrl = res.data.wss_flv
-          } else {
-            videoUrl = res.data.ws_flv
-          }
+      const playRes = await streamPullPush(row.id)
+      await nextTick(async () => {
+        let videoUrl
+        if (location.protocol === 'https:') {
+          videoUrl = playRes.data.wss_flv
+        } else {
+          videoUrl = playRes.data.ws_flv
+        }
 
-          setPlayUrl(videoUrl, idxTmp)
-          setEnableAudio(row.enableAudio, idxTmp)
+        setPlayUrl(videoUrl, idxTmp)
+        setEnableAudio(row.enableAudio, idxTmp)
 
-          quality.value = []
-          defaultQuality.value = ''
-          isPtz.value = row.type === '5' || row.type === '12'  // ONVIF 和 GB28181 支持云台
-          isQuality.value = false
-          isLive.value = true
-          
-          // 保存当前设备信息
-          deviceRows.value[idxTmp] = row
+        quality.value = []
+        defaultQuality.value = ''
+        isPtz.value = row.type === '5' || row.type === '12'  // ONVIF 和 GB28181 支持云台
+        isQuality.value = false
+        isLive.value = true
+        
+        // 保存当前设备信息
+        deviceRows.value[idxTmp] = row
 
-          await nextTick()
-          const playerRef = proxy.$refs[`player${idxTmp}`]
-          if (playerRef && playerRef.length > 0) {
-            playerRef[0].play(videoUrl)
-          }
-        })
-      }).catch(err => {
-        videoTip.value[idxTmp] = '播放失败'
+        await nextTick()
+        const playerRef = proxy.$refs[`player${idxTmp}`]
+        if (playerRef && playerRef.length > 0) {
+          playerRef[0].play(videoUrl)
+        }
       })
-          .finally(() => {
-            loading.value = false
-          })
     } else if (row.type === '12') {
-      startGb28181Play(row.id).then(async (res: any) => {
-        await nextTick(async () => {
-          let videoUrl
-          if (location.protocol === 'https:') {
-            videoUrl = res.data.wss_flv
-          } else {
-            videoUrl = res.data.ws_flv
-          }
+      const playRes = await startGb28181Play(row.id)
+      await nextTick(async () => {
+        let videoUrl
+        if (location.protocol === 'https:') {
+          videoUrl = playRes.data.wss_flv
+        } else {
+          videoUrl = playRes.data.ws_flv
+        }
 
-          setPlayUrl(videoUrl, idxTmp)
-          setEnableAudio(row.enableAudio, idxTmp)
+        setPlayUrl(videoUrl, idxTmp)
+        setEnableAudio(row.enableAudio, idxTmp)
 
-          quality.value = []
-          defaultQuality.value = ''
-          isPtz.value = row.type === '5' || row.type === '12'  // ONVIF 和 GB28181 支持云台
-          isQuality.value = false
-          isLive.value = true
-          
-          // 保存当前设备信息
-          deviceRows.value[idxTmp] = row
+        quality.value = []
+        defaultQuality.value = ''
+        isPtz.value = row.type === '5' || row.type === '12'  // ONVIF 和 GB28181 支持云台
+        isQuality.value = false
+        isLive.value = true
+        
+        // 保存当前设备信息
+        deviceRows.value[idxTmp] = row
 
-          await nextTick()
-          const playerRef = proxy.$refs[`player${idxTmp}`]
-          if (playerRef && playerRef.length > 0) {
-            playerRef[0].play(videoUrl)
-          }
-        })
-      }).catch(err => {
-        videoTip.value[idxTmp] = '播放失败'
+        await nextTick()
+        const playerRef = proxy.$refs[`player${idxTmp}`]
+        if (playerRef && playerRef.length > 0) {
+          playerRef[0].play(videoUrl)
+        }
       })
-          .finally(() => {
-            loading.value = false
-          })
     } else if (row.type === '14') {
-      startJt1078Play(row.id).then(async (res: any) => {
-        await nextTick(async () => {
-          let videoUrl
-          if (location.protocol === 'https:') {
-            videoUrl = res.data.wss_flv
-          } else {
-            videoUrl = res.data.ws_flv
-          }
+      const playRes = await startJt1078Play(row.id)
+      await nextTick(async () => {
+        let videoUrl
+        if (location.protocol === 'https:') {
+          videoUrl = playRes.data.wss_flv
+        } else {
+          videoUrl = playRes.data.ws_flv
+        }
 
-          setPlayUrl(videoUrl, idxTmp)
-          setEnableAudio(row.enableAudio, idxTmp)
+        setPlayUrl(videoUrl, idxTmp)
+        setEnableAudio(row.enableAudio, idxTmp)
 
-          quality.value = []
-          defaultQuality.value = ''
-          isPtz.value = row.type === '5' || row.type === '12'  // ONVIF 和 GB28181 支持云台
-          isQuality.value = false
-          isLive.value = true
-          
-          // 保存当前设备信息
-          deviceRows.value[idxTmp] = row
+        quality.value = []
+        defaultQuality.value = ''
+        isPtz.value = row.type === '5' || row.type === '12'  // ONVIF 和 GB28181 支持云台
+        isQuality.value = false
+        isLive.value = true
+        
+        // 保存当前设备信息
+        deviceRows.value[idxTmp] = row
 
-          await nextTick()
-          const playerRef = proxy.$refs[`player${idxTmp}`]
-          if (playerRef && playerRef.length > 0) {
-            playerRef[0].play(videoUrl)
-          }
-        })
-      }).catch(err => {
-        videoTip.value[idxTmp] = '播放失败'
+        await nextTick()
+        const playerRef = proxy.$refs[`player${idxTmp}`]
+        if (playerRef && playerRef.length > 0) {
+          playerRef[0].play(videoUrl)
+        }
       })
-          .finally(() => {
-            loading.value = false
-          })
     }
-  })
+  } catch (err) {
+    console.error('拉流失败', err)
+    videoTip.value[idxTmp] = '播放失败'
+  } finally {
+    if (loadingCounterRef !== null) {
+      loadingCounterRef.count--
+      if (loadingCounterRef.count === 0) {
+        loading.value = false
+      }
+    } else {
+      loading.value = false
+    }
+  }
 }
 
 function setPlayUrl(url, idx) {
@@ -518,14 +502,6 @@ const liveStyle = computed(() => {
     gap: gap
   }
 })
-
-function getPlayerClass(splitIndex, i) {
-  let classStr = 'play-box'
-  if (playerIdx.value === (i - 1)) {
-    classStr += ' active'
-  }
-  return classStr
-}
 
 /**
  * 删除视频
@@ -610,21 +586,57 @@ function handleSaveLayout() {
 /**
  * 从本地存储恢复布局
  */
-function handleRestoreLayout() {
+async function handleRestoreLayout() {
   const saved = localStorage.getItem(STORAGE_KEY)
   if (saved) {
     try {
       const config = JSON.parse(saved)
       spiltIndex.value = config.spiltIndex
+      
+      // 确保数组长度足够
+      const targetLength = layout[spiltIndex.value].spilt
+      while (videoUrl.value.length < targetLength) {
+        videoUrl.value.push('')
+        videoTip.value.push('')
+        enableAudio.value.push('')
+        deviceRows.value.push(null)
+      }
+      
+      // 恢复基础数据
       videoUrl.value = [...config.videoUrl]
       videoTip.value = [...config.videoTip]
       enableAudio.value = [...config.enableAudio]
       deviceRows.value = config.deviceRows ? [...config.deviceRows] : []
+      
       proxy.$modal.msgSuccess("布局已恢复")
+      
+      // 重新拉流播放
+      await nextTick()
+      await restorePlayStreams()
     } catch (e) {
       console.error('恢复布局失败', e)
     }
   }
+}
+
+/**
+ * 恢复播放流
+ */
+async function restorePlayStreams() {
+  const loadingCounter = { count: 0 }
+  const promises = []
+  
+  for (let i = 0; i < deviceRows.value.length; i++) {
+    const device = deviceRows.value[i]
+    if (device && device.id) {
+      // 重新拉流，传入明确的索引和 loading 计数器
+      videoTip.value[i] = '正在恢复...'
+      promises.push(sendDevicePush(device.id, i, loadingCounter))
+    }
+  }
+  
+  // 并行执行所有拉流
+  await Promise.all(promises)
 }
 
 const convertWsToHttp = (wsUrl: string) => {
