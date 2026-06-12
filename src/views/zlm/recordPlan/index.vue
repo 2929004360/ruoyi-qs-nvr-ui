@@ -118,7 +118,7 @@
     </div>
 
     <div v-else class="card-view" v-loading="loading">
-      <el-row :gutter="16">
+      <el-row :gutter="16" v-if="recordPlanList.length > 0">
         <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6" v-for="item in recordPlanList" :key="item.id">
           <div class="device-card" :class="{ 'is-selected': item.checked }">
             <!-- 头部区域 -->
@@ -178,6 +178,7 @@
           </div>
         </el-col>
       </el-row>
+      <el-empty v-else description="暂无录像计划数据" />
     </div>
 
     <!-- 分页 -->

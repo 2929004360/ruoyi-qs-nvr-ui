@@ -145,9 +145,8 @@
     </div>
 
     <div v-else class="card-view" v-loading="loading">
-      <el-row :gutter="16">
-        <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6" v-for="item in platformList" :key="item.id">
-          <div class="platform-card" :class="{ 'is-selected': item.checked, 'is-online': item.status === 1 }">
+      <div class="card-grid" v-if="platformList.length > 0">
+        <div class="platform-card" :class="{ 'is-selected': item.checked, 'is-online': item.status === 1 }" v-for="item in platformList" :key="item.id">
             <div class="card-header">
               <div class="header-left">
                 <el-checkbox v-model="item.checked" @change="handleCardSelection" class="card-checkbox"/>
@@ -242,9 +241,9 @@
                 </el-tooltip>
               </div>
             </div>
-          </div>
-        </el-col>
-      </el-row>
+        </div>
+      </div>
+      <el-empty v-else description="暂无平台数据" />
     </div>
 
     <pagination
@@ -1082,6 +1081,23 @@ onMounted(() => {
 
 .card-view {
   animation: fadeInUp 0.4s ease-out 0.25s both;
+}
+
+/* 4列网格布局 */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1400px) {
+  .card-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 1000px) {
+  .card-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+  .card-grid { grid-template-columns: 1fr; }
 }
 
 .platform-card {

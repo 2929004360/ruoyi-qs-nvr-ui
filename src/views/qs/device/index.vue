@@ -267,9 +267,8 @@
 
     <!-- 卡片视图 -->
     <div v-else class="card-view" v-loading="loading">
-      <el-row :gutter="16">
-        <el-col :xs="24" :sm="12" :md="8" :lg="6" :xl="6" v-for="item in deviceList" :key="item.id">
-          <div class="device-card" :class="{ 'is-selected': item.checked, 'is-online': item.deviceStatus === 'ON' }">
+      <div v-if="deviceList.length > 0" class="card-grid">
+        <div class="device-card" :class="{ 'is-selected': item.checked, 'is-online': item.deviceStatus === 'ON' }" v-for="item in deviceList" :key="item.id">
             <!-- 媒体区 -->
             <div class="card-media">
               <div class="media-inner">
@@ -429,8 +428,8 @@
               </div>
             </div>
           </div>
-        </el-col>
-      </el-row>
+      </div>
+      <el-empty v-else description="暂无设备数据" />
     </div>
 
     <pagination
@@ -12149,9 +12148,28 @@ watch(tabActiveName, (newVal) => {
   padding: 8px 0;
 }
 
+/* 5列网格布局 */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1600px) {
+  .card-grid { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 1200px) {
+  .card-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 768px) {
+  .card-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 480px) {
+  .card-grid { grid-template-columns: 1fr; }
+}
+
 .device-card {
   position: relative;
-  margin-bottom: 16px;
   background: var(--el-bg-color);
   border: 1px solid var(--el-border-color-lighter);
   border-radius: 16px;
@@ -12166,14 +12184,16 @@ watch(tabActiveName, (newVal) => {
     0 8px 16px rgba(0,0,0,0.02);
 }
 
-.device-card:nth-child(1) { animation-delay: 0.04s; }
-.device-card:nth-child(2) { animation-delay: 0.08s; }
-.device-card:nth-child(3) { animation-delay: 0.12s; }
-.device-card:nth-child(4) { animation-delay: 0.16s; }
-.device-card:nth-child(5) { animation-delay: 0.20s; }
-.device-card:nth-child(6) { animation-delay: 0.24s; }
-.device-card:nth-child(7) { animation-delay: 0.28s; }
-.device-card:nth-child(8) { animation-delay: 0.32s; }
+.device-card:nth-child(1) { animation-delay: 0.02s; }
+.device-card:nth-child(2) { animation-delay: 0.04s; }
+.device-card:nth-child(3) { animation-delay: 0.06s; }
+.device-card:nth-child(4) { animation-delay: 0.08s; }
+.device-card:nth-child(5) { animation-delay: 0.10s; }
+.device-card:nth-child(6) { animation-delay: 0.12s; }
+.device-card:nth-child(7) { animation-delay: 0.14s; }
+.device-card:nth-child(8) { animation-delay: 0.16s; }
+.device-card:nth-child(9) { animation-delay: 0.18s; }
+.device-card:nth-child(10) { animation-delay: 0.20s; }
 
 @keyframes cardFadeIn {
   to {
@@ -13369,7 +13389,7 @@ html.dark {
   }
 
   .custom-table :deep(.el-table__row:hover) {
-    background-color: #0c2a5e !important;
+    background-color: rgba(255, 255, 255, 0.06) !important;
   }
 
   .custom-table :deep(.el-table__cell),
@@ -14432,7 +14452,7 @@ html.dark {
   }
 
   .custom-table :deep(.el-table__row:hover) {
-    background-color: #0c2a5e !important;
+    background-color: rgba(255, 255, 255, 0.06) !important;
   }
 
   .custom-table :deep(.el-table__cell),
